@@ -60,21 +60,22 @@ export interface AnswerPayload {
   riskOwner?: string // New
 }
 
-// New type for general programme documents
+// This type now reflects the DB schema, not the temporary client-side file object
 export interface GeneralDocument {
   id: string
-  file: File // The actual File object
+  project_name: string
+  file_path: string
   name: string
-  type: string
-  size: number // in bytes
-  uploadedAt: Date
-  description?: string // Optional description
+  type: string | null
+  size: number | null
+  description: string | null
+  uploaded_at: string // Comes as string from DB
+  url?: string // Optional public URL for the file
 }
 
 export interface Project {
   name: string
   standards: AssessmentStandard[]
-  generalDocuments: GeneralDocument[]
   createdAt: Date
   lastModifiedAt: Date
 }

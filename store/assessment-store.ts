@@ -1,6 +1,6 @@
 import { create } from "zustand"
 import { persist, type StateStorage } from "zustand/middleware"
-import type { AssessmentStandard, AnswerPayload, RAGStatus, GeneralDocument, Project } from "@/lib/types" // Added Project
+import type { AssessmentStandard, AnswerPayload, RAGStatus, Project } from "@/lib/types" // Added Project
 import { ASSESSMENT_STANDARDS } from "@/lib/constants"
 
 // Helper function to create a fresh set of standards for a new project
@@ -48,8 +48,6 @@ interface AssessmentState {
     questionId?: string
     ragStatus: RAGStatus
   }>
-  addGeneralDocument: (file: File, description?: string) => void
-  removeGeneralDocument: (documentId: string) => void
 }
 
 const customStorage: StateStorage = {
@@ -64,11 +62,6 @@ const customStorage: StateStorage = {
         ...project,
         createdAt: new Date(project.createdAt),
         lastModifiedAt: new Date(project.lastModifiedAt),
-        generalDocuments: (project.generalDocuments || []).map((doc: any) => ({
-          ...doc,
-          uploadedAt: new Date(doc.uploadedAt),
-          file: null, // File object is not persisted
-        })),
         // Potentially revive dates within standards/questions if any were added
       })),
     }
@@ -79,9 +72,6 @@ const customStorage: StateStorage = {
       ...newValue.state,
       projects: newValue.state.projects.map((project: Project) => ({
         ...project,
-        generalDocuments: project.generalDocuments.map(
-          ({ file, ...restOfDoc }: GeneralDocument) => restOfDoc, // eslint-disable-line @typescript-eslint/no-unused-vars
-        ),
       })),
     }
     localStorage.setItem(name, JSON.stringify({ state: modifiedState, version: newValue.version }))
@@ -103,7 +93,6 @@ export const useAssessmentStore = create<AssessmentState>()(
         const newProject: Project = {
           name: projectName,
           standards: createInitialProjectStandards(),
-          generalDocuments: [],
           createdAt: new Date(),
           lastModifiedAt: new Date(),
         }
@@ -403,45 +392,6 @@ export const useAssessmentStore = create<AssessmentState>()(
           return a.standardName.localeCompare(b.standardName)
         })
       },
-
-      addGeneralDocument: (file, description) =>
-        set((state) => {
-          const activeProject = state.projects.find((p) => p.name === state.activeProjectName)
-          if (!activeProject) return state
-
-          const newDoc: GeneralDocument = {
-            id: crypto.randomUUID(),
-            file,
-            name: file.name,
-            type: file.type,
-            size: file.size,
-            uploadedAt: new Date(),
-            description,
-          }
-          const updatedProject = {
-            ...activeProject,
-            generalDocuments: [...activeProject.generalDocuments, newDoc],
-            lastModifiedAt: new Date(),
-          }
-          return {
-            projects: state.projects.map((p) => (p.name === state.activeProjectName ? updatedProject : p)),
-          }
-        }),
-
-      removeGeneralDocument: (documentId) =>
-        set((state) => {
-          const activeProject = state.projects.find((p) => p.name === state.activeProjectName)
-          if (!activeProject) return state
-
-          const updatedProject = {
-            ...activeProject,
-            generalDocuments: activeProject.generalDocuments.filter((doc) => doc.id !== documentId),
-            lastModifiedAt: new Date(),
-          }
-          return {
-            projects: state.projects.map((p) => (p.name === state.activeProjectName ? updatedProject : p)),
-          }
-        }),
     }),
     {
       name: "power-platform-assessment-storage-v2", // Changed name to avoid conflicts with old structure

@@ -229,7 +229,7 @@ export default function DashboardPage() {
         <>
           <OverallSummary />
           <section className="mb-8">
-            <GeneralDocumentation />
+            <GeneralDocumentation projectName={activeProjectName} />
           </section>
           <section className="mb-8">
             <h2 className="text-2xl font-semibold mb-4">
