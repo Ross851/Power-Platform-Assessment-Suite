@@ -75,6 +75,7 @@ export interface GeneralDocument {
 
 export interface Project {
   name: string
+  clientReferenceNumber?: string
   standards: AssessmentStandard[]
   createdAt: Date
   lastModifiedAt: Date

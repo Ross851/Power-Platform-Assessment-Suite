@@ -52,6 +52,7 @@ const createDummyProject = (): Project => {
 
   return {
     name: "Contoso Demo Project",
+    clientReferenceNumber: "TEL-C0N-001",
     standards,
     createdAt: new Date("2024-05-10T10:00:00Z"),
     lastModifiedAt: new Date("2024-05-20T14:30:00Z"),
@@ -63,7 +64,7 @@ interface AssessmentState {
   projects: Project[]
   activeProjectName: string | null
 
-  createProject: (projectName: string) => void
+  createProject: (projectName: string, clientReferenceNumber?: string) => void
   setActiveProject: (projectName: string) => void
   getActiveProject: () => Project | undefined
   deleteProject: (projectName: string) => void
@@ -119,13 +120,14 @@ export const useAssessmentStore = create<AssessmentState>()(
       projects: [createDummyProject()],
       activeProjectName: "Contoso Demo Project",
 
-      createProject: (projectName) => {
+      createProject: (projectName, clientReferenceNumber) => {
         if (get().projects.find((p) => p.name === projectName)) {
           alert(`Project "${projectName}" already exists.`)
           return
         }
         const newProject: Project = {
           name: projectName,
+          clientReferenceNumber: clientReferenceNumber || undefined,
           standards: createInitialProjectStandards(),
           createdAt: new Date(),
           lastModifiedAt: new Date(),

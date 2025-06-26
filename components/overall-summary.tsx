@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Progress } from "@/components/ui/progress"
 import { useAssessmentStore } from "@/store/assessment-store"
 import { useEffect, useState } from "react"
-import { RAGIndicator } from "./rag-indicator" // Import RAGIndicator
+import { RAGIndicator } from "./rag-indicator"
 import { AlertTriangle } from "lucide-react"
 import Link from "next/link"
 import { Button } from "./ui/button"
@@ -20,7 +20,6 @@ export function OverallSummary() {
   }, [])
 
   if (!isClient || !activeProject) {
-    // Add !activeProject check
     return (
       <Card className="mb-8">
         <CardHeader>
@@ -44,7 +43,7 @@ export function OverallSummary() {
     if (score < 2.5) return "2 - Managed"
     if (score < 3.5) return "3 - Defined"
     if (score < 4.5) return "4 - Quantitatively Managed"
-    return "5 - Optimizing"
+    return "5 - Optimising"
   }
 
   const ragColorClasses = {
@@ -58,8 +57,13 @@ export function OverallSummary() {
     <>
       <Card className="mb-8">
         <CardHeader>
-          <div className="flex justify-between items-center">
-            <CardTitle>Overall Progress & Maturity</CardTitle>
+          <div className="flex justify-between items-start">
+            <div>
+              <CardTitle>Overall Progress & Maturity</CardTitle>
+              {activeProject.clientReferenceNumber && (
+                <CardDescription>Ref: {activeProject.clientReferenceNumber}</CardDescription>
+              )}
+            </div>
             <RAGIndicator status={overallRAG} size="lg" showText />
           </div>
         </CardHeader>

@@ -42,6 +42,7 @@ export default function DashboardPage() {
   } = useAssessmentStore()
 
   const [newProjectName, setNewProjectName] = useState("")
+  const [newProjectRef, setNewProjectRef] = useState("")
   const [isClient, setIsClient] = useState(false)
   const [confirmDeleteProject, setConfirmDeleteProject] = useState<string | null>(null)
   const [isExporting, setIsExporting] = useState(false)
@@ -62,8 +63,9 @@ export default function DashboardPage() {
 
   const handleCreateProject = () => {
     if (newProjectName.trim()) {
-      createProject(newProjectName.trim())
+      createProject(newProjectName.trim(), newProjectRef.trim())
       setNewProjectName("")
+      setNewProjectRef("")
     }
   }
 
@@ -127,7 +129,7 @@ export default function DashboardPage() {
   return (
     <div className="container mx-auto p-4 md:p-8 bg-background text-foreground min-h-screen">
       <header className="mb-8">
-        <h1 className="text-3xl font-bold text-primary">Power Platform Assessment Suite</h1>
+        <h1 className="text-3xl font-bold text-primary">Telana Power Platform Assessment Suite</h1>
         <p className="text-muted-foreground">
           Evaluate your organisation's Power Platform maturity against Microsoft best practices.
         </p>
@@ -149,6 +151,15 @@ export default function DashboardPage() {
                 placeholder="e.g., Contoso Q3 Assessment"
               />
             </div>
+            <div className="w-full sm:w-auto">
+              <Label htmlFor="new-project-ref">Client Reference Number (Optional)</Label>
+              <Input
+                id="new-project-ref"
+                value={newProjectRef}
+                onChange={(e) => setNewProjectRef(e.target.value)}
+                placeholder="e.g., TEL-C0N-001"
+              />
+            </div>
             <Button onClick={handleCreateProject} disabled={!newProjectName.trim()}>
               <FolderPlus className="mr-2 h-4 w-4" /> Create Project
             </Button>
@@ -164,7 +175,8 @@ export default function DashboardPage() {
                   <SelectContent>
                     {projects.map((p) => (
                       <SelectItem key={p.name} value={p.name}>
-                        {p.name} (Last modified: {format(new Date(p.lastModifiedAt), "dd MMM yyyy, HH:mm")})
+                        {p.name} {p.clientReferenceNumber && `(${p.clientReferenceNumber})`} (Last modified:{" "}
+                        {format(new Date(p.lastModifiedAt), "dd MMM yyyy, HH:mm")})
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -234,6 +246,9 @@ export default function DashboardPage() {
           <section className="mb-8">
             <h2 className="text-2xl font-semibold mb-4">
               Assessment Standards for: <span className="text-primary">{activeProjectName}</span>
+              {activeProject?.clientReferenceNumber && (
+                <span className="text-muted-foreground text-lg ml-2">({activeProject.clientReferenceNumber})</span>
+              )}
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {displayStandards.map(
