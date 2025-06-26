@@ -256,7 +256,7 @@ export const ASSESSMENT_STANDARDS: AssessmentStandard[] = [
           "Consider how access is granted, managed, and revoked for apps, flows, and underlying data sources. Are Azure AD groups used effectively? Effective controls are key to data security and compliance.",
         bestPractice: {
           description:
-            "Effective access control uses a 'Defense-in-Depth' strategy, combining authentication, authorisation (Web Roles, Table Permissions), and regular configuration checks. For external sites, this includes making use of Power Pages' robust security model. Observability tools help verify that these controls are working as intended.",
+            "Effective access control uses a 'Defence-in-Depth' strategy, combining authentication, authorisation (Web Roles, Table Permissions), and regular configuration checks. For external sites, this includes making use of Power Pages' robust security model. Observability tools help verify that these controls are working as intended.",
           link: "https://learn.microsoft.com/en-us/power-platform/admin/wp-security",
           linkText: "Review the Power Platform Security White Paper",
         },
@@ -271,7 +271,7 @@ export const ASSESSMENT_STANDARDS: AssessmentStandard[] = [
           "Check the site's configuration in the Power Platform admin centre. A WAF provides a critical perimeter defence against common web attacks. Active management of security headers is part of ongoing application security.",
         bestPractice: {
           description:
-            "Power Pages security follows a 'Defense-in-Depth' model. A key layer is the network perimeter, where a Web Application Firewall (WAF) should be used to filter malicious traffic. Additionally, configuring HTTP Security Headers like Content-Security-Policy (CSP) hardens the application against client-side attacks. Monitoring WAF logs and site activity provides crucial security insights.",
+            "Power Pages security follows a 'Defence-in-Depth' model. A key layer is the network perimeter, where a Web Application Firewall (WAF) should be used to filter malicious traffic. Additionally, configuring HTTP Security Headers like Content-Security-Policy (CSP) hardens the application against client-side attacks. Monitoring WAF logs and site activity provides crucial security insights.",
           link: "https://learn.microsoft.com/en-us/power-pages/guidance/white-papers/security",
           linkText: "Read the Power Pages Security White Paper",
         },
@@ -747,22 +747,22 @@ export const ASSESSMENT_STANDARDS: AssessmentStandard[] = [
       },
       {
         id: "coe-q19",
-        text: "Is there a systematic process to identify, quantify (e.g., using a technical debt register, SQALE method, or impact on Secure/Compliance Scores), and manage technical debt across the Power Platform (e.g., legacy solutions, complex customizations, orphaned assets, unsupported components)? Upload relevant documentation or analysis.",
+        text: "Is there a systematic process to identify, quantify (e.g., using a technical debt register, SQALE method, or impact on Secure/Compliance Scores), and manage technical debt across the Power Platform (e.g., legacy solutions, complex customisations, orphaned assets, unsupported components)? Upload relevant documentation or analysis.",
         type: "document-review",
         weight: 4,
         category: "Operational Excellence & Technical Debt",
         guidance:
-          "Evaluate if a formal process exists for cataloging technical debt, including outdated software versions, unsupported customizations, dependencies on legacy systems, and orphaned solutions. Assess if methods like SQALE are used for visualization or if impact is measured through maintenance costs, security vulnerabilities (e.g., Secure Score gaps), compliance risks (e.g., Compliance Manager findings), or operational inefficiencies. A mature approach includes a remediation plan and tracks reduction efforts. Consider the Power Platform environmental architecture model (personal, team, important, critical) when assessing impact of debt on different workloads.",
+          "Evaluate if a formal process exists for cataloguing technical debt, including outdated software versions, unsupported customisations, dependencies on legacy systems, and orphaned solutions. Assess if methods like SQALE are used for visualisation or if impact is measured through maintenance costs, security vulnerabilities (e.g., Secure Score gaps), compliance risks (e.g., Compliance Manager findings), or operational inefficiencies. A mature approach includes a remediation plan and tracks reduction efforts. Consider the Power Platform environmental architecture model (personal, team, important, critical) when assessing impact of debt on different workloads.",
         bestPractice: {
           description:
             "A mature organisation proactively identifies, quantifies, and manages technical debt. This involves maintaining a technical debt register, regularly assessing its impact on security, compliance, cost, and agility, and implementing a strategic plan for remediation or mitigation. This aligns with principles of operational excellence and sustainable platform growth.",
           link: "https://learn.microsoft.com/en-us/power-platform/guidance/well-architected/operational-excellence/overview",
           linkText: "Learn about Operational Excellence",
           suggestedActions: [
-            "Establish a formal process for identifying and cataloging technical debt across all Power Platform solutions and components.",
+            "Establish a formal process for identifying and cataloguing technical debt across all Power Platform solutions and components.",
             "Develop a technical debt register, including details like age, complexity, dependencies, business impact, and estimated remediation effort.",
             "Quantify technical debt by assessing its impact on maintenance costs, security posture (Secure Score), compliance status (Compliance Manager), and operational efficiency.",
-            "Prioritise technical debt items based on risk and business impact, potentially using a SQALE-like model for visualization.",
+            "Prioritise technical debt items based on risk and business impact, potentially using a SQALE-like model for visualisation.",
             "Develop and implement a remediation plan, including strategies for refactoring, retiring, or replacing indebted solutions.",
             "Regularly review and update the technical debt register and remediation plan as part of the CoE's operational rhythm.",
             "Integrate technical debt review into the solution lifecycle management process.",
@@ -771,24 +771,24 @@ export const ASSESSMENT_STANDARDS: AssessmentStandard[] = [
       },
       {
         id: "coe-q20",
-        text: "Is there a formal process for analyzing custom-developed solutions against native Power Platform capabilities to identify modernization opportunities (e.g., replacing custom code with standard features, evaluating TCO)? Upload relevant analysis or strategy documents.",
+        text: "Is there a formal process for analysing custom-developed solutions against native Power Platform capabilities to identify modernisation opportunities (e.g., replacing custom code with standard features, evaluating TCO)? Upload relevant analysis or strategy documents.",
         type: "document-review",
         weight: 3,
-        category: "Modernization & Optimization",
+        category: "Modernisation & Optimisation",
         guidance:
-          "Assess if the CoE or relevant teams systematically review existing or proposed custom solutions (including complex scripts, custom components, or extensive code-first developments) against the evolving capabilities of the Power Platform. This analysis should consider factors like Total Cost of Ownership (TCO), maintainability, scalability, security, and alignment with the Power Platform environmental architecture model (personal, team, important, critical workloads). Look for evidence of a '65% opportunity assessment' mindset, mapping existing functionality to native features and identifying gaps where platform capabilities can be leveraged. The goal is to identify opportunities to modernize by replacing custom solutions with standard, supported Power Platform features where feasible.",
+          "Assess if the CoE or relevant teams systematically review existing or proposed custom solutions (including complex scripts, custom components, or extensive code-first developments) against the evolving capabilities of the Power Platform. This analysis should consider factors like Total Cost of Ownership (TCO), maintainability, scalability, security, and alignment with the Power Platform environmental architecture model (personal, team, important, critical workloads). Look for evidence of a '65% opportunity assessment' mindset, mapping existing functionality to native features and identifying gaps where platform capabilities can be leveraged. The goal is to identify opportunities to modernise by replacing custom solutions with standard, supported Power Platform features where feasible.",
         bestPractice: {
           description:
-            "A mature CoE proactively evaluates custom solutions against native Power Platform capabilities to identify opportunities for modernization. This reduces technical debt, lowers TCO, improves maintainability, and leverages the ongoing innovation of the platform. This process should be integrated into solution design reviews and periodic portfolio assessments.",
-          link: "https://learn.microsoft.com/en-us/power-platform/guidance/adoption/strategy", // General strategy link, specific "custom vs native" deep dives are often in broader adoption/CoE materials
+            "A mature CoE proactively evaluates custom solutions against native Power Platform capabilities to identify opportunities for modernisation. This reduces technical debt, lowers TCO, improves maintainability, and leverages the ongoing innovation of the platform. This process should be integrated into solution design reviews and periodic portfolio assessments.",
+          link: "https://learn.microsoft.com/en-us/power-platform/guidance/adoption/strategy",
           linkText: "Power Platform Adoption Strategy",
           suggestedActions: [
             "Establish a regular review process (e.g., annually or bi-annually) to assess existing custom solutions against current Power Platform features.",
-            "Develop criteria for evaluating when to modernize a custom solution, including TCO, maintenance effort, security risks, and alignment with strategic platform goals.",
+            "Develop criteria for evaluating when to modernise a custom solution, including TCO, maintenance effort, security risks, and alignment with strategic platform goals.",
             "For new solutions, mandate an analysis of native Power Platform capabilities before approving custom development.",
-            "Create a backlog of identified modernization opportunities, prioritized by potential ROI, risk reduction, and strategic value.",
-            "Document successful modernization efforts as case studies to encourage further adoption of native features.",
-            "Utilize tools like Microsoft 365 Usage Analytics and PowerShell scripts to identify underused premium features that could replace custom functionality.",
+            "Create a backlog of identified modernisation opportunities, prioritised by potential ROI, risk reduction, and strategic value.",
+            "Document successful modernisation efforts as case studies to encourage further adoption of native features.",
+            "Utilise tools like Microsoft 365 Usage Analytics and PowerShell scripts to identify underused premium features that could replace custom functionality.",
           ],
         },
       },

@@ -63,7 +63,7 @@ export const exportToClientWord = async (project: Project) => {
 
           createSubHeading("1. Key Findings & Strategic Recommendations"),
           createParagraph(
-            "This assessment has identified several key areas for improvement that will enhance security, streamline governance, and unlock greater value from your Power Platform investment. The following recommendations are prioritized based on business impact and risk mitigation.",
+            "This assessment has identified several key areas for improvement that will enhance security, streamline governance, and unlock greater value from your Power Platform investment. The following recommendations are prioritised based on business impact and risk mitigation.",
           ),
           ...highPriorityAreas.slice(0, 5).flatMap((area) => [
             new Paragraph({
@@ -109,7 +109,7 @@ export const exportToClientWord = async (project: Project) => {
 
           createSubHeading("3. Strategic Roadmap Overview"),
           createParagraph(
-            "We recommend a phased approach to address these findings, focusing on foundational improvements first, followed by optimization and innovation.",
+            "We recommend a phased approach to address these findings, focusing on foundational improvements first, followed by optimisation and innovation.",
           ),
           createStyledTable([
             new TableRow({
@@ -125,7 +125,7 @@ export const exportToClientWord = async (project: Project) => {
             }),
             new TableRow({
               children: [
-                createCell("Phase 2: Optimization"),
+                createCell("Phase 2: Optimisation"),
                 createCell("3-6 Months"),
                 createCell("Remediate 'Amber' status risks. Implement ALM automation and mature CoE processes."),
               ],
@@ -135,7 +135,7 @@ export const exportToClientWord = async (project: Project) => {
                 createCell("Phase 3: Innovation"),
                 createCell("6-12 Months"),
                 createCell(
-                  "Focus on technical debt reduction, modernization of custom apps, and expanding Responsible AI governance.",
+                  "Focus on technical debt reduction, modernisation of custom apps, and expanding Responsible AI governance.",
                 ),
               ],
             }),
@@ -144,7 +144,7 @@ export const exportToClientWord = async (project: Project) => {
 
           createSubHeading("4. Next Steps"),
           createParagraph(
-            "We recommend a follow-up workshop to review these findings in detail and finalize the implementation plan and resource allocation. The accompanying technical document provides the detailed instructions for your development team.",
+            "We recommend a follow-up workshop to review these findings in detail and finalise the implementation plan and resource allocation. The accompanying technical document provides the detailed instructions for your development team.",
           ),
         ],
       },
