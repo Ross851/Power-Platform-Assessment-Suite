@@ -1,6 +1,6 @@
 import { create } from "zustand"
 import { persist, type StateStorage } from "zustand/middleware"
-import type { AssessmentStandard, AnswerPayload, RAGStatus, Project } from "@/lib/types" // Added Project
+import type { AssessmentStandard, AnswerPayload, RAGStatus, Project } from "@/lib/types"
 import { ASSESSMENT_STANDARDS } from "@/lib/constants"
 
 // Helper function to create a fresh set of standards for a new project
@@ -21,17 +21,53 @@ const createInitialProjectStandards = (): AssessmentStandard[] =>
     ragStatus: "grey" as RAGStatus,
   }))
 
-interface AssessmentState {
-  projects: Project[] // Store multiple projects
-  activeProjectName: string | null // Name of the currently active project
+// --- DUMMY DATA CREATION ---
+const createDummyProject = (): Project => {
+  const standards = createInitialProjectStandards()
 
-  // Project Management Actions
+  // Answer doc-q1 as 'Yes' (Green)
+  const docStandard = standards.find((s) => s.slug === "documentation-rulebooks")
+  if (docStandard) {
+    const docQ1 = docStandard.questions.find((q) => q.id === "doc-q1")
+    if (docQ1) docQ1.answer = true
+  }
+
+  // Answer dlp-q1 as 'No' (Red) and add risk owner
+  const dlpStandard = standards.find((s) => s.slug === "dlp-policy")
+  if (dlpStandard) {
+    const dlpQ1 = dlpStandard.questions.find((q) => q.id === "dlp-q1")
+    if (dlpQ1) {
+      dlpQ1.answer = false
+      dlpQ1.evidenceNotes = "DLP policies are only applied to the default environment, leaving production vulnerable."
+      dlpQ1.riskOwner = "CIO / Head of Security"
+    }
+  }
+
+  // Answer env-q2 as '3' (Amber)
+  const envStandard = standards.find((s) => s.slug === "environment-usage")
+  if (envStandard) {
+    const envQ2 = envStandard.questions.find((q) => q.id === "env-q2")
+    if (envQ2) envQ2.answer = 3
+  }
+
+  return {
+    name: "Contoso Demo Project",
+    standards,
+    createdAt: new Date("2024-05-10T10:00:00Z"),
+    lastModifiedAt: new Date("2024-05-20T14:30:00Z"),
+  }
+}
+// --- END DUMMY DATA ---
+
+interface AssessmentState {
+  projects: Project[]
+  activeProjectName: string | null
+
   createProject: (projectName: string) => void
   setActiveProject: (projectName: string) => void
   getActiveProject: () => Project | undefined
-  deleteProject: (projectName: string) => void // Optional: for later
+  deleteProject: (projectName: string) => void
 
-  // Existing actions, now need to be context-aware of the active project
   setAnswer: (payload: AnswerPayload) => void
   getStandardBySlug: (slug: string) => AssessmentStandard | undefined
   getStandardProgress: (slug: string) => number
@@ -55,14 +91,12 @@ const customStorage: StateStorage = {
     const str = localStorage.getItem(name)
     if (!str) return null
     const { state, version } = JSON.parse(str)
-    // Revive Date objects and handle generalDocuments within each project
     const revivedState = {
       ...state,
       projects: (state.projects || []).map((project: any) => ({
         ...project,
         createdAt: new Date(project.createdAt),
         lastModifiedAt: new Date(project.lastModifiedAt),
-        // Potentially revive dates within standards/questions if any were added
       })),
     }
     return { state: revivedState, version }
@@ -82,12 +116,12 @@ const customStorage: StateStorage = {
 export const useAssessmentStore = create<AssessmentState>()(
   persist(
     (set, get) => ({
-      projects: [],
-      activeProjectName: null,
+      projects: [createDummyProject()],
+      activeProjectName: "Contoso Demo Project",
 
       createProject: (projectName) => {
         if (get().projects.find((p) => p.name === projectName)) {
-          alert(`Project "${projectName}" already exists.`) // Or handle more gracefully
+          alert(`Project "${projectName}" already exists.`)
           return
         }
         const newProject: Project = {
@@ -227,10 +261,10 @@ export const useAssessmentStore = create<AssessmentState>()(
                       else if (perc < 75) riskLevel = "medium"
                       else riskLevel = "low"
                       break
-                    case "document-review": // Assuming document review implies some level of maturity if present
+                    case "document-review":
                       const hasContent = q.answer || (q.document?.annotations && q.document.annotations.length > 0)
-                      questionScore = hasContent ? 3 : 1 // Simplified: 3 if assessed, 1 if not/empty
-                      riskLevel = hasContent ? "medium" : "low" // Or high if absence is critical
+                      questionScore = hasContent ? 3 : 1
+                      riskLevel = hasContent ? "medium" : "low"
                       break
                     default:
                       questionScore = 3
@@ -266,7 +300,6 @@ export const useAssessmentStore = create<AssessmentState>()(
               }
               return { ...std, questions: updatedQuestions, maturityScore, ragStatus: standardRagStatus }
             }
-            // Accumulate RAG for overall project status from other standards too
             if (std.ragStatus === "red") projectHasRed = true
             if (std.ragStatus === "amber") projectHasAmber = true
             if (std.ragStatus === "green" && !projectHasRed && !projectHasAmber) projectHasGreen = true
@@ -284,13 +317,10 @@ export const useAssessmentStore = create<AssessmentState>()(
             if (projectHasRed) projectOverallRagStatus = "red"
             else if (projectHasAmber) projectOverallRagStatus = "amber"
             else if (projectHasGreen) projectOverallRagStatus = "green"
-            else projectOverallRagStatus = "grey" // All answered are grey (e.g. text only)
+            else projectOverallRagStatus = "grey"
           } else {
-            projectOverallRagStatus = "grey" // No questions answered in the project
+            projectOverallRagStatus = "grey"
           }
-
-          // Note: This simple overall RAG might need more nuance, e.g. weighting standards
-          // For now, any red makes project red, any amber (no red) makes it amber.
 
           const updatedProject = { ...activeProject, standards: newStandards, lastModifiedAt: new Date() }
           return {
@@ -370,7 +400,6 @@ export const useAssessmentStore = create<AssessmentState>()(
                 })
               }
             })
-            // If the standard itself is red/amber but no specific question is, add the standard
             if (
               !std.questions.some((q) => q.ragStatus === "red" || q.ragStatus === "amber") &&
               (std.completion || 0) > 0
@@ -383,7 +412,6 @@ export const useAssessmentStore = create<AssessmentState>()(
             }
           }
         })
-        // Sort by RAG status (red first), then by standard name
         return highPriority.sort((a, b) => {
           if (a.ragStatus === "red" && b.ragStatus !== "red") return -1
           if (a.ragStatus !== "red" && b.ragStatus === "red") return 1
@@ -394,7 +422,7 @@ export const useAssessmentStore = create<AssessmentState>()(
       },
     }),
     {
-      name: "power-platform-assessment-storage-v2", // Changed name to avoid conflicts with old structure
+      name: "power-platform-assessment-storage-v2",
       storage: customStorage,
     },
   ),
