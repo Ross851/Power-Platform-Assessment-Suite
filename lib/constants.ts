@@ -212,6 +212,27 @@ export const ASSESSMENT_STANDARDS: AssessmentStandard[] = [
           linkText: "Circuit Breaker Pattern",
         },
       },
+      {
+        id: "env-q7",
+        text: "Is there an automated process in place (e.g., using the CoE Starter Kit) to identify and report on potentially orphaned or unused applications and flows ('zombie assets')?",
+        type: "boolean",
+        weight: 4,
+        category: "Governance & Hygiene",
+        guidance:
+          "Review CoE Starter Kit dashboards or custom monitoring for reports on apps/flows with no recent launches, no owner, or old modification dates. Unmanaged assets pose security risks from outdated permissions, consume resources, and create significant technical debt.",
+        bestPractice: {
+          description:
+            "A mature governance strategy includes automated monitoring to proactively identify unused assets. The CoE Starter Kit provides essential tools for this, enabling administrators to flag apps and flows for review based on usage data, lack of ownership, or modification date, which is crucial for mitigating security and compliance risks.",
+          link: "https://learn.microsoft.com/en-us/power-platform/guidance/coe/governance-components#inactivity-processes",
+          linkText: "Learn about CoE inactivity processes",
+          suggestedActions: [
+            "Deploy and configure the CoE Starter Kit Core and Governance components.",
+            "Activate and customise the 'App and Flow Inactivity notifications' flows to alert owners of potentially unused assets.",
+            "Establish a regular review cadence (e.g., monthly) for the 'Power BI - Inactivity' report to identify orphaned solutions.",
+            "Define clear thresholds for what constitutes an 'inactive' or 'orphaned' asset (e.g., not run in 90 days, no owner).",
+          ],
+        },
+      },
     ],
   },
   {
@@ -792,6 +813,27 @@ export const ASSESSMENT_STANDARDS: AssessmentStandard[] = [
           ],
         },
       },
+      {
+        id: "coe-q21",
+        text: "Is there a mandatory ownership policy for all production solutions, including a regular attestation process where owners must confirm their solutions are still required and compliant?",
+        type: "boolean",
+        weight: 4,
+        category: "CoE Governance & Accountability",
+        guidance:
+          "Check for a formal policy requiring every app/flow to have a named owner and a backup. The attestation process (e.g., quarterly/annual review) forces accountability and prevents assets from becoming 'zombies' when owners leave the organisation, which is critical for business continuity.",
+        bestPractice: {
+          description:
+            "A robust ownership and attestation process is critical for preventing solution abandonment. This ensures every asset has a responsible owner who regularly confirms its business value and compliance, forming a key part of the solution lifecycle and mitigating risks of unmanaged technical debt.",
+          link: "https://learn.microsoft.com/en-us/power-platform/guidance/coe/govern#compliance-processes",
+          linkText: "Explore CoE compliance processes",
+          suggestedActions: [
+            "Mandate owner assignment for all new solutions before they are promoted to production.",
+            "Implement the CoE Starter Kit's 'Developer Compliance Centre' to manage ownership and attestation.",
+            "Configure an automated quarterly or bi-annual attestation campaign for all production solution owners.",
+            "Establish a clear succession plan and process for when a solution owner leaves their role or the company.",
+          ],
+        },
+      },
     ],
   },
   {
@@ -840,6 +882,27 @@ export const ASSESSMENT_STANDARDS: AssessmentStandard[] = [
         category: "Governance Document Review",
         guidance:
           "Collect and review all relevant policy documents. Use the annotation feature to note specific missing rules, unclear sections, or contradictions. Use the overall assessment text area to create a summary document outlining key areas for policy improvement.",
+      },
+      {
+        id: "gov-q4",
+        text: "Is there a formal, documented 'sunset' policy and process for decommissioning unused applications and flows?",
+        type: "boolean",
+        weight: 3,
+        category: "Governance Process",
+        guidance:
+          "A sunset policy should outline the steps for archiving, disabling, and eventually deleting assets flagged as unused by the inactivity process. This includes communication with last known users, data archival, and licence reclamation.",
+        bestPractice: {
+          description:
+            "A clear decommissioning process completes the asset lifecycle. It ensures that unused solutions are removed in a controlled manner, reducing security exposure, freeing up resources, and preventing the accumulation of technical debt.",
+          link: "https://learn.microsoft.com/en-us/power-platform/guidance/adoption/archive-and-delete",
+          linkText: "Guidance on archiving and deleting assets",
+          suggestedActions: [
+            "Document a multi-stage decommissioning process: 1. Notify owner/users, 2. Disable app/flow, 3. Archive solution and data, 4. Delete after a defined period (e.g., 6 months).",
+            "Define clear roles and responsibilities for each step of the decommissioning process.",
+            "Automate parts of the process where possible, such as disabling flows or removing app permissions via CoE tools.",
+            "Communicate the sunset policy clearly to all makers and stakeholders.",
+          ],
+        },
       },
     ],
   },
@@ -1005,7 +1068,7 @@ export const ASSESSMENT_STANDARDS: AssessmentStandard[] = [
         bestPractice: {
           description:
             "Treating custom components as first-class citizens with their own ALM process ensures they are reliable, reusable, and don't introduce breaking changes unexpectedly. This includes versioning, automated testing, and solution segmentation.",
-          link: "https://learn.microsoft.com/en-us/power-apps/developer/component-framework/implement-alm-pcf",
+          link: "https://learn.microsoft.com/en-us/power-platform/developer/component-framework/implement-alm-pcf",
           linkText: "ALM for PCF Controls",
         },
       },
