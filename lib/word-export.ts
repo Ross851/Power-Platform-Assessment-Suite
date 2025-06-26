@@ -13,7 +13,7 @@ import {
   AlignmentType,
 } from "docx"
 import saveAs from "file-saver"
-import type { Project, Question } from "./types"
+import type { Project, Question, Evidence } from "./types"
 import { format } from "date-fns"
 
 // --- Helper Functions ---
@@ -30,7 +30,7 @@ const createSubHeading = (text: string, level: HeadingLevel = HeadingLevel.HEADI
 
 const createParagraph = (text: string) => new Paragraph(text)
 
-const createBullet = (text: string) => new Paragraph({ text, bullet: { level: 0 } })
+const createBullet = (text: string, level = 0) => new Paragraph({ text, bullet: { level } })
 
 const createCell = (text: string, bold = false) =>
   new TableCell({
@@ -239,7 +239,7 @@ export const exportToTechnicalWord = async (project: Project) => {
             children: [createCell("Current Answer", true), createCell(JSON.stringify(gap.answer) || "N/A")],
           }),
           new TableRow({
-            children: [createCell("Evidence Notes", true), createCell(gap.evidenceNotes || "None")],
+            children: [createCell("Evidence Summary", true), createCell(gap.evidenceNotes || "None")],
           }),
         ]),
         new Paragraph({ text: "" }),
@@ -265,6 +265,16 @@ export const exportToTechnicalWord = async (project: Project) => {
             children: [createCell("Gap to Gold Standard"), createCell(String(gapToGold))],
           }),
         ]),
+        new Paragraph({ text: "" }),
+        new Paragraph({ children: [new TextRun({ text: "Associated Evidence:", bold: true })] }),
+        ...(gap.evidence.length > 0
+          ? gap.evidence.flatMap((evi: Evidence) => [
+              createBullet(`Type: ${evi.type.charAt(0).toUpperCase() + evi.type.slice(1)}`, 1),
+              createBullet(`Content: ${evi.content}`, 1),
+              createBullet(`Added: ${format(new Date(evi.uploadedAt), "dd MMM yyyy, HH:mm")}`, 1),
+              new Paragraph(""),
+            ])
+          : [createParagraph("No specific evidence provided.")]),
         new Paragraph({ text: "" }),
         new Paragraph({ children: [new TextRun({ text: "Best Practice:", bold: true })] }),
         createParagraph(gap.bestPractice?.description || "N/A"),

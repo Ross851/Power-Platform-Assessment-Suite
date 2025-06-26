@@ -8,6 +8,7 @@ import { ASSESSMENT_STANDARDS } from "@/lib/constants"
 import type { AssessmentStandard as AssessmentStandardType } from "@/lib/types"
 import { OverallSummary } from "@/components/overall-summary"
 import { GeneralDocumentation } from "@/components/general-documentation"
+import { VersionManager } from "@/components/version-manager"
 import { FileDown, ExternalLink, FolderPlus, Trash2, AlertCircle, Briefcase, Wrench } from "lucide-react"
 import { RAGIndicator } from "@/components/rag-indicator"
 import { useAssessmentStore } from "@/store/assessment-store"
@@ -256,6 +257,7 @@ export default function DashboardPage() {
       {activeProjectName && activeProject && (
         <>
           <OverallSummary />
+          <VersionManager />
           <section className="mb-8">
             <GeneralDocumentation projectName={activeProjectName} />
           </section>

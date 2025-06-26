@@ -9,7 +9,7 @@ import { ArrowLeft, ArrowRight, CheckCircle } from "lucide-react"
 import { QuestionDisplay } from "@/components/question-display"
 import { Progress } from "@/components/ui/progress"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { RAGIndicator } from "@/components/rag-indicator" // Import RAGIndicator
+import { RAGIndicator } from "@/components/rag-indicator"
 import { Alert, AlertCircle, AlertDescription, AlertTitle } from "@/components/ui/alert"
 
 export default function AssessmentStandardPage() {
@@ -17,15 +17,8 @@ export default function AssessmentStandardPage() {
   const params = useParams()
   const standardSlug = params.standardSlug as string
 
-  const {
-    getStandardBySlug,
-    setAnswer,
-    getStandardProgress,
-    calculateScoresAndRAG,
-    getStandardMaturityScore,
-    activeProjectName,
-    getActiveProject,
-  } = useAssessmentStore()
+  const { getStandardBySlug, calculateScoresAndRAG, getStandardProgress, getStandardMaturityScore, activeProjectName } =
+    useAssessmentStore()
 
   const [standard, setStandard] = useState<AssessmentStandard | undefined>(undefined)
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
@@ -34,44 +27,25 @@ export default function AssessmentStandardPage() {
   useEffect(() => {
     setIsClient(true)
     if (!activeProjectName) {
-      // Optional: redirect or show a message if no project is active
-      // For now, it might just show "Loading..." or an error if standard is not found
       setStandard(undefined)
       return
     }
-    // Fetch standard fresh from store on mount/slug change or active project change
     const currentStandard = getStandardBySlug(standardSlug)
     setStandard(currentStandard)
     if (currentStandard) {
-      calculateScoresAndRAG(standardSlug) // Initial calculation
+      calculateScoresAndRAG(standardSlug)
     }
-  }, [standardSlug, getStandardBySlug, calculateScoresAndRAG, activeProjectName]) // Added activeProjectName
+  }, [standardSlug, getStandardBySlug, calculateScoresAndRAG, activeProjectName])
 
-  const handleAnswerChange = (
-    questionId: string,
-    answer: any,
-    additionalData?: string | object,
-    riskOwner?: string,
-  ) => {
-    const payload: any = {
-      standardSlug,
-      questionId,
-      answer,
-    }
-    if (typeof additionalData === "string") {
-      payload.evidenceNotes = additionalData
-    } else {
-      payload.documentData = additionalData
-    }
-    if (riskOwner !== undefined) {
-      payload.riskOwner = riskOwner
-    }
-
-    setAnswer(payload)
-    calculateScoresAndRAG(standardSlug) // Recalculate scores and RAG on answer change
-    // Re-fetch standard from store to reflect updates immediately
-    setStandard(getStandardBySlug(standardSlug))
-  }
+  // This effect listens for changes in the store and updates the local state
+  useEffect(() => {
+    const unsubscribe = useAssessmentStore.subscribe((state) => {
+      const activeProject = state.projects.find((p) => p.name === state.activeProjectName)
+      const updatedStandard = activeProject?.standards.find((s) => s.slug === standardSlug)
+      setStandard(updatedStandard)
+    })
+    return () => unsubscribe()
+  }, [standardSlug, activeProjectName])
 
   const goToNextQuestion = () => {
     if (standard && currentQuestionIndex < standard.questions.length - 1) {
@@ -86,7 +60,7 @@ export default function AssessmentStandardPage() {
   }
 
   const completeStandard = () => {
-    calculateScoresAndRAG(standardSlug) // Final calculation
+    calculateScoresAndRAG(standardSlug)
     router.push("/")
   }
 
@@ -140,7 +114,7 @@ export default function AssessmentStandardPage() {
 
         <CardContent>
           {currentQuestion ? (
-            <QuestionDisplay question={currentQuestion} onAnswerChange={handleAnswerChange} key={currentQuestion.id} />
+            <QuestionDisplay question={currentQuestion} standardSlug={standardSlug} key={currentQuestion.id} />
           ) : (
             <p>No questions available for this standard.</p>
           )}

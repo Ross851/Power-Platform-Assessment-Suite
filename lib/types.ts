@@ -8,59 +8,77 @@ export type QuestionType =
   | "file-upload" // General file upload
   | "document-review" // Specific for document review with viewer
 
-export type RAGStatus = "red" | "amber" | "green" | "grey" // Added grey for unassessed/neutral
+export type RAGStatus = "red" | "amber" | "green" | "grey"
 
 export interface BestPractice {
   description: string
   link?: string
   linkText?: string
-  suggestedActions?: string[] // New: for more specific mitigation steps
+  suggestedActions?: string[]
+}
+
+export type EvidenceType = "file" | "snippet"
+
+export interface Evidence {
+  id: string // UUID from database
+  type: EvidenceType
+  content: string // File name for 'file', text content for 'snippet'
+  url?: string // Public URL for files
+  uploadedAt: string
 }
 
 export interface Question {
   id: string
   text: string
   type: QuestionType
-  weight: number // For scoring
-  category: string // For grouping or detailed analysis
-  guidance?: string // New field for hints and guidance (UK English)
-  bestPractice?: BestPractice // New field for best practice guidance
-  options?: string[] // For scale or multi-select
+  weight: number
+  category: string
+  guidance?: string
+  bestPractice?: BestPractice
+  options?: string[]
   answer?: any
-  score?: number // Calculated score for this question
-  evidenceNotes?: string // For text area related to evidence
-  riskLevel?: "low" | "medium" | "high" // Calculated risk
-  ragStatus?: RAGStatus // New field for RAG status
-  riskOwner?: string // New: to assign an owner to the risk identified by this question
+  score?: number
+  evidenceNotes?: string
+  riskLevel?: "low" | "medium" | "high"
+  ragStatus?: RAGStatus
+  riskOwner?: string
   document?: {
     file?: File | null
     fileName?: string
     numPages?: number
     annotations?: Array<{ page: number; text: string; tags?: string[] }>
   }
+  evidence: Evidence[] // New: for storing multiple pieces of evidence
 }
 
 export interface AssessmentStandard {
   slug: string
   name: string
-  weight: number // Overall weight of this standard in the assessment
+  weight: number
   description: string
   questions: Question[]
-  completion?: number // Percentage completion for this standard
-  maturityScore?: number // Maturity score for this standard
-  ragStatus?: RAGStatus // New field for RAG status
+  completion?: number
+  maturityScore?: number
+  ragStatus?: RAGStatus
+}
+
+export interface ProjectVersion {
+  id: string
+  name: string
+  createdAt: Date
+  standards: AssessmentStandard[]
 }
 
 export interface AnswerPayload {
   standardSlug: string
   questionId: string
-  answer: any
+  answer?: any
   evidenceNotes?: string
-  documentData?: any // For document review type
-  riskOwner?: string // New
+  documentData?: any
+  riskOwner?: string
+  evidence?: Evidence[] // To update evidence list
 }
 
-// This type now reflects the DB schema, not the temporary client-side file object
 export interface GeneralDocument {
   id: string
   project_name: string
@@ -69,14 +87,15 @@ export interface GeneralDocument {
   type: string | null
   size: number | null
   description: string | null
-  uploaded_at: string // Comes as string from DB
-  url?: string // Optional public URL for the file
+  uploaded_at: string
+  url?: string
 }
 
 export interface Project {
   name: string
-  clientReferenceNumber: string // Now mandatory
+  clientReferenceNumber: string
   standards: AssessmentStandard[]
   createdAt: Date
   lastModifiedAt: Date
+  versions: ProjectVersion[] // New: for versioning
 }

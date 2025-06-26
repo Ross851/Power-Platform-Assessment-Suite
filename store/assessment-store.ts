@@ -1,7 +1,8 @@
 import { create } from "zustand"
 import { persist, type StateStorage } from "zustand/middleware"
-import type { AssessmentStandard, AnswerPayload, RAGStatus, Project } from "@/lib/types"
+import type { AssessmentStandard, AnswerPayload, RAGStatus, Project, ProjectVersion } from "@/lib/types"
 import { ASSESSMENT_STANDARDS } from "@/lib/constants"
+import { v4 as uuidv4 } from "uuid"
 
 // Helper function to create a fresh set of standards for a new project
 const createInitialProjectStandards = (): AssessmentStandard[] =>
@@ -15,6 +16,7 @@ const createInitialProjectStandards = (): AssessmentStandard[] =>
       ragStatus: "grey" as RAGStatus,
       evidenceNotes: "",
       document: q.type === "document-review" ? { file: null, fileName: "", annotations: [] } : undefined,
+      evidence: [], // Initialise evidence array
     })),
     completion: 0,
     maturityScore: 0,
@@ -56,6 +58,7 @@ const createDummyProject = (): Project => {
     standards,
     createdAt: new Date("2024-05-10T10:00:00Z"),
     lastModifiedAt: new Date("2024-05-20T14:30:00Z"),
+    versions: [], // Initialise versions array
   }
 }
 // --- END DUMMY DATA ---
@@ -87,31 +90,33 @@ interface AssessmentState {
     riskOwner?: string
     category: string
   }>
+
+  // Versioning Actions
+  createVersion: (versionName: string) => void
+  restoreVersion: (versionId: string) => void
 }
 
 const customStorage: StateStorage = {
   getItem: (name) => {
     const str = localStorage.getItem(name)
     if (!str) return null
-    const { state, version } = JSON.parse(str)
+    const { state } = JSON.parse(str)
     const revivedState = {
       ...state,
       projects: (state.projects || []).map((project: any) => ({
         ...project,
         createdAt: new Date(project.createdAt),
         lastModifiedAt: new Date(project.lastModifiedAt),
+        versions: (project.versions || []).map((v: any) => ({
+          ...v,
+          createdAt: new Date(v.createdAt),
+        })),
       })),
     }
-    return { state: revivedState, version }
+    return { state: revivedState }
   },
   setItem: (name, newValue) => {
-    const modifiedState = {
-      ...newValue.state,
-      projects: newValue.state.projects.map((project: Project) => ({
-        ...project,
-      })),
-    }
-    localStorage.setItem(name, JSON.stringify({ state: modifiedState, version: newValue.version }))
+    localStorage.setItem(name, JSON.stringify(newValue))
   },
   removeItem: (name) => localStorage.removeItem(name),
 }
@@ -133,6 +138,7 @@ export const useAssessmentStore = create<AssessmentState>()(
           standards: createInitialProjectStandards(),
           createdAt: new Date(),
           lastModifiedAt: new Date(),
+          versions: [],
         }
         set((state) => ({
           projects: [...state.projects, newProject],
@@ -161,24 +167,23 @@ export const useAssessmentStore = create<AssessmentState>()(
         return get().projects.find((p) => p.name === activeName)
       },
 
-      setAnswer: ({ standardSlug, questionId, answer, evidenceNotes, documentData, riskOwner }) =>
+      setAnswer: ({ standardSlug, questionId, answer, evidenceNotes, documentData, riskOwner, evidence }) =>
         set((state) => {
           const activeProject = state.projects.find((p) => p.name === state.activeProjectName)
           if (!activeProject) return state
 
           const newStandards = activeProject.standards.map((standard) => {
             if (standard.slug === standardSlug) {
-              const newQuestions = standard.questions.map((q) =>
-                q.id === questionId
-                  ? {
-                      ...q,
-                      answer,
-                      evidenceNotes: evidenceNotes || q.evidenceNotes,
-                      document: documentData ? { ...q.document, ...documentData } : q.document,
-                      riskOwner: riskOwner !== undefined ? riskOwner : q.riskOwner,
-                    }
-                  : q,
-              )
+              const newQuestions = standard.questions.map((q) => {
+                if (q.id !== questionId) return q
+                const updatedQ = { ...q }
+                if (answer !== undefined) updatedQ.answer = answer
+                if (evidenceNotes !== undefined) updatedQ.evidenceNotes = evidenceNotes
+                if (documentData) updatedQ.document = { ...q.document, ...documentData }
+                if (riskOwner !== undefined) updatedQ.riskOwner = riskOwner
+                if (evidence !== undefined) updatedQ.evidence = evidence
+                return updatedQ
+              })
               const answeredQuestions = newQuestions.filter(
                 (q) =>
                   (q.answer !== undefined && q.answer !== "") || (q.type === "document-review" && q.document?.file),
@@ -429,9 +434,57 @@ export const useAssessmentStore = create<AssessmentState>()(
           return a.standardName.localeCompare(b.standardName)
         })
       },
+
+      createVersion: (versionName) => {
+        set((state) => {
+          const activeProject = state.projects.find((p) => p.name === state.activeProjectName)
+          if (!activeProject) return state
+
+          const newVersion: ProjectVersion = {
+            id: uuidv4(),
+            name: versionName,
+            createdAt: new Date(),
+            // Deep copy of standards to snapshot the state
+            standards: JSON.parse(JSON.stringify(activeProject.standards)),
+          }
+
+          const updatedProject = {
+            ...activeProject,
+            versions: [...activeProject.versions, newVersion],
+          }
+
+          return {
+            projects: state.projects.map((p) => (p.name === state.activeProjectName ? updatedProject : p)),
+          }
+        })
+      },
+
+      restoreVersion: (versionId) => {
+        set((state) => {
+          const activeProject = state.projects.find((p) => p.name === state.activeProjectName)
+          if (!activeProject) return state
+
+          const versionToRestore = activeProject.versions.find((v) => v.id === versionId)
+          if (!versionToRestore) {
+            alert("Version not found.")
+            return state
+          }
+
+          const updatedProject = {
+            ...activeProject,
+            // Restore standards from the selected version
+            standards: JSON.parse(JSON.stringify(versionToRestore.standards)),
+            lastModifiedAt: new Date(),
+          }
+
+          return {
+            projects: state.projects.map((p) => (p.name === state.activeProjectName ? updatedProject : p)),
+          }
+        })
+      },
     }),
     {
-      name: "power-platform-assessment-storage-v3", // Incremented version for storage changes
+      name: "power-platform-assessment-storage-v4", // Incremented version
       storage: customStorage,
     },
   ),
