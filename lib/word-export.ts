@@ -22,9 +22,9 @@ const sanitizeFilename = (name: string) => name.replace(/[^a-zA-Z0-9-]/g, "_")
 const createHeading = (text: string, level: HeadingLevel = HeadingLevel.HEADING_1) =>
   new Paragraph({ heading: level, children: [new TextRun({ text, bold: true })] })
 
-const createSubHeading = (text: string) =>
+const createSubHeading = (text: string, level: HeadingLevel = HeadingLevel.HEADING_2) =>
   new Paragraph({
-    heading: HeadingLevel.HEADING_2,
+    heading: level,
     children: [new TextRun({ text, bold: true })],
   })
 
@@ -197,44 +197,94 @@ export const exportToTechnicalWord = async (project: Project) => {
     ),
     new Paragraph({ text: "" }),
 
-    ...allGaps.flatMap((gap) => [
-      createSubHeading(`Gap: ${gap.questionId} - ${gap.questionText}`),
-      createStyledTable([
-        new TableRow({
-          children: [createCell("Standard", true), createCell(gap.standardName)],
-        }),
-        new TableRow({
-          children: [createCell("Category", true), createCell(gap.category)],
-        }),
-        new TableRow({
-          children: [createCell("Status", true), createCell(gap.ragStatus.toUpperCase())],
-        }),
-        new TableRow({
-          children: [createCell("Current Answer", true), createCell(JSON.stringify(gap.answer) || "N/A")],
-        }),
-        new TableRow({
-          children: [createCell("Evidence Notes", true), createCell(gap.evidenceNotes || "None")],
-        }),
-      ]),
-      new Paragraph({ text: "" }),
-      new Paragraph({ children: [new TextRun({ text: "Best Practice:", bold: true })] }),
-      createParagraph(gap.bestPractice?.description || "N/A"),
-      new Paragraph({ text: "" }),
-      new Paragraph({ children: [new TextRun({ text: "Implementation Steps:", bold: true })] }),
-      ...(gap.bestPractice?.suggestedActions?.map((action) => createBullet(action)) || [
-        createParagraph("No specific actions suggested. Review best practice for guidance."),
-      ]),
-      new Paragraph({
-        children: [
-          new TextRun({ text: "Reference: ", bold: true }),
-          new TextRun({
-            text: gap.bestPractice?.link || "No link available",
-            style: "Hyperlink",
+    createSubHeading("2. Scoring & Gap Analysis Explained", HeadingLevel.HEADING_2),
+    createParagraph(
+      "Our scoring model rates each assessment point on a scale of 1 to 5. This score determines the RAG (Red, Amber, Green) status and helps prioritise actions.",
+    ),
+    createBullet("Score 1-2 (Red Status): Indicates a significant gap and high risk. Urgent attention is required."),
+    createBullet(
+      "Score 3 (Amber Status): Represents a state of basic compliance. The foundational requirements are met, but there are clear opportunities for improvement.",
+    ),
+    createBullet(
+      "Score 4-5 (Green Status): Shows strong alignment with Microsoft's best practices and a low-risk profile.",
+    ),
+    createParagraph("The gap analysis measures the difference between your current score and two key benchmarks:"),
+    createBullet(
+      "Gap to Basic Compliance: The difference between your score and the target score of 3. A value greater than zero here indicates a failure to meet baseline standards.",
+    ),
+    createBullet(
+      "Gap to Gold Standard: The difference between your score and the maximum score of 5. This represents the effort required to achieve the highest level of maturity.",
+    ),
+    new Paragraph({ text: "" }),
+
+    createSubHeading("3. Detailed Gap Analysis & Remediation Steps", HeadingLevel.HEADING_2),
+    ...allGaps.flatMap((gap) => {
+      const currentScore = gap.score || 0
+      const gapToBasic = Math.max(0, 3 - currentScore)
+      const gapToGold = Math.max(0, 5 - currentScore)
+
+      return [
+        createSubHeading(`Gap: ${gap.questionId} - ${gap.questionText}`, HeadingLevel.HEADING_3),
+        createStyledTable([
+          new TableRow({
+            children: [createCell("Standard", true), createCell(gap.standardName)],
           }),
-        ],
-      }),
-      new Paragraph({ text: "" }),
-    ]),
+          new TableRow({
+            children: [createCell("Category", true), createCell(gap.category)],
+          }),
+          new TableRow({
+            children: [createCell("Status", true), createCell(gap.ragStatus.toUpperCase())],
+          }),
+          new TableRow({
+            children: [createCell("Current Answer", true), createCell(JSON.stringify(gap.answer) || "N/A")],
+          }),
+          new TableRow({
+            children: [createCell("Evidence Notes", true), createCell(gap.evidenceNotes || "None")],
+          }),
+        ]),
+        new Paragraph({ text: "" }),
+        new Paragraph({ children: [new TextRun({ text: "Quantitative Gap Analysis:", bold: true })] }),
+        createStyledTable([
+          new TableRow({
+            children: [createCell("Metric", true), createCell("Score", true)],
+            tableHeader: true,
+          }),
+          new TableRow({
+            children: [createCell("Current Score"), createCell(String(currentScore))],
+          }),
+          new TableRow({
+            children: [createCell("Basic Compliance Target"), createCell("3")],
+          }),
+          new TableRow({
+            children: [createCell("Gold Standard Target"), createCell("5")],
+          }),
+          new TableRow({
+            children: [createCell("Gap to Basic Compliance"), createCell(String(gapToBasic))],
+          }),
+          new TableRow({
+            children: [createCell("Gap to Gold Standard"), createCell(String(gapToGold))],
+          }),
+        ]),
+        new Paragraph({ text: "" }),
+        new Paragraph({ children: [new TextRun({ text: "Best Practice:", bold: true })] }),
+        createParagraph(gap.bestPractice?.description || "N/A"),
+        new Paragraph({ text: "" }),
+        new Paragraph({ children: [new TextRun({ text: "Implementation Steps:", bold: true })] }),
+        ...(gap.bestPractice?.suggestedActions?.map((action) => createBullet(action)) || [
+          createParagraph("No specific actions suggested. Review best practice for guidance."),
+        ]),
+        new Paragraph({
+          children: [
+            new TextRun({ text: "Reference: ", bold: true }),
+            new TextRun({
+              text: gap.bestPractice?.link || "No link available",
+              style: "Hyperlink",
+            }),
+          ],
+        }),
+        new Paragraph({ text: "" }),
+      ]
+    }),
   ])
 
   const blob = await Packer.toBlob(doc)
@@ -246,8 +296,10 @@ export const exportToTechnicalWord = async (project: Project) => {
 }
 
 // --- Data Helper Functions ---
-const getHighPriorityAreas = (project: Project) => {
-  const areas: Array<Question & { standardName: string; category: string }> = []
+type HighPriorityArea = Question & { standardName: string; category: string }
+
+const getHighPriorityAreas = (project: Project): HighPriorityArea[] => {
+  const areas: HighPriorityArea[] = []
   project.standards.forEach((std) => {
     std.questions.forEach((q) => {
       if (q.ragStatus === "red" || q.ragStatus === "amber") {
@@ -258,14 +310,20 @@ const getHighPriorityAreas = (project: Project) => {
   return areas.sort((a, b) => (a.ragStatus === "red" && b.ragStatus !== "red" ? -1 : 1))
 }
 
-const getAllGaps = (project: Project) => {
-  const gaps: Array<Question & { standardName: string }> = []
+const getAllGaps = (project: Project): HighPriorityArea[] => {
+  const gaps: HighPriorityArea[] = []
   project.standards.forEach((std) => {
     std.questions.forEach((q) => {
       if (q.ragStatus === "red" || q.ragStatus === "amber") {
-        gaps.push({ ...q, standardName: std.name })
+        gaps.push({ ...q, standardName: std.name, category: q.category })
       }
     })
   })
-  return gaps
+  return gaps.sort((a, b) => {
+    if (a.ragStatus === "red" && b.ragStatus !== "red") return -1
+    if (a.ragStatus !== "red" && b.ragStatus === "red") return 1
+    if (a.ragStatus === "amber" && b.ragStatus !== "amber") return -1
+    if (a.ragStatus !== "amber" && b.ragStatus === "amber") return 1
+    return 0
+  })
 }

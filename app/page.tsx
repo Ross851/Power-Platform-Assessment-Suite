@@ -41,8 +41,9 @@ export default function DashboardPage() {
     calculateScoresAndRAG,
   } = useAssessmentStore()
 
-  const [newProjectName, setNewProjectName] = useState("")
-  const [newProjectRef, setNewProjectRef] = useState("")
+  const [clientName, setClientName] = useState("")
+  const [projectTopic, setProjectTopic] = useState("")
+  const [clientRef, setClientRef] = useState("")
   const [isClient, setIsClient] = useState(false)
   const [confirmDeleteProject, setConfirmDeleteProject] = useState<string | null>(null)
   const [isExporting, setIsExporting] = useState(false)
@@ -62,10 +63,12 @@ export default function DashboardPage() {
   }, [isClient, activeProject, calculateScoresAndRAG])
 
   const handleCreateProject = () => {
-    if (newProjectName.trim()) {
-      createProject(newProjectName.trim(), newProjectRef.trim())
-      setNewProjectName("")
-      setNewProjectRef("")
+    if (clientName.trim() && projectTopic.trim() && clientRef.trim()) {
+      const projectName = `Telana_${clientName.trim().replace(/ /g, "_")}_${projectTopic.trim().replace(/ /g, "_")}`
+      createProject(projectName, clientRef.trim())
+      setClientName("")
+      setProjectTopic("")
+      setClientRef("")
     }
   }
 
@@ -108,7 +111,7 @@ export default function DashboardPage() {
     return (
       <div className="container mx-auto p-4 md:p-8 bg-background text-foreground min-h-screen">
         <header className="mb-8">
-          <h1 className="text-3xl font-bold text-primary">Power Platform Assessment Suite</h1>
+          <h1 className="text-3xl font-bold text-primary">Telana Power Platform Assessment Suite</h1>
           <p className="text-muted-foreground">Loading assessment data...</p>
         </header>
       </div>
@@ -141,31 +144,44 @@ export default function DashboardPage() {
           <CardDescription>Create a new assessment project or select an existing one.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex flex-col sm:flex-row gap-2 items-end">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-2 items-end">
             <div className="flex-grow">
-              <Label htmlFor="new-project-name">New Project Name</Label>
+              <Label htmlFor="client-name">Client Name</Label>
               <Input
-                id="new-project-name"
-                value={newProjectName}
-                onChange={(e) => setNewProjectName(e.target.value)}
-                placeholder="e.g., Contoso Q3 Assessment"
+                id="client-name"
+                value={clientName}
+                onChange={(e) => setClientName(e.target.value)}
+                placeholder="e.g., Contoso"
               />
             </div>
-            <div className="w-full sm:w-auto">
-              <Label htmlFor="new-project-ref">Client Reference Number (Optional)</Label>
+            <div className="flex-grow">
+              <Label htmlFor="project-topic">Project Topic</Label>
               <Input
-                id="new-project-ref"
-                value={newProjectRef}
-                onChange={(e) => setNewProjectRef(e.target.value)}
+                id="project-topic"
+                value={projectTopic}
+                onChange={(e) => setProjectTopic(e.target.value)}
+                placeholder="e.g., Q3 Assessment"
+              />
+            </div>
+            <div className="flex-grow">
+              <Label htmlFor="client-ref">Client Reference Number</Label>
+              <Input
+                id="client-ref"
+                value={clientRef}
+                onChange={(e) => setClientRef(e.target.value)}
                 placeholder="e.g., TEL-C0N-001"
               />
             </div>
-            <Button onClick={handleCreateProject} disabled={!newProjectName.trim()}>
-              <FolderPlus className="mr-2 h-4 w-4" /> Create Project
-            </Button>
           </div>
+          <Button
+            onClick={handleCreateProject}
+            disabled={!clientName.trim() || !projectTopic.trim() || !clientRef.trim()}
+            className="w-full md:w-auto"
+          >
+            <FolderPlus className="mr-2 h-4 w-4" /> Create Project
+          </Button>
           {projects.length > 0 && (
-            <div className="flex flex-col sm:flex-row gap-2 items-end">
+            <div className="flex flex-col sm:flex-row gap-2 items-end pt-4 border-t">
               <div className="flex-grow">
                 <Label htmlFor="active-project-select">Active Project</Label>
                 <Select value={activeProjectName || ""} onValueChange={handleSetActiveProject}>
@@ -175,8 +191,8 @@ export default function DashboardPage() {
                   <SelectContent>
                     {projects.map((p) => (
                       <SelectItem key={p.name} value={p.name}>
-                        {p.name} {p.clientReferenceNumber && `(${p.clientReferenceNumber})`} (Last modified:{" "}
-                        {format(new Date(p.lastModifiedAt), "dd MMM yyyy, HH:mm")})
+                        {p.name} ({p.clientReferenceNumber}) - Last modified:{" "}
+                        {format(new Date(p.lastModifiedAt), "dd MMM yyyy, HH:mm")}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -246,9 +262,7 @@ export default function DashboardPage() {
           <section className="mb-8">
             <h2 className="text-2xl font-semibold mb-4">
               Assessment Standards for: <span className="text-primary">{activeProjectName}</span>
-              {activeProject?.clientReferenceNumber && (
-                <span className="text-muted-foreground text-lg ml-2">({activeProject.clientReferenceNumber})</span>
-              )}
+              <span className="text-muted-foreground text-lg ml-2">({activeProject.clientReferenceNumber})</span>
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {displayStandards.map(

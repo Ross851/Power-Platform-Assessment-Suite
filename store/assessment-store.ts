@@ -51,7 +51,7 @@ const createDummyProject = (): Project => {
   }
 
   return {
-    name: "Contoso Demo Project",
+    name: "Telana_Contoso_Demo",
     clientReferenceNumber: "TEL-C0N-001",
     standards,
     createdAt: new Date("2024-05-10T10:00:00Z"),
@@ -64,7 +64,7 @@ interface AssessmentState {
   projects: Project[]
   activeProjectName: string | null
 
-  createProject: (projectName: string, clientReferenceNumber?: string) => void
+  createProject: (projectName: string, clientReferenceNumber: string) => void
   setActiveProject: (projectName: string) => void
   getActiveProject: () => Project | undefined
   deleteProject: (projectName: string) => void
@@ -84,6 +84,8 @@ interface AssessmentState {
     questionText?: string
     questionId?: string
     ragStatus: RAGStatus
+    riskOwner?: string
+    category: string
   }>
 }
 
@@ -118,7 +120,7 @@ export const useAssessmentStore = create<AssessmentState>()(
   persist(
     (set, get) => ({
       projects: [createDummyProject()],
-      activeProjectName: "Contoso Demo Project",
+      activeProjectName: "Telana_Contoso_Demo",
 
       createProject: (projectName, clientReferenceNumber) => {
         if (get().projects.find((p) => p.name === projectName)) {
@@ -127,7 +129,7 @@ export const useAssessmentStore = create<AssessmentState>()(
         }
         const newProject: Project = {
           name: projectName,
-          clientReferenceNumber: clientReferenceNumber || undefined,
+          clientReferenceNumber,
           standards: createInitialProjectStandards(),
           createdAt: new Date(),
           lastModifiedAt: new Date(),
@@ -388,6 +390,8 @@ export const useAssessmentStore = create<AssessmentState>()(
           questionText?: string
           questionId?: string
           ragStatus: RAGStatus
+          riskOwner?: string
+          category: string
         }> = []
         activeProject.standards.forEach((std) => {
           if (std.ragStatus === "red" || std.ragStatus === "amber") {
@@ -399,6 +403,8 @@ export const useAssessmentStore = create<AssessmentState>()(
                   questionText: q.text,
                   questionId: q.id,
                   ragStatus: q.ragStatus,
+                  riskOwner: q.riskOwner,
+                  category: q.category,
                 })
               }
             })
@@ -410,6 +416,7 @@ export const useAssessmentStore = create<AssessmentState>()(
                 standardName: std.name,
                 standardSlug: std.slug,
                 ragStatus: std.ragStatus!,
+                category: std.name, // Fallback category
               })
             }
           }
@@ -424,7 +431,7 @@ export const useAssessmentStore = create<AssessmentState>()(
       },
     }),
     {
-      name: "power-platform-assessment-storage-v2",
+      name: "power-platform-assessment-storage-v3", // Incremented version for storage changes
       storage: customStorage,
     },
   ),
