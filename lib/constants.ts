@@ -90,6 +90,12 @@ export const ASSESSMENT_STANDARDS: AssessmentStandard[] = [
             "Integrate DLP policy monitoring with Microsoft Purview data classification insights.",
           ],
         },
+        discovery: [
+          "Navigate to the Power Platform Admin Center (admin.powerplatform.microsoft.com).",
+          "In the left navigation pane, select 'Policies' > 'Data policies'.",
+          "Review the list of policies. Check the 'Scope' column to see which environments they apply to (e.g., Tenant-level, Multiple environments).",
+          "Click on a policy and select the 'Connectors' tab to review how connectors are classified (Business, Non-Business, Blocked).",
+        ],
       },
       {
         id: "dlp-q2",
@@ -124,6 +130,27 @@ export const ASSESSMENT_STANDARDS: AssessmentStandard[] = [
         category: "Governance",
         guidance:
           "A clear process ensures legitimate needs can be met while maintaining control and auditability. This process should be part of your overall governance framework.",
+      },
+      {
+        id: "dlp-q5",
+        text: "Are DLP policies configured to restrict data flows between different geographic regions to comply with data residency requirements?",
+        type: "boolean",
+        weight: 4,
+        category: "Data Residency & Compliance",
+        guidance:
+          "For global organizations, it's critical to prevent sensitive data from one region (e.g., EU) from being processed or stored in another (e.g., US). Check if DLP policies are scoped to specific regions or use connector action controls to block cross-region data movement.",
+        bestPractice: {
+          description:
+            "In a multi-region tenancy, DLP policies must be designed to enforce data sovereignty. This involves creating region-specific policies that prevent connectors from moving data across geographic boundaries, which is a key requirement for regulations like GDPR.",
+          link: "https://learn.microsoft.com/en-us/power-platform/admin/dlp-connector-action-controls",
+          linkText: "Connector action controls",
+          suggestedActions: [
+            "Map out all data residency requirements for your organization.",
+            "Create region-specific DLP policies for environments within each geography.",
+            "Use connector action controls to block specific actions that could lead to cross-region data transfer.",
+            "Regularly audit DLP logs for violations of regional data policies.",
+          ],
+        },
       },
     ],
   },
@@ -169,15 +196,15 @@ export const ASSESSMENT_STANDARDS: AssessmentStandard[] = [
       },
       {
         id: "env-q4",
-        text: "Is there a defined strategy and governance process for managing on-premises data gateways (e.g., installation, updates, sharing, monitoring, environment-specific configurations, clustering for HA)?",
+        text: "Is there a defined strategy and governance process for managing on-premises data gateways, including regional deployment for data residency?",
         type: "boolean",
         weight: 3,
         category: "Connectivity & Integration",
         guidance:
-          "Assess policies for gateway clusters for high availability, security (who can install/manage), patching, monitoring gateway performance and errors, and how gateways are allocated or restricted to specific environments or users. This is critical for secure and reliable hybrid connectivity.",
+          "Assess policies for gateway clusters for high availability, security (who can install/manage), patching, monitoring performance, and how gateways are allocated. For global organizations, check for a strategy of deploying gateways within specific geographic regions to keep data local.",
         bestPractice: {
           description:
-            "A well-defined governance model for on-premises data gateways, including clustering for high availability and environment-specific configurations, ensures secure, reliable, and performant connectivity to on-premises data sources.",
+            "A well-defined governance model for on-premises data gateways, including clustering for HA and region-specific deployments, ensures secure, reliable, and compliant connectivity to on-premises data sources.",
           link: "https://learn.microsoft.com/en-us/power-platform/admin/wp-onpremises-data-gateway",
           linkText: "On-premises data gateway best practices",
         },
@@ -212,6 +239,28 @@ export const ASSESSMENT_STANDARDS: AssessmentStandard[] = [
           linkText: "Circuit Breaker Pattern",
         },
       },
+      {
+        id: "env-q7",
+        text: "Is there a defined strategy for managing data residency, including the geographic distribution of environments and data?",
+        type: "boolean",
+        weight: 5,
+        category: "Data Residency & Compliance",
+        guidance:
+          "For global organizations, this is critical. Look for a documented policy that specifies where data can be stored and processed, and how environments are provisioned to comply with laws like GDPR. This impacts performance, latency, and compliance.",
+        bestPractice: {
+          description:
+            "A formal data residency strategy involves creating separate environments in different geographic regions, supported by region-specific DLP policies and gateway deployments. This ensures compliance with data localization laws and optimizes performance for global users.",
+          link: "https://learn.microsoft.com/en-us/power-platform/admin/new-datacenter-regions",
+          linkText: "Power Platform geographic availability",
+          suggestedActions: [
+            "Define and document a clear data residency policy for the organization.",
+            "Establish separate Power Platform environments for each required geographic region.",
+            "Implement a process for provisioning regional on-premises data gateways.",
+            "Configure region-specific DLP policies to prevent unauthorized cross-border data flows.",
+            "Monitor for and audit any cross-region data movement to ensure compliance.",
+          ],
+        },
+      },
     ],
   },
   {
@@ -244,6 +293,14 @@ export const ASSESSMENT_STANDARDS: AssessmentStandard[] = [
             "Integrate Identity Secure Score recommendations into the review process.",
           ],
         },
+        discovery: [
+          "For environment roles: Navigate to the Power Platform Admin Center.",
+          "Select an environment, then go to 'Settings' > 'Users + permissions' > 'Security roles'.",
+          "Click on a key role (e.g., System Administrator, Basic User) to inspect its detailed privileges across different tables.",
+          "For tenant-level roles: Navigate to the Microsoft Entra admin center (entra.microsoft.com).",
+          "Go to 'Identity' > 'Roles & admins' > 'Roles and administrators'.",
+          "Search for roles like 'Power Platform Administrator' or 'Dynamics 365 Administrator' and review their assigned members.",
+        ],
       },
       {
         id: "sec-q2",
@@ -256,7 +313,7 @@ export const ASSESSMENT_STANDARDS: AssessmentStandard[] = [
           "Consider how access is granted, managed, and revoked for apps, flows, and underlying data sources. Are Azure AD groups used effectively? Effective controls are key to data security and compliance.",
         bestPractice: {
           description:
-            "Effective access control uses a 'Defense-in-Depth' strategy, combining authentication, authorisation (Web Roles, Table Permissions), and regular configuration checks. For external sites, this includes making use of Power Pages' robust security model. Observability tools help verify that these controls are working as intended.",
+            "Effective access control uses a 'Defence-in-Depth' strategy, combining authentication, authorisation (Web Roles, Table Permissions), and regular configuration checks. For external sites, this includes making use of Power Pages' robust security model. Observability tools help verify that these controls are working as intended.",
           link: "https://learn.microsoft.com/en-us/power-platform/admin/wp-security",
           linkText: "Review the Power Platform Security White Paper",
         },
@@ -271,7 +328,7 @@ export const ASSESSMENT_STANDARDS: AssessmentStandard[] = [
           "Check the site's configuration in the Power Platform admin centre. A WAF provides a critical perimeter defence against common web attacks. Active management of security headers is part of ongoing application security.",
         bestPractice: {
           description:
-            "Power Pages security follows a 'Defense-in-Depth' model. A key layer is the network perimeter, where a Web Application Firewall (WAF) should be used to filter malicious traffic. Additionally, configuring HTTP Security Headers like Content-Security-Policy (CSP) hardens the application against client-side attacks. Monitoring WAF logs and site activity provides crucial security insights.",
+            "Power Pages security follows a 'Defence-in-Depth' model. A key layer is the network perimeter, where a Web Application Firewall (WAF) should be used to filter malicious traffic. Additionally, configuring HTTP Security Headers like Content-Security-Policy (CSP) hardens the application against client-side attacks. Monitoring WAF logs and site activity provides crucial security insights.",
           link: "https://learn.microsoft.com/en-us/power-pages/guidance/white-papers/security",
           linkText: "Read the Power Pages Security White Paper",
         },
@@ -371,6 +428,27 @@ export const ASSESSMENT_STANDARDS: AssessmentStandard[] = [
           ],
         },
       },
+      {
+        id: "sec-q9",
+        text: "Is there a formal security review process for custom connectors to prevent credential leakage and ensure secure coding practices?",
+        type: "boolean",
+        weight: 4,
+        category: "Integration Security",
+        guidance:
+          "Custom connectors can be a major security risk if not properly governed. Check for a mandatory code review process that looks for hardcoded credentials, insecure handling of API keys, and adherence to OAuth 2.0 standards over basic authentication.",
+        bestPractice: {
+          description:
+            "All custom connectors must undergo a rigorous security review before being deployed to production. This process should enforce the use of secure authentication methods like OAuth 2.0 and mandate that all secrets are stored in Azure Key Vault, not in the connector definition.",
+          link: "https://learn.microsoft.com/en-us/connectors/custom-connectors/security",
+          linkText: "Custom connector security",
+          suggestedActions: [
+            "Mandate a security code review for all new or updated custom connectors.",
+            "Prohibit the use of hardcoded credentials or API keys within connector definitions.",
+            "Enforce the use of Azure Key Vault for all secrets and credentials used by connectors.",
+            "Prioritize OAuth 2.0 authentication for all custom connectors where possible.",
+          ],
+        },
+      },
     ],
   },
   {
@@ -447,6 +525,27 @@ export const ASSESSMENT_STANDARDS: AssessmentStandard[] = [
             "Effective management of AI Builder credits ensures that AI capabilities are available when needed and costs are controlled. Monitor consumption via the Power Platform Admin Centre and consider allocating credits strategically.",
           link: "https://learn.microsoft.com/en-us/ai-builder/administer-licensing",
           linkText: "AI Builder licensing and credit management",
+        },
+      },
+      {
+        id: "lic-q6",
+        text: "Is there a regular audit process to detect and remediate licensing compliance risks (e.g., premium connector misuse, per-app violations, guest access)?",
+        type: "boolean",
+        weight: 4,
+        category: "Compliance & Auditing",
+        guidance:
+          "Licensing violations can lead to significant unexpected costs. Check for a proactive process, potentially using PowerShell scripts or CoE Starter Kit tools, to audit for common issues like apps with standard licenses using premium connectors, or users with per-app licenses accessing multiple apps.",
+        bestPractice: {
+          description:
+            "A proactive, automated licensing audit is crucial for avoiding large, unbudgeted costs and ensuring compliance. This process should be run regularly (e.g., monthly) to identify and address violations before they become a major financial risk.",
+          link: "https://learn.microsoft.com/en-us/power-platform/guidance/coe/power-bi-licensing",
+          linkText: "CoE Power BI - Licensing",
+          suggestedActions: [
+            "Develop and schedule a monthly PowerShell script to audit for common licensing violations.",
+            "Use the CoE Starter Kit's licensing dashboards to visualize potential compliance issues.",
+            "Establish a clear process for remediating identified violations, including user communication and license reallocation.",
+            "Educate makers on licensing rules to prevent violations from occurring.",
+          ],
         },
       },
     ],
@@ -714,12 +813,18 @@ export const ASSESSMENT_STANDARDS: AssessmentStandard[] = [
         weight: 3,
         category: "Operational Excellence",
         guidance:
-          "Assess if there are processes for performance testing, identifying bottlenecks, optimising apps/flows (e.g., efficient Dataverse queries, flow design), and planning for capacity/scalability of widely adopted solutions. This includes monitoring and proactive adjustments.",
+          "Assess if there are processes for performance testing, identifying bottlenecks (e.g., delegation warnings, API throttling), optimising apps/flows (e.g., efficient Dataverse queries, flow design), and planning for capacity/scalability of widely adopted solutions.",
         bestPractice: {
           description:
             "A proactive approach to performance optimisation and scalability, including regular performance testing and adherence to design best practices, ensures critical Power Platform solutions remain responsive and reliable as usage grows.",
           link: "https://learn.microsoft.com/en-us/power-platform/guidance/well-architected/performance-efficiency/overview",
           linkText: "Well-Architected: Performance Efficiency",
+          suggestedActions: [
+            "Mandate performance testing for any app expected to have more than 100 concurrent users.",
+            "Implement automated alerts for flows that consistently exceed duration thresholds or hit API throttling limits.",
+            "Conduct quarterly capacity planning reviews for Dataverse storage and API call quotas.",
+            "Enforce data retention and archival policies to manage Dataverse storage growth.",
+          ],
         },
       },
       {
@@ -747,48 +852,87 @@ export const ASSESSMENT_STANDARDS: AssessmentStandard[] = [
       },
       {
         id: "coe-q19",
-        text: "Is there a systematic process to identify, quantify (e.g., using a technical debt register, SQALE method, or impact on Secure/Compliance Scores), and manage technical debt across the Power Platform (e.g., legacy solutions, complex customizations, orphaned assets, unsupported components)? Upload relevant documentation or analysis.",
+        text: "Is there a systematic process to identify, quantify (e.g., using a technical debt register, SQALE method, or impact on Secure/Compliance Scores), and manage technical debt across the Power Platform (e.g., legacy solutions, complex customisations, orphaned assets, unsupported components)? Upload relevant documentation or analysis.",
         type: "document-review",
         weight: 4,
         category: "Operational Excellence & Technical Debt",
         guidance:
-          "Evaluate if a formal process exists for cataloging technical debt, including outdated software versions, unsupported customizations, dependencies on legacy systems, and orphaned solutions. Assess if methods like SQALE are used for visualization or if impact is measured through maintenance costs, security vulnerabilities (e.g., Secure Score gaps), compliance risks (e.g., Compliance Manager findings), or operational inefficiencies. A mature approach includes a remediation plan and tracks reduction efforts. Consider the Power Platform environmental architecture model (personal, team, important, critical) when assessing impact of debt on different workloads.",
+          "Evaluate if a formal process exists for cataloguing technical debt, including outdated software versions, unsupported customisations (e.g., CDS connectors), dependencies on legacy systems (e.g., SharePoint lists), and orphaned solutions. Assess if impact is measured through maintenance costs, security vulnerabilities, or operational inefficiencies.",
         bestPractice: {
           description:
             "A mature organisation proactively identifies, quantifies, and manages technical debt. This involves maintaining a technical debt register, regularly assessing its impact on security, compliance, cost, and agility, and implementing a strategic plan for remediation or mitigation. This aligns with principles of operational excellence and sustainable platform growth.",
           link: "https://learn.microsoft.com/en-us/power-platform/guidance/well-architected/operational-excellence/overview",
           linkText: "Learn about Operational Excellence",
           suggestedActions: [
-            "Establish a formal process for identifying and cataloging technical debt across all Power Platform solutions and components.",
+            "Establish a formal process for identifying and cataloguing technical debt across all Power Platform solutions and components.",
             "Develop a technical debt register, including details like age, complexity, dependencies, business impact, and estimated remediation effort.",
-            "Quantify technical debt by assessing its impact on maintenance costs, security posture (Secure Score), compliance status (Compliance Manager), and operational efficiency.",
-            "Prioritise technical debt items based on risk and business impact, potentially using a SQALE-like model for visualization.",
+            "Prioritise technical debt items based on risk and business impact.",
             "Develop and implement a remediation plan, including strategies for refactoring, retiring, or replacing indebted solutions.",
-            "Regularly review and update the technical debt register and remediation plan as part of the CoE's operational rhythm.",
             "Integrate technical debt review into the solution lifecycle management process.",
           ],
         },
       },
       {
         id: "coe-q20",
-        text: "Is there a formal process for analyzing custom-developed solutions against native Power Platform capabilities to identify modernization opportunities (e.g., replacing custom code with standard features, evaluating TCO)? Upload relevant analysis or strategy documents.",
+        text: "Is there a formal process for analysing custom-developed solutions against native Power Platform capabilities to identify modernisation opportunities (e.g., replacing custom code with standard features, evaluating TCO)? Upload relevant analysis or strategy documents.",
         type: "document-review",
         weight: 3,
-        category: "Modernization & Optimization",
+        category: "Modernisation & Optimisation",
         guidance:
-          "Assess if the CoE or relevant teams systematically review existing or proposed custom solutions (including complex scripts, custom components, or extensive code-first developments) against the evolving capabilities of the Power Platform. This analysis should consider factors like Total Cost of Ownership (TCO), maintainability, scalability, security, and alignment with the Power Platform environmental architecture model (personal, team, important, critical workloads). Look for evidence of a '65% opportunity assessment' mindset, mapping existing functionality to native features and identifying gaps where platform capabilities can be leveraged. The goal is to identify opportunities to modernize by replacing custom solutions with standard, supported Power Platform features where feasible.",
+          "Assess if the CoE or relevant teams systematically review existing or proposed custom solutions (including complex scripts, custom components, or extensive code-first developments) against the evolving capabilities of the Power Platform. This analysis should consider factors like Total Cost of Ownership (TCO), maintainability, scalability, and security.",
         bestPractice: {
           description:
-            "A mature CoE proactively evaluates custom solutions against native Power Platform capabilities to identify opportunities for modernization. This reduces technical debt, lowers TCO, improves maintainability, and leverages the ongoing innovation of the platform. This process should be integrated into solution design reviews and periodic portfolio assessments.",
-          link: "https://learn.microsoft.com/en-us/power-platform/guidance/adoption/strategy", // General strategy link, specific "custom vs native" deep dives are often in broader adoption/CoE materials
+            "A mature CoE proactively evaluates custom solutions against native Power Platform capabilities to identify opportunities for modernisation. This reduces technical debt, lowers TCO, improves maintainability, and leverages the ongoing innovation of the platform. This process should be integrated into solution design reviews and periodic portfolio assessments.",
+          link: "https://learn.microsoft.com/en-us/power-platform/guidance/adoption/strategy",
           linkText: "Power Platform Adoption Strategy",
           suggestedActions: [
             "Establish a regular review process (e.g., annually or bi-annually) to assess existing custom solutions against current Power Platform features.",
-            "Develop criteria for evaluating when to modernize a custom solution, including TCO, maintenance effort, security risks, and alignment with strategic platform goals.",
+            "Develop criteria for evaluating when to modernise a custom solution, including TCO, maintenance effort, and security risks.",
             "For new solutions, mandate an analysis of native Power Platform capabilities before approving custom development.",
-            "Create a backlog of identified modernization opportunities, prioritized by potential ROI, risk reduction, and strategic value.",
-            "Document successful modernization efforts as case studies to encourage further adoption of native features.",
-            "Utilize tools like Microsoft 365 Usage Analytics and PowerShell scripts to identify underused premium features that could replace custom functionality.",
+            "Create a backlog of identified modernisation opportunities, prioritised by potential ROI and risk reduction.",
+          ],
+        },
+      },
+      {
+        id: "coe-q21",
+        text: "Is there a defined Business Continuity and Disaster Recovery (BCDR) plan specifically for critical Power Platform solutions?",
+        type: "boolean",
+        weight: 4,
+        category: "Business Continuity",
+        guidance:
+          "Check for a documented BCDR plan that covers critical Power Platform assets. This should include backup strategies for apps and flows, Dataverse recovery procedures, dependency mapping, and defined Recovery Time Objectives (RTOs) and Recovery Point Objectives (RPOs).",
+        bestPractice: {
+          description:
+            "A comprehensive BCDR plan is essential for ensuring that critical business processes supported by Power Platform can be restored in the event of a disaster. This plan must be documented, tested regularly, and include both technical recovery steps and business communication plans.",
+          link: "https://learn.microsoft.com/en-us/power-platform/admin/backup-restore-environments",
+          linkText: "Backup and restore environments",
+          suggestedActions: [
+            "Identify all business-critical applications and flows running on the Power Platform.",
+            "Document the dependencies for each critical solution (e.g., data sources, APIs).",
+            "Define and agree upon RTOs and RPOs for each critical solution.",
+            "Establish and automate backup procedures for both Dataverse and non-Dataverse assets (apps, flows).",
+            "Create and test a disaster recovery plan, including failover procedures and communication plans.",
+          ],
+        },
+      },
+      {
+        id: "coe-q22",
+        text: "Is there a formal process to discover, assess, and govern 'Shadow IT' solutions built on the Power Platform?",
+        type: "boolean",
+        weight: 3,
+        category: "Shadow IT Governance",
+        guidance:
+          "Shadow IT (solutions built by business users without IT oversight) is common. Check for a proactive strategy to identify these solutions (e.g., using CoE Starter Kit tools), assess their risk, and either bring them into a governed model, support them, or retire them.",
+        bestPractice: {
+          description:
+            "A mature governance model doesn't just block Shadow IT; it engages with it. The strategy should include regular discovery scans, a risk assessment framework, and a clear 'amnesty' program to help makers align their solutions with corporate governance and security standards.",
+          link: "https://learn.microsoft.com/en-us/power-platform/guidance/coe/governance-components",
+          linkText: "CoE Governance Components",
+          suggestedActions: [
+            "Use the CoE Starter Kit to regularly scan for new apps and flows, especially in the Default environment.",
+            "Establish a risk assessment process for newly discovered solutions.",
+            "Create a clear communication plan and process for engaging with citizen developers.",
+            "Offer an 'amnesty' or support program to help makers bring their valuable solutions into a governed framework.",
           ],
         },
       },
@@ -840,6 +984,27 @@ export const ASSESSMENT_STANDARDS: AssessmentStandard[] = [
         category: "Governance Document Review",
         guidance:
           "Collect and review all relevant policy documents. Use the annotation feature to note specific missing rules, unclear sections, or contradictions. Use the overall assessment text area to create a summary document outlining key areas for policy improvement.",
+      },
+      {
+        id: "gov-q4",
+        text: "Is there a formal, auditable process for approving deployments to production environments?",
+        type: "boolean",
+        weight: 4,
+        category: "Compliance & Audit",
+        guidance:
+          "For compliance with regulations like SOX, a clear audit trail is essential. Check if there is a system (e.g., in Azure DevOps, ServiceNow) that records who requested, approved, and deployed changes to production, along with the justification.",
+        bestPractice: {
+          description:
+            "All production deployments must go through a formal, tracked approval process. This ensures accountability, provides a clear audit trail for compliance, and helps prevent unauthorized changes. This process should be integrated into the ALM pipeline.",
+          link: "https://learn.microsoft.com/en-us/azure/devops/pipelines/process/approvals",
+          linkText: "Approvals and checks in Azure Pipelines",
+          suggestedActions: [
+            "Integrate mandatory approval gates into your production deployment pipelines.",
+            "Ensure that the approval history, including approver and justification, is retained for audit purposes (e.g., for 7 years).",
+            "Define clear roles and responsibilities for who can request and approve production deployments.",
+            "Track authorization for any required rollback procedures.",
+          ],
+        },
       },
     ],
   },
@@ -926,7 +1091,7 @@ export const ASSESSMENT_STANDARDS: AssessmentStandard[] = [
         weight: 3,
         category: "ALM & DevOps",
         guidance:
-          "Power Platform Pipelines provide a simplified, in-product experience for ALM, allowing makers and admins to set up deployment pipelines within the Power Platform. Assess its adoption for citizen developer-led or simpler ALM scenarios, or as a complement to Azure DevOps based ALM.",
+          "Power Platform Pipelines provide a simplified, in-product experience for ALM, allowing makers and admins to set up deployment pipelines within the Power Platform. Assess its adoption for citizen-developer–led or simpler ALM scenarios, or as a complement to Azure DevOps–based ALM.",
         bestPractice: {
           description:
             "Power Platform Pipelines offer an accessible way to implement ALM for solutions, particularly suited for maker-driven initiatives or as an entry point to more structured deployment processes, promoting consistency and control.",
@@ -1052,6 +1217,342 @@ export const ASSESSMENT_STANDARDS: AssessmentStandard[] = [
             "A template-based YAML pipeline architecture promotes consistency and reusability ('Don't Repeat Yourself'). It allows for easier maintenance and governance of pipelines, ensuring all solutions follow a standardised, high-quality deployment process.",
           link: "https://learn.microsoft.com/en-us/azure/devops/pipelines/process/templates",
           linkText: "About YAML Pipeline Templates",
+        },
+      },
+      {
+        id: "alm-q14",
+        text: "Is there a defined solution layering and segmentation strategy to manage dependencies and avoid monolithic solutions?",
+        type: "boolean",
+        weight: 4,
+        category: "ALM Architecture",
+        guidance:
+          "Check for a strategy that breaks down functionality into logical, layered solutions (e.g., a base layer for data model, a departmental layer, an app-specific layer). This prevents large, unmanageable solutions and simplifies dependency management.",
+        bestPractice: {
+          description:
+            "A robust solution segmentation strategy is key to scalable, enterprise-grade ALM. It involves creating smaller, layered, and managed solutions with clear dependencies, which simplifies updates, reduces deployment risks, and improves maintainability.",
+          link: "https://learn.microsoft.com/en-us/power-platform/alm/solution-concepts-alm#solution-layering",
+          linkText: "Solution Layering",
+          suggestedActions: [
+            "Define and document a solution segmentation strategy (e.g., Base -> Department -> Application).",
+            "Enforce the use of publisher prefixes to identify ownership and prevent conflicts.",
+            "Mandate that all production-bound solutions are managed.",
+            "Use solution upgrade mechanisms instead of updates for better control.",
+          ],
+        },
+      },
+    ],
+  },
+  {
+    slug: "advanced-alm-devops",
+    name: "Advanced ALM & DevOps",
+    weight: 20,
+    description:
+      "Deep dive into Application Lifecycle Management, DevOps integration, solution architecture, and source control maturity.",
+    questions: [
+      {
+        id: "alm-adv-q1",
+        text: "Are unmanaged solutions deployed to production environments?",
+        type: "boolean",
+        weight: 5,
+        category: "Solution Management",
+        guidance:
+          "Deploying unmanaged solutions to production makes rollbacks nearly impossible, creates solution layering conflicts, and breaks the chain of custody for changes. It is a primary indicator of low ALM maturity.",
+        bestPractice: {
+          description:
+            "Production environments must exclusively contain managed solutions. All changes should be deployed via a managed solution upgrade, ensuring a clean, versioned, and rollback-capable state. This is a non-negotiable principle for enterprise-grade ALM.",
+          link: "https://learn.microsoft.com/en-us/power-platform/alm/solution-concepts-alm#managed-solutions",
+          linkText: "Understand Managed Solutions",
+          suggestedActions: [
+            "Implement a policy immediately prohibiting unmanaged solutions in production.",
+            "Begin a remediation project to convert all existing unmanaged solutions in production to managed.",
+            "Configure deployment pipelines to block unmanaged solution imports into production environments.",
+          ],
+        },
+        discovery: [
+          "**Navigate to Power Apps:** Go to `make.powerapps.com` and select the production environment.",
+          "**Check Solutions:** In the left navigation, click on 'Solutions'.",
+          "**Filter for Unmanaged:** Add a filter to the 'Managed' column to show only 'Unmanaged' solutions. Any result here is a critical finding.",
+        ],
+      },
+      {
+        id: "alm-adv-q2",
+        text: "Are all production-bound solutions stored and versioned in a source control system like Git?",
+        type: "boolean",
+        weight: 5,
+        category: "Source Control",
+        guidance:
+          "Without source control, there is no single source of truth for your application's code. This leads to lost intellectual property when developers leave, no audit trail for changes, and an inability to collaborate effectively.",
+        bestPractice: {
+          description:
+            "All Power Platform solutions must be unpacked and checked into a source control repository (e.g., Git) before they can be considered for production deployment. This enables versioning, peer reviews via pull requests, and automated builds.",
+          link: "https://learn.microsoft.com/en-us/power-platform/alm/solution-api-alm",
+          linkText: "Source Code-centric ALM",
+          suggestedActions: [
+            "Mandate Git integration for all new production-bound solutions.",
+            "Establish a standardized repository structure for Power Platform solutions.",
+            "Integrate `SolutionPackager` or `pac solution unpack` into your development workflow to decompose solution files.",
+          ],
+        },
+      },
+      {
+        id: "alm-adv-q3",
+        text: "Are branch protection policies (e.g., mandatory pull requests, status checks) enforced in your source control repository?",
+        type: "boolean",
+        weight: 4,
+        category: "Source Control",
+        guidance:
+          "Without branch protection, developers can push untested or unreviewed code directly into the main branch, bypassing quality gates and introducing defects into the deployment pipeline.",
+        bestPractice: {
+          description:
+            "The main branch must be protected. All changes must come through pull requests that require at least one peer review and a successful build validation (including solution checks) before merging.",
+          link: "https://learn.microsoft.com/en-us/azure/devops/repos/git/branch-policies",
+          linkText: "About branch policies",
+          suggestedActions: [
+            "Configure branch policies for your `main` or `release` branches in Azure DevOps or GitHub.",
+            "Require a minimum number of reviewers for pull requests.",
+            "Integrate automated builds and solution checker validation as a required status check.",
+          ],
+        },
+      },
+      {
+        id: "alm-adv-q4",
+        text: "Is there a documented and tested rollback procedure for every critical production application?",
+        type: "boolean",
+        weight: 4,
+        category: "Deployment & Operations",
+        guidance:
+          "If a deployment fails, the lack of a tested rollback plan can turn a minor issue into a multi-day outage, causing significant business disruption and revenue loss.",
+        bestPractice: {
+          description:
+            "Every critical application must have a documented rollback procedure. This typically involves deploying a previous version of the managed solution. The procedure should be tested quarterly in a non-production environment.",
+          suggestedActions: [
+            "Identify all critical applications and document their rollback steps.",
+            "Automate the rollback procedure within your deployment pipeline.",
+            "Conduct and document quarterly rollback tests.",
+          ],
+        },
+      },
+    ],
+  },
+  {
+    slug: "secrets-connections-security",
+    name: "Secrets, Connections & App Security",
+    weight: 25,
+    description:
+      "Assessment of how secrets, API keys, and connection credentials are managed, stored, and used across the platform.",
+    questions: [
+      {
+        id: "sec-adv-q1",
+        text: "Are all application secrets, connection strings, and API keys stored securely in Azure Key Vault instead of environment variables or code?",
+        type: "boolean",
+        weight: 5,
+        category: "Secrets Management",
+        guidance:
+          "Storing secrets in plain text (in environment variables, Power Automate actions, or app source code) is a critical vulnerability. If exposed, it can lead to immediate, unauthorized access to critical systems and data breaches.",
+        bestPractice: {
+          description:
+            "All secrets must be stored in Azure Key Vault. Power Platform solutions should use Key Vault-backed environment variables or retrieve secrets at runtime using a managed identity. Plain text secrets are forbidden in any environment.",
+          link: "https://learn.microsoft.com/en-us/power-platform/admin/environment-variables-azure-key-vault",
+          linkText: "Use Key Vault secrets in Power Platform",
+          suggestedActions: [
+            "Conduct an audit to find all hardcoded secrets and migrate them to Azure Key Vault immediately.",
+            "Implement a policy that all new solutions must use Key Vault for secrets management.",
+            "Use secret scanning tools in your DevOps pipeline to prevent new secrets from being committed to source control.",
+          ],
+        },
+        discovery: [
+          "**Review Power Automate Flows:** Check 'Initialize Variable' or 'Compose' actions for anything that looks like a password, API key, or connection string.",
+          "**Check Custom Connectors:** Examine the security configuration of custom connectors for hardcoded credentials.",
+          "**Scan Source Code:** Use tools like GitGuardian or `git-secrets` to scan your repositories for exposed credentials.",
+          "**Review Environment Variables:** In the Power Apps portal, check the values of environment variables to see if they contain plain text secrets.",
+        ],
+      },
+      {
+        id: "sec-adv-q2",
+        text: "Are App Registrations configured with least-privilege permissions?",
+        type: "boolean",
+        weight: 4,
+        category: "Application Security",
+        guidance:
+          "Granting excessive permissions (e.g., Directory.ReadWrite.All when only User.Read is needed) dramatically increases the blast radius of a potential breach. A compromised app can lead to a full tenant compromise.",
+        bestPractice: {
+          description:
+            "App Registrations must follow the principle of least privilege. Each permission must be justified and documented. Conduct quarterly reviews of all App Registration permissions to identify and remove excessive rights.",
+          suggestedActions: [
+            "Establish a formal review and approval process for all API permission grants.",
+            "Audit all existing App Registrations and remediate overprivileged applications.",
+            "Use tools like the Microsoft Graph Postman collection to test the minimal required permissions for a given task.",
+          ],
+        },
+      },
+      {
+        id: "sec-adv-q3",
+        text: "Is there an automated process for rotating all client secrets and certificates at least every 90 days?",
+        type: "boolean",
+        weight: 4,
+        category: "Secrets Management",
+        guidance:
+          "Long-lived secrets are a major security risk. If a secret is compromised, a lack of rotation means an attacker has persistent access. Manual rotation processes are often forgotten or skipped.",
+        bestPractice: {
+          description:
+            "Implement an automated rotation policy for all credentials. For production, secrets should be rotated every 30-90 days. This process should be fully automated using scripts and integrated with Azure Key Vault and your deployment pipelines.",
+          suggestedActions: [
+            "Develop PowerShell or Azure CLI scripts to automate the creation of new secrets and updating Key Vault.",
+            "Integrate secret rotation into your CI/CD process.",
+            "Set up monitoring to alert on secrets approaching their expiry date.",
+          ],
+        },
+      },
+      {
+        id: "sec-adv-q4",
+        text: "Are Azure Storage accounts secured using managed identities and private endpoints, with public access disabled?",
+        type: "boolean",
+        weight: 5,
+        category: "Data Security",
+        guidance:
+          "Publicly accessible storage accounts or the use of long-lived account keys are common causes of major data breaches. This exposes all data in the storage account to potential theft or ransomware.",
+        bestPractice: {
+          description:
+            "Storage accounts must have public access disabled. Access should be granted via managed identities for Power Platform services. If network isolation is required, use private endpoints. SAS tokens should be short-lived and used sparingly.",
+          link: "https://learn.microsoft.com/en-us/azure/storage/common/storage-network-security",
+          linkText: "Azure Storage security guide",
+          suggestedActions: [
+            "Audit all storage accounts and disable public blob access.",
+            "Configure storage account firewalls to restrict access to trusted networks.",
+            "Refactor solutions to use managed identities instead of storage account keys.",
+          ],
+        },
+      },
+    ],
+  },
+  {
+    slug: "business-continuity-ownership",
+    name: "Business Continuity & Ownership",
+    weight: 15,
+    description: "Assessment of disaster recovery readiness and the governance of application and resource ownership.",
+    questions: [
+      {
+        id: "bcdr-q1",
+        text: "Are there automated backups for all critical Canvas Apps and Power Automate flows, in addition to Dataverse backups?",
+        type: "boolean",
+        weight: 5,
+        category: "Business Continuity",
+        guidance:
+          "Dataverse has built-in backup capabilities, but Canvas Apps and flows do not. Without a specific backup strategy for these components, they can be permanently lost due to accidental deletion or corruption.",
+        bestPractice: {
+          description:
+            "A comprehensive BCDR plan includes automated backups for all Power Platform components. This can be achieved by exporting solutions to a source control repository on a regular schedule via a DevOps pipeline.",
+          suggestedActions: [
+            "Use PowerShell scripts in an Azure DevOps pipeline to export critical solutions nightly.",
+            "Store exported solution files in an artifact repository or source control.",
+            "Document and test the process for restoring an app or flow from backup.",
+          ],
+        },
+      },
+      {
+        id: "bcdr-q2",
+        text: "Are all production applications and flows assigned at least two owners?",
+        type: "boolean",
+        weight: 4,
+        category: "Ownership",
+        guidance:
+          "When a critical application has a single owner who leaves the company, the business process it supports can be completely stalled. The app becomes 'orphaned,' making it impossible to update or fix.",
+        bestPractice: {
+          description:
+            "A mandatory co-ownership policy must be enforced for all production assets. Ownership should be regularly audited, and an automated process should be in place to handle ownership changes when an employee departs.",
+          suggestedActions: [
+            "Implement a Power Automate flow that runs quarterly to audit app ownership and flag single-owner apps.",
+            "Integrate with your HR offboarding process to automatically trigger an ownership review for assets owned by a departing employee.",
+            "Establish a governance team or a business unit lead as a default secondary owner for critical apps.",
+          ],
+        },
+        discovery: [
+          "**Use CoE Starter Kit:** The 'Power BI - Governance' dashboard has reports to identify orphaned and single-owner applications.",
+          "**Use PowerShell:** Run `Get-AdminPowerApp | ForEach-Object { Get-AdminPowerAppRoleAssignment -AppName $_.AppName }` to audit owners for each app.",
+        ],
+      },
+      {
+        id: "bcdr-q3",
+        text: "Is there a documented Business Continuity and Disaster Recovery (BCDR) plan that defines RTOs and RPOs for critical Power Platform solutions?",
+        type: "boolean",
+        weight: 4,
+        category: "Business Continuity",
+        guidance:
+          "Without a formal BCDR plan, recovery from a major incident (like a regional outage or ransomware attack) is based on guesswork. This leads to extended downtime and a failure to meet business expectations.",
+        bestPractice: {
+          description:
+            "A formal BCDR plan must be documented and tested. It should identify critical solutions, map their dependencies, and define the Recovery Time Objective (RTO) and Recovery Point Objective (RPO) agreed upon with the business.",
+          suggestedActions: [
+            "Conduct a Business Impact Analysis (BIA) to identify critical solutions and their required RTO/RPO.",
+            "Document the step-by-step recovery procedures for each critical solution.",
+            "Perform a tabletop exercise or a full DR test at least annually.",
+          ],
+        },
+      },
+    ],
+  },
+  {
+    slug: "power-pages-governance",
+    name: "Power Pages Governance",
+    weight: 10,
+    description: "Assessment of security, licensing, and capacity management for external-facing Power Pages websites.",
+    questions: [
+      {
+        id: "pp-q1",
+        text: "Are all Power Pages sites that expose sensitive data protected by a Web Application Firewall (WAF)?",
+        type: "boolean",
+        weight: 5,
+        category: "Security",
+        guidance:
+          "Exposing a Power Pages site directly to the internet without a WAF leaves it vulnerable to common web attacks like SQL injection, cross-site scripting (XSS), and DDoS attacks.",
+        bestPractice: {
+          description:
+            "All production Power Pages sites must be fronted by a WAF, such as Azure Front Door with a WAF policy. The WAF should be configured in 'Prevention' mode with the latest managed rule sets.",
+          link: "https://learn.microsoft.com/en-us/power-pages/security/azure-front-door-power-pages",
+          linkText: "Set up Azure Front Door with Power Pages",
+          suggestedActions: [
+            "Deploy Azure Front Door for all external-facing Power Pages sites.",
+            "Enable and configure the WAF policy with Microsoft's managed rule sets.",
+            "Regularly review WAF logs for potential threats and tune rules as needed.",
+          ],
+        },
+      },
+      {
+        id: "pp-q2",
+        text: "Is anonymous access to Dataverse tables strictly controlled and reviewed for all Power Pages sites?",
+        type: "boolean",
+        weight: 5,
+        category: "Data Security",
+        guidance:
+          "Incorrectly configured table permissions are a common cause of data breaches in Power Pages, where sensitive data is accidentally exposed to anonymous, unauthenticated users.",
+        bestPractice: {
+          description:
+            "Table permissions must be configured with the principle of least privilege. Anonymous access should be disabled by default. A formal review process must be in place to approve any table permissions that grant access to unauthenticated users.",
+          link: "https://learn.microsoft.com/en-us/power-pages/security/table-permissions",
+          linkText: "Configure table permissions",
+          suggestedActions: [
+            "Audit all table permissions for every Power Pages site.",
+            "Remove all anonymous permissions unless there is a documented and approved business justification.",
+            "Use the Power Platform CLI to script and version control table permission configurations.",
+          ],
+        },
+      },
+      {
+        id: "pp-q3",
+        text: "Is Power Pages capacity (authenticated and anonymous page views) actively monitored to prevent service disruptions?",
+        type: "boolean",
+        weight: 4,
+        category: "Capacity & Licensing",
+        guidance:
+          "Running out of Power Pages capacity can cause your external website to become unavailable to users, leading to business disruption and reputational damage. This is often not monitored until it's too late.",
+        bestPractice: {
+          description:
+            "Power Pages capacity should be monitored weekly via the Power Platform Admin Center. Set up proactive alerts (e.g., using a Power Automate flow) to notify administrators when consumption exceeds 80% of the allocated capacity.",
+          suggestedActions: [
+            "Establish a weekly review of the 'Capacity' reports in the PPAC.",
+            "Create an automated flow that checks capacity usage via admin connectors and sends alerts.",
+            "Forecast future capacity needs based on historical trends and upcoming events.",
+          ],
         },
       },
     ],

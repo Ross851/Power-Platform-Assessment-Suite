@@ -14,81 +14,82 @@ import { DocumentReviewInput } from "./question-types/document-review-input"
 import { RAGIndicator } from "./rag-indicator"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Button } from "@/components/ui/button"
-import { Info, Lightbulb, ExternalLink } from "lucide-react"
+import { Info, Lightbulb, ExternalLink, Compass } from "lucide-react"
 import { Input } from "@/components/ui/input"
+import { EvidenceManager } from "./evidence-manager"
+import { useAssessmentStore } from "@/store/assessment-store"
 
 interface QuestionDisplayProps {
   question: Question
-  onAnswerChange: (questionId: string, mainAnswer: any, additionalData?: string | object, riskOwner?: string) => void
+  standardSlug: string
 }
 
-export function QuestionDisplay({ question, onAnswerChange }: QuestionDisplayProps) {
+export function QuestionDisplay({ question, standardSlug }: QuestionDisplayProps) {
+  const { setAnswer } = useAssessmentStore()
+  const activeProjectName = useAssessmentStore((state) => state.activeProjectName)
+
   const [evidence, setEvidence] = useState(question.evidenceNotes || "")
   const [riskOwnerInput, setRiskOwnerInput] = useState(question.riskOwner || "")
 
-  const handleEvidenceChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const newEvidence = e.target.value
-    setEvidence(newEvidence)
-    if (question.type === "document-review") {
-      onAnswerChange(
-        question.id,
-        question.answer,
-        { ...(question.document || {}), evidenceNotes: newEvidence },
-        riskOwnerInput,
-      )
-    } else {
-      onAnswerChange(question.id, question.answer, newEvidence, riskOwnerInput)
+  const handleAnswerChange = (
+    questionId: string,
+    mainAnswer: any,
+    additionalData?: string | object,
+    riskOwner?: string,
+  ) => {
+    const payload: any = {
+      standardSlug,
+      questionId,
+      answer: mainAnswer,
+      riskOwner: riskOwner !== undefined ? riskOwner : riskOwnerInput,
     }
+    if (question.type === "document-review") {
+      payload.documentData = additionalData
+    } else {
+      payload.evidenceNotes = typeof additionalData === "string" ? additionalData : evidence
+    }
+    setAnswer(payload)
   }
 
-  const handleMainAnswerChange = (mainAnswer: any, additionalData?: string | object) => {
-    if (question.type === "document-review") {
-      const docDataWithEvidence = {
-        ...((additionalData as object) || question.document || {}),
-        evidenceNotes: evidence,
-      }
-      onAnswerChange(question.id, mainAnswer, docDataWithEvidence, riskOwnerInput)
-    } else {
-      onAnswerChange(question.id, mainAnswer, evidence, riskOwnerInput)
-    }
+  const handleEvidenceNotesChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const newEvidence = e.target.value
+    setEvidence(newEvidence)
+    setAnswer({
+      standardSlug,
+      questionId: question.id,
+      evidenceNotes: newEvidence,
+    })
   }
 
   const handleRiskOwnerBlur = () => {
-    // Only call onAnswerChange if riskOwnerInput has actually changed from the stored question.riskOwner
-    // or if question.riskOwner was undefined and riskOwnerInput has a value.
     if (riskOwnerInput !== (question.riskOwner || "")) {
-      if (question.type === "document-review") {
-        onAnswerChange(
-          question.id,
-          question.answer,
-          { ...(question.document || {}), evidenceNotes: evidence },
-          riskOwnerInput,
-        )
-      } else {
-        onAnswerChange(question.id, question.answer, evidence, riskOwnerInput)
-      }
+      setAnswer({
+        standardSlug,
+        questionId: question.id,
+        riskOwner: riskOwnerInput,
+      })
     }
   }
 
   const renderQuestionInput = () => {
     switch (question.type) {
       case "boolean":
-        return <BooleanInput question={question} onAnswerChange={handleMainAnswerChange} />
+        return <BooleanInput question={question} onAnswerChange={(answer) => handleAnswerChange(question.id, answer)} />
       case "scale":
-        return <ScaleInput question={question} onAnswerChange={handleMainAnswerChange} />
+        return <ScaleInput question={question} onAnswerChange={(answer) => handleAnswerChange(question.id, answer)} />
       case "percentage":
-        return <PercentageInput question={question} onAnswerChange={handleMainAnswerChange} />
+        return (
+          <PercentageInput question={question} onAnswerChange={(answer) => handleAnswerChange(question.id, answer)} />
+        )
       case "text":
-        return <TextInput question={question} onAnswerChange={handleMainAnswerChange} />
+        return <TextInput question={question} onAnswerChange={(answer) => handleAnswerChange(question.id, answer)} />
       case "numeric":
-        return <NumericInput question={question} onAnswerChange={handleMainAnswerChange} />
+        return <NumericInput question={question} onAnswerChange={(answer) => handleAnswerChange(question.id, answer)} />
       case "document-review":
         return (
           <DocumentReviewInput
             question={question}
-            onAnswerChange={(questionId, overallAssessment, documentData) => {
-              handleMainAnswerChange(overallAssessment, documentData)
-            }}
+            onAnswerChange={(qId, overallAssessment, docData) => handleAnswerChange(qId, overallAssessment, docData)}
           />
         )
       default:
@@ -102,7 +103,7 @@ export function QuestionDisplay({ question, onAnswerChange }: QuestionDisplayPro
         <Label htmlFor={question.id} className="text-lg font-semibold block flex-1 pr-2">
           {question.text}
         </Label>
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-1">
           {question.guidance && (
             <Popover>
               <PopoverTrigger asChild>
@@ -117,6 +118,34 @@ export function QuestionDisplay({ question, onAnswerChange }: QuestionDisplayPro
               </PopoverContent>
             </Popover>
           )}
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-primary">
+                <Compass className="h-4 w-4" />
+                <span className="sr-only">Show discovery guide</span>
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-96 text-sm" side="top" align="end">
+              <p className="font-medium mb-2 text-base">How to Find This Information</p>
+              {question.discovery && question.discovery.length > 0 ? (
+                <div className="space-y-3">
+                  <p className="text-muted-foreground">
+                    Follow these steps to locate the data needed to answer this question:
+                  </p>
+                  <ol className="list-decimal list-outside pl-5 space-y-2 text-xs">
+                    {question.discovery.map((step, index) => (
+                      <li key={index}>{step}</li>
+                    ))}
+                  </ol>
+                </div>
+              ) : (
+                <p className="text-muted-foreground">
+                  No specific discovery steps provided for this question. Refer to the general guidance for more
+                  information.
+                </p>
+              )}
+            </PopoverContent>
+          </Popover>
           <RAGIndicator status={question.ragStatus} size="md" />
         </div>
       </div>
@@ -127,23 +156,32 @@ export function QuestionDisplay({ question, onAnswerChange }: QuestionDisplayPro
       <div className="mb-4">{renderQuestionInput()}</div>
 
       {question.type !== "document-review" && (
-        <div>
+        <div className="mb-4">
           <Label htmlFor={`${question.id}-evidence`} className="text-sm font-medium text-muted-foreground mb-1 block">
-            Observations / Evidence (Optional)
+            Observations / Evidence Summary (Optional)
           </Label>
           <Textarea
             id={`${question.id}-evidence`}
             value={evidence}
-            onChange={handleEvidenceChange}
-            placeholder="Enter any observations, links to documentation, or evidence..."
+            onChange={handleEvidenceNotesChange}
+            placeholder="Summarise your findings, link to documentation, or describe the evidence provided below..."
             className="min-h-[100px]"
           />
         </div>
       )}
 
+      {activeProjectName && (
+        <EvidenceManager
+          projectName={activeProjectName}
+          questionId={question.id}
+          standardSlug={standardSlug}
+          initialEvidence={question.evidence}
+        />
+      )}
+
       {question.riskLevel && question.ragStatus !== "grey" && (
         <div
-          className={`mt-4 text-sm p-3 rounded-md border ${
+          className={`mt-6 text-sm p-3 rounded-md border ${
             question.ragStatus === "red"
               ? "bg-red-50 border-red-200 text-red-900 dark:bg-red-900/20 dark:border-red-800 dark:text-red-200"
               : question.ragStatus === "amber"

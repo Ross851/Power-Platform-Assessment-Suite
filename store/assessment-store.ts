@@ -1,7 +1,8 @@
 import { create } from "zustand"
 import { persist, type StateStorage } from "zustand/middleware"
-import type { AssessmentStandard, AnswerPayload, RAGStatus, GeneralDocument, Project } from "@/lib/types" // Added Project
+import type { AssessmentStandard, AnswerPayload, RAGStatus, Project, ProjectVersion } from "@/lib/types"
 import { ASSESSMENT_STANDARDS } from "@/lib/constants"
+import { v4 as uuidv4 } from "uuid"
 
 // Helper function to create a fresh set of standards for a new project
 const createInitialProjectStandards = (): AssessmentStandard[] =>
@@ -15,27 +16,66 @@ const createInitialProjectStandards = (): AssessmentStandard[] =>
       ragStatus: "grey" as RAGStatus,
       evidenceNotes: "",
       document: q.type === "document-review" ? { file: null, fileName: "", annotations: [] } : undefined,
+      evidence: [], // Initialise evidence array
     })),
     completion: 0,
     maturityScore: 0,
     ragStatus: "grey" as RAGStatus,
   }))
 
-interface AssessmentState {
-  projects: Project[] // Store multiple projects
-  activeProjectName: string | null // Name of the currently active project
+// --- DUMMY DATA CREATION ---
+const createDummyProject = (): Project => {
+  const standards = createInitialProjectStandards()
 
-  // Project Management Actions
-  createProject: (projectName: string) => void
+  // Answer doc-q1 as 'Yes' (Green)
+  const docStandard = standards.find((s) => s.slug === "documentation-rulebooks")
+  if (docStandard) {
+    const docQ1 = docStandard.questions.find((q) => q.id === "doc-q1")
+    if (docQ1) docQ1.answer = true
+  }
+
+  // Answer dlp-q1 as 'No' (Red) and add risk owner
+  const dlpStandard = standards.find((s) => s.slug === "dlp-policy")
+  if (dlpStandard) {
+    const dlpQ1 = dlpStandard.questions.find((q) => q.id === "dlp-q1")
+    if (dlpQ1) {
+      dlpQ1.answer = false
+      dlpQ1.evidenceNotes = "DLP policies are only applied to the default environment, leaving production vulnerable."
+      dlpQ1.riskOwner = "CIO / Head of Security"
+    }
+  }
+
+  // Answer env-q2 as '3' (Amber)
+  const envStandard = standards.find((s) => s.slug === "environment-usage")
+  if (envStandard) {
+    const envQ2 = envStandard.questions.find((q) => q.id === "env-q2")
+    if (envQ2) envQ2.answer = 3
+  }
+
+  return {
+    name: "Telana_Contoso_Demo",
+    clientReferenceNumber: "TEL-C0N-001",
+    standards,
+    createdAt: new Date("2024-05-10T10:00:00Z"),
+    lastModifiedAt: new Date("2024-05-20T14:30:00Z"),
+    versions: [], // Initialise versions array
+  }
+}
+// --- END DUMMY DATA ---
+
+interface AssessmentState {
+  projects: Project[]
+  activeProjectName: string | null
+
+  createProject: (projectName: string, clientReferenceNumber: string) => void
   setActiveProject: (projectName: string) => void
   getActiveProject: () => Project | undefined
-  deleteProject: (projectName: string) => void // Optional: for later
+  deleteProject: (projectName: string) => void
 
-  // Existing actions, now need to be context-aware of the active project
   setAnswer: (payload: AnswerPayload) => void
   getStandardBySlug: (slug: string) => AssessmentStandard | undefined
   getStandardProgress: (slug: string) => number
-  getOverallProgress: () => number
+  getOverallProgress: (projectName?: string) => number
   calculateScoresAndRAG: (standardSlug: string) => void
   getStandardMaturityScore: (slug: string) => number
   getOverallMaturityScore: () => number
@@ -47,44 +87,43 @@ interface AssessmentState {
     questionText?: string
     questionId?: string
     ragStatus: RAGStatus
+    riskOwner?: string
+    category: string
   }>
-  addGeneralDocument: (file: File, description?: string) => void
-  removeGeneralDocument: (documentId: string) => void
+
+  // Versioning Actions
+  createVersion: (versionName: string) => void
+  restoreVersion: (versionId: string) => void
 }
 
 const customStorage: StateStorage = {
   getItem: (name) => {
-    const str = localStorage.getItem(name)
-    if (!str) return null
-    const { state, version } = JSON.parse(str)
-    // Revive Date objects and handle generalDocuments within each project
-    const revivedState = {
-      ...state,
-      projects: (state.projects || []).map((project: any) => ({
-        ...project,
-        createdAt: new Date(project.createdAt),
-        lastModifiedAt: new Date(project.lastModifiedAt),
-        generalDocuments: (project.generalDocuments || []).map((doc: any) => ({
-          ...doc,
-          uploadedAt: new Date(doc.uploadedAt),
-          file: null, // File object is not persisted
+    try {
+      const str = localStorage.getItem(name)
+      if (!str) return null
+      const { state } = JSON.parse(str)
+      const revivedState = {
+        ...state,
+        projects: (state.projects || []).map((project: any) => ({
+          ...project,
+          createdAt: new Date(project.createdAt),
+          lastModifiedAt: new Date(project.lastModifiedAt),
+          versions: (project.versions || []).map((v: any) => ({
+            ...v,
+            createdAt: new Date(v.createdAt),
+          })),
         })),
-        // Potentially revive dates within standards/questions if any were added
-      })),
+      }
+      return { state: revivedState }
+    } catch (e) {
+      console.error("Failed to parse or revive state from localStorage.", e)
+      // If parsing fails, clear the stored item and return null to re-initialize.
+      localStorage.removeItem(name)
+      return null
     }
-    return { state: revivedState, version }
   },
   setItem: (name, newValue) => {
-    const modifiedState = {
-      ...newValue.state,
-      projects: newValue.state.projects.map((project: Project) => ({
-        ...project,
-        generalDocuments: project.generalDocuments.map(
-          ({ file, ...restOfDoc }: GeneralDocument) => restOfDoc, // eslint-disable-line @typescript-eslint/no-unused-vars
-        ),
-      })),
-    }
-    localStorage.setItem(name, JSON.stringify({ state: modifiedState, version: newValue.version }))
+    localStorage.setItem(name, JSON.stringify(newValue))
   },
   removeItem: (name) => localStorage.removeItem(name),
 }
@@ -92,20 +131,21 @@ const customStorage: StateStorage = {
 export const useAssessmentStore = create<AssessmentState>()(
   persist(
     (set, get) => ({
-      projects: [],
-      activeProjectName: null,
+      projects: [createDummyProject()],
+      activeProjectName: null, // Start with no active project
 
-      createProject: (projectName) => {
+      createProject: (projectName, clientReferenceNumber) => {
         if (get().projects.find((p) => p.name === projectName)) {
-          alert(`Project "${projectName}" already exists.`) // Or handle more gracefully
+          alert(`Project "${projectName}" already exists.`)
           return
         }
         const newProject: Project = {
           name: projectName,
+          clientReferenceNumber,
           standards: createInitialProjectStandards(),
-          generalDocuments: [],
           createdAt: new Date(),
           lastModifiedAt: new Date(),
+          versions: [],
         }
         set((state) => ({
           projects: [...state.projects, newProject],
@@ -118,6 +158,7 @@ export const useAssessmentStore = create<AssessmentState>()(
           set({ activeProjectName: projectName })
         } else {
           console.warn(`Project "${projectName}" not found.`)
+          set({ activeProjectName: null })
         }
       },
 
@@ -134,24 +175,23 @@ export const useAssessmentStore = create<AssessmentState>()(
         return get().projects.find((p) => p.name === activeName)
       },
 
-      setAnswer: ({ standardSlug, questionId, answer, evidenceNotes, documentData, riskOwner }) =>
+      setAnswer: ({ standardSlug, questionId, answer, evidenceNotes, documentData, riskOwner, evidence }) =>
         set((state) => {
           const activeProject = state.projects.find((p) => p.name === state.activeProjectName)
           if (!activeProject) return state
 
           const newStandards = activeProject.standards.map((standard) => {
             if (standard.slug === standardSlug) {
-              const newQuestions = standard.questions.map((q) =>
-                q.id === questionId
-                  ? {
-                      ...q,
-                      answer,
-                      evidenceNotes: evidenceNotes || q.evidenceNotes,
-                      document: documentData ? { ...q.document, ...documentData } : q.document,
-                      riskOwner: riskOwner !== undefined ? riskOwner : q.riskOwner,
-                    }
-                  : q,
-              )
+              const newQuestions = standard.questions.map((q) => {
+                if (q.id !== questionId) return q
+                const updatedQ = { ...q }
+                if (answer !== undefined) updatedQ.answer = answer
+                if (evidenceNotes !== undefined) updatedQ.evidenceNotes = evidenceNotes
+                if (documentData) updatedQ.document = { ...q.document, ...documentData }
+                if (riskOwner !== undefined) updatedQ.riskOwner = riskOwner
+                if (evidence !== undefined) updatedQ.evidence = evidence
+                return updatedQ
+              })
               const answeredQuestions = newQuestions.filter(
                 (q) =>
                   (q.answer !== undefined && q.answer !== "") || (q.type === "document-review" && q.document?.file),
@@ -183,11 +223,20 @@ export const useAssessmentStore = create<AssessmentState>()(
         return (answeredQuestions / standard.questions.length) * 100
       },
 
-      getOverallProgress: () => {
-        const activeProject = get().getActiveProject()
-        if (!activeProject || activeProject.standards.length === 0) return 0
-        const totalProgress = activeProject.standards.reduce((acc, curr) => acc + (curr.completion || 0), 0)
-        return totalProgress / activeProject.standards.length
+      getOverallProgress: (projectName) => {
+        const project = projectName ? get().projects.find((p) => p.name === projectName) : get().getActiveProject()
+
+        if (!project || project.standards.length === 0) return 0
+
+        const totalProgress = project.standards.reduce((acc, curr) => {
+          const answeredQuestions = curr.questions.filter(
+            (q) => (q.answer !== undefined && q.answer !== "") || (q.type === "document-review" && q.document?.file),
+          ).length
+          const completion = curr.questions.length > 0 ? (answeredQuestions / curr.questions.length) * 100 : 0
+          return acc + completion
+        }, 0)
+
+        return totalProgress / project.standards.length
       },
 
       calculateScoresAndRAG: (standardSlug) =>
@@ -238,10 +287,10 @@ export const useAssessmentStore = create<AssessmentState>()(
                       else if (perc < 75) riskLevel = "medium"
                       else riskLevel = "low"
                       break
-                    case "document-review": // Assuming document review implies some level of maturity if present
+                    case "document-review":
                       const hasContent = q.answer || (q.document?.annotations && q.document.annotations.length > 0)
-                      questionScore = hasContent ? 3 : 1 // Simplified: 3 if assessed, 1 if not/empty
-                      riskLevel = hasContent ? "medium" : "low" // Or high if absence is critical
+                      questionScore = hasContent ? 3 : 1
+                      riskLevel = hasContent ? "medium" : "low"
                       break
                     default:
                       questionScore = 3
@@ -277,7 +326,6 @@ export const useAssessmentStore = create<AssessmentState>()(
               }
               return { ...std, questions: updatedQuestions, maturityScore, ragStatus: standardRagStatus }
             }
-            // Accumulate RAG for overall project status from other standards too
             if (std.ragStatus === "red") projectHasRed = true
             if (std.ragStatus === "amber") projectHasAmber = true
             if (std.ragStatus === "green" && !projectHasRed && !projectHasAmber) projectHasGreen = true
@@ -295,13 +343,10 @@ export const useAssessmentStore = create<AssessmentState>()(
             if (projectHasRed) projectOverallRagStatus = "red"
             else if (projectHasAmber) projectOverallRagStatus = "amber"
             else if (projectHasGreen) projectOverallRagStatus = "green"
-            else projectOverallRagStatus = "grey" // All answered are grey (e.g. text only)
+            else projectOverallRagStatus = "grey"
           } else {
-            projectOverallRagStatus = "grey" // No questions answered in the project
+            projectOverallRagStatus = "grey"
           }
-
-          // Note: This simple overall RAG might need more nuance, e.g. weighting standards
-          // For now, any red makes project red, any amber (no red) makes it amber.
 
           const updatedProject = { ...activeProject, standards: newStandards, lastModifiedAt: new Date() }
           return {
@@ -367,6 +412,8 @@ export const useAssessmentStore = create<AssessmentState>()(
           questionText?: string
           questionId?: string
           ragStatus: RAGStatus
+          riskOwner?: string
+          category: string
         }> = []
         activeProject.standards.forEach((std) => {
           if (std.ragStatus === "red" || std.ragStatus === "amber") {
@@ -378,10 +425,11 @@ export const useAssessmentStore = create<AssessmentState>()(
                   questionText: q.text,
                   questionId: q.id,
                   ragStatus: q.ragStatus,
+                  riskOwner: q.riskOwner,
+                  category: q.category,
                 })
               }
             })
-            // If the standard itself is red/amber but no specific question is, add the standard
             if (
               !std.questions.some((q) => q.ragStatus === "red" || q.ragStatus === "amber") &&
               (std.completion || 0) > 0
@@ -390,11 +438,11 @@ export const useAssessmentStore = create<AssessmentState>()(
                 standardName: std.name,
                 standardSlug: std.slug,
                 ragStatus: std.ragStatus!,
+                category: std.name, // Fallback category
               })
             }
           }
         })
-        // Sort by RAG status (red first), then by standard name
         return highPriority.sort((a, b) => {
           if (a.ragStatus === "red" && b.ragStatus !== "red") return -1
           if (a.ragStatus !== "red" && b.ragStatus === "red") return 1
@@ -404,47 +452,56 @@ export const useAssessmentStore = create<AssessmentState>()(
         })
       },
 
-      addGeneralDocument: (file, description) =>
+      createVersion: (versionName) => {
         set((state) => {
           const activeProject = state.projects.find((p) => p.name === state.activeProjectName)
           if (!activeProject) return state
 
-          const newDoc: GeneralDocument = {
-            id: crypto.randomUUID(),
-            file,
-            name: file.name,
-            type: file.type,
-            size: file.size,
-            uploadedAt: new Date(),
-            description,
+          const newVersion: ProjectVersion = {
+            id: uuidv4(),
+            name: versionName,
+            createdAt: new Date(),
+            // Deep copy of standards to snapshot the state
+            standards: JSON.parse(JSON.stringify(activeProject.standards)),
           }
+
           const updatedProject = {
             ...activeProject,
-            generalDocuments: [...activeProject.generalDocuments, newDoc],
-            lastModifiedAt: new Date(),
+            versions: [...activeProject.versions, newVersion],
           }
+
           return {
             projects: state.projects.map((p) => (p.name === state.activeProjectName ? updatedProject : p)),
           }
-        }),
+        })
+      },
 
-      removeGeneralDocument: (documentId) =>
+      restoreVersion: (versionId) => {
         set((state) => {
           const activeProject = state.projects.find((p) => p.name === state.activeProjectName)
           if (!activeProject) return state
 
+          const versionToRestore = activeProject.versions.find((v) => v.id === versionId)
+          if (!versionToRestore) {
+            alert("Version not found.")
+            return state
+          }
+
           const updatedProject = {
             ...activeProject,
-            generalDocuments: activeProject.generalDocuments.filter((doc) => doc.id !== documentId),
+            // Restore standards from the selected version
+            standards: JSON.parse(JSON.stringify(versionToRestore.standards)),
             lastModifiedAt: new Date(),
           }
+
           return {
             projects: state.projects.map((p) => (p.name === state.activeProjectName ? updatedProject : p)),
           }
-        }),
+        })
+      },
     }),
     {
-      name: "power-platform-assessment-storage-v2", // Changed name to avoid conflicts with old structure
+      name: "power-platform-assessment-storage-v4", // Incremented version
       storage: customStorage,
     },
   ),
