@@ -7,7 +7,7 @@ import { v4 as uuidv4 } from "uuid"
 import { z } from "zod"
 
 // --- Authentication Helper ---
-async function getCurrentUser() {
+async function getCurrentUser(throwIfMissing = true) {
   const supabase = createClient()
   const {
     data: { user },
@@ -15,7 +15,10 @@ async function getCurrentUser() {
   } = await supabase.auth.getUser()
 
   if (error || !user) {
-    throw new Error("Authentication required")
+    if (throwIfMissing) {
+      throw new Error("Authentication required")
+    }
+    return null
   }
 
   return user
@@ -266,7 +269,13 @@ export async function getEvidenceForQuestion(
   questionId: string,
 ): Promise<{ evidence: Evidence[]; error?: string }> {
   const supabase = createClient()
-  await getCurrentUser() // Ensure authenticated
+
+  // ---------- 🛡  Auth check (no hard throw) ----------
+  const user = await getCurrentUser(false)
+  if (!user) {
+    return { evidence: [], error: "You must be signed in to view evidence for this question." }
+  }
+  // ----------------------------------------------------
 
   try {
     const { data, error } = await supabase
