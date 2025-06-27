@@ -17,7 +17,7 @@ interface ProjectListProps {
   projects: Project[]
 }
 
-export default function ProjectList({ projects }: ProjectListProps) {
+export function ProjectList({ projects }: ProjectListProps) {
   const [query, setQuery] = useState("")
 
   /** ------------------------------------------------------------
@@ -67,3 +67,6 @@ export default function ProjectList({ projects }: ProjectListProps) {
     </section>
   )
 }
+
+// Keep a default export in case some pages import it that way.
+export default ProjectList
