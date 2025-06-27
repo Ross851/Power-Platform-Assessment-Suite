@@ -29,6 +29,8 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { Separator } from "@/components/ui/separator"
+import { ScrollArea } from "@/components/ui/scroll-area"
 import { RAGIndicator } from "./rag-indicator"
 import {
   Edit,
@@ -42,6 +44,11 @@ import {
   CheckCircle2,
   Save,
   ClipboardList,
+  FileText,
+  Eye,
+  CheckCircle,
+  XCircle,
+  Clock,
 } from "lucide-react"
 
 interface QuestionDisplayProps {
@@ -137,14 +144,52 @@ export function QuestionDisplay({ question, standardSlug }: QuestionDisplayProps
     return <CheckCircle2 className="w-6 h-6 text-green-500" />
   }
 
-  const hasAssessmentFeedback = () => {
+  // Assessment completion status helpers
+  const hasQuickObservations = () => {
+    return question.evidenceNotes && question.evidenceNotes.trim().length > 0
+  }
+
+  const hasDetailedEvidence = () => {
+    return question.evidence && question.evidence.length > 0
+  }
+
+  const hasAssessmentMethodology = () => {
     return (
       question.assessmentFeedback &&
       (question.assessmentFeedback.howAssessed?.length > 0 ||
-        question.assessmentFeedback.findings ||
-        question.assessmentFeedback.recommendations ||
-        question.assessmentFeedback.reviewedBy)
+        question.assessmentFeedback.reviewedBy ||
+        question.assessmentFeedback.assessmentDate)
     )
+  }
+
+  const hasDetailedAnalysis = () => {
+    return (
+      question.assessmentFeedback &&
+      (question.assessmentFeedback.findings ||
+        question.assessmentFeedback.limitations ||
+        question.assessmentFeedback.recommendations)
+    )
+  }
+
+  const getCompletionIcon = (isComplete: boolean) => {
+    return isComplete ? (
+      <CheckCircle className="h-4 w-4 text-green-600" />
+    ) : (
+      <XCircle className="h-4 w-4 text-gray-400" />
+    )
+  }
+
+  const getAssessmentStatusIcon = () => {
+    const methodologyComplete = hasAssessmentMethodology()
+    const analysisComplete = hasDetailedAnalysis()
+
+    if (methodologyComplete && analysisComplete) {
+      return <CheckCircle className="h-4 w-4 text-green-600" />
+    } else if (methodologyComplete || analysisComplete) {
+      return <Clock className="h-4 w-4 text-amber-500" />
+    } else {
+      return <XCircle className="h-4 w-4 text-gray-400" />
+    }
   }
 
   return (
@@ -170,16 +215,171 @@ export function QuestionDisplay({ question, standardSlug }: QuestionDisplayProps
                     Score: {question.score}/5
                   </Badge>
                 )}
-                {hasAssessmentFeedback() && (
-                  <Badge variant="outline" className="text-xs bg-green-50 text-green-700 border-green-200">
-                    Assessment Documented
-                  </Badge>
-                )}
               </div>
             </div>
           </div>
 
           <div className="flex items-center gap-1">
+            {/* Assessment Status Popover */}
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-8 w-8 relative" title="View Assessment Status">
+                  {getAssessmentStatusIcon()}
+                  <span className="sr-only">Assessment Status</span>
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-96" side="left" align="start">
+                <div className="space-y-4">
+                  <div className="flex items-center gap-2">
+                    <Eye className="h-5 w-5 text-blue-600" />
+                    <h4 className="font-semibold text-base">Assessment Status Overview</h4>
+                  </div>
+
+                  <Separator />
+
+                  {/* Quick Observations Section */}
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <FileText className="h-4 w-4 text-blue-500" />
+                        <span className="font-medium text-sm">Quick Observations</span>
+                      </div>
+                      {getCompletionIcon(hasQuickObservations())}
+                    </div>
+
+                    <div className="pl-6 space-y-2">
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="text-muted-foreground">Evidence Summary</span>
+                        {getCompletionIcon(hasQuickObservations())}
+                      </div>
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="text-muted-foreground">Detailed Evidence Files</span>
+                        {getCompletionIcon(hasDetailedEvidence())}
+                      </div>
+                    </div>
+
+                    {hasQuickObservations() && (
+                      <div className="pl-6">
+                        <ScrollArea className="h-20 w-full rounded border p-2 bg-muted/30">
+                          <p className="text-xs text-muted-foreground">
+                            {question.evidenceNotes?.substring(0, 150)}
+                            {question.evidenceNotes && question.evidenceNotes.length > 150 ? "..." : ""}
+                          </p>
+                        </ScrollArea>
+                      </div>
+                    )}
+                  </div>
+
+                  <Separator />
+
+                  {/* In-Depth Assessment Section */}
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <ClipboardList className="h-4 w-4 text-purple-500" />
+                        <span className="font-medium text-sm">In-Depth Assessment</span>
+                      </div>
+                      {getCompletionIcon(hasAssessmentMethodology() && hasDetailedAnalysis())}
+                    </div>
+
+                    <div className="pl-6 space-y-2">
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="text-muted-foreground">Assessment Methodology</span>
+                        {getCompletionIcon(hasAssessmentMethodology())}
+                      </div>
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="text-muted-foreground">Detailed Analysis</span>
+                        {getCompletionIcon(hasDetailedAnalysis())}
+                      </div>
+                    </div>
+
+                    {/* Assessment Methodology Preview */}
+                    {hasAssessmentMethodology() && (
+                      <div className="pl-6 space-y-2">
+                        <div className="text-xs font-medium text-muted-foreground">Methodology Preview:</div>
+                        <div className="space-y-1">
+                          {question.assessmentFeedback?.assessmentDate && (
+                            <div className="flex items-center gap-2 text-xs">
+                              <Calendar className="h-3 w-3" />
+                              <span>{question.assessmentFeedback.assessmentDate}</span>
+                            </div>
+                          )}
+                          {question.assessmentFeedback?.reviewedBy && (
+                            <div className="flex items-center gap-2 text-xs">
+                              <User className="h-3 w-3" />
+                              <span>{question.assessmentFeedback.reviewedBy}</span>
+                            </div>
+                          )}
+                        </div>
+                        {question.assessmentFeedback?.howAssessed &&
+                          question.assessmentFeedback.howAssessed.length > 0 && (
+                            <ScrollArea className="h-16 w-full rounded border p-2 bg-muted/30">
+                              <p className="text-xs text-muted-foreground">
+                                {question.assessmentFeedback.howAssessed.join(", ").substring(0, 100)}
+                                {question.assessmentFeedback.howAssessed.join(", ").length > 100 ? "..." : ""}
+                              </p>
+                            </ScrollArea>
+                          )}
+                      </div>
+                    )}
+
+                    {/* Detailed Analysis Preview */}
+                    {hasDetailedAnalysis() && (
+                      <div className="pl-6 space-y-2">
+                        <div className="text-xs font-medium text-muted-foreground">Analysis Preview:</div>
+                        {question.assessmentFeedback?.findings && (
+                          <div>
+                            <div className="text-xs font-medium text-green-600 mb-1">Findings:</div>
+                            <ScrollArea className="h-12 w-full rounded border p-2 bg-muted/30">
+                              <p className="text-xs text-muted-foreground">
+                                {question.assessmentFeedback.findings.substring(0, 80)}
+                                {question.assessmentFeedback.findings.length > 80 ? "..." : ""}
+                              </p>
+                            </ScrollArea>
+                          </div>
+                        )}
+                        {question.assessmentFeedback?.recommendations && (
+                          <div>
+                            <div className="text-xs font-medium text-blue-600 mb-1">Recommendations:</div>
+                            <ScrollArea className="h-12 w-full rounded border p-2 bg-muted/30">
+                              <p className="text-xs text-muted-foreground">
+                                {question.assessmentFeedback.recommendations.substring(0, 80)}
+                                {question.assessmentFeedback.recommendations.length > 80 ? "..." : ""}
+                              </p>
+                            </ScrollArea>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+
+                  <Separator />
+
+                  {/* Action Buttons */}
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setIsEvidenceDialogOpen(true)}
+                      className="flex-1 text-xs"
+                    >
+                      <FileText className="h-3 w-3 mr-1" />
+                      Edit Observations
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setIsFeedbackDialogOpen(true)}
+                      className="flex-1 text-xs"
+                    >
+                      <ClipboardList className="h-3 w-3 mr-1" />
+                      Edit Assessment
+                    </Button>
+                  </div>
+                </div>
+              </PopoverContent>
+            </Popover>
+
             {/* Developer Guidance */}
             {question.developerGuidance && (
               <Popover>
@@ -279,10 +479,23 @@ export function QuestionDisplay({ question, standardSlug }: QuestionDisplayProps
                 <Button
                   variant="ghost"
                   size="icon"
-                  className={`h-8 w-8 ${hasAssessmentFeedback() ? "text-green-600 bg-green-50 hover:bg-green-100" : ""}`}
+                  className={`h-8 w-8 ${
+                    hasAssessmentMethodology() && hasDetailedAnalysis()
+                      ? "text-green-600 bg-green-50 hover:bg-green-100"
+                      : hasAssessmentMethodology() || hasDetailedAnalysis()
+                        ? "text-amber-600 bg-amber-50 hover:bg-amber-100"
+                        : ""
+                  }`}
                 >
                   <ClipboardList className="h-4 w-4" />
-                  <span className="sr-only">Assessment Feedback {hasAssessmentFeedback() ? "(Completed)" : ""}</span>
+                  <span className="sr-only">
+                    Assessment Feedback{" "}
+                    {hasAssessmentMethodology() && hasDetailedAnalysis()
+                      ? "(Completed)"
+                      : hasAssessmentMethodology() || hasDetailedAnalysis()
+                        ? "(Partial)"
+                        : ""}
+                  </span>
                 </Button>
               </DialogTrigger>
               <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
@@ -296,8 +509,14 @@ export function QuestionDisplay({ question, standardSlug }: QuestionDisplayProps
 
                 <Tabs defaultValue="methodology" className="w-full">
                   <TabsList className="grid w-full grid-cols-2">
-                    <TabsTrigger value="methodology">Assessment Methodology</TabsTrigger>
-                    <TabsTrigger value="findings">Findings & Recommendations</TabsTrigger>
+                    <TabsTrigger value="methodology" className="flex items-center gap-2">
+                      Assessment Methodology
+                      {hasAssessmentMethodology() && <CheckCircle className="h-3 w-3 text-green-600" />}
+                    </TabsTrigger>
+                    <TabsTrigger value="findings" className="flex items-center gap-2">
+                      Findings & Recommendations
+                      {hasDetailedAnalysis() && <CheckCircle className="h-3 w-3 text-green-600" />}
+                    </TabsTrigger>
                   </TabsList>
 
                   <TabsContent value="methodology" className="space-y-4">
