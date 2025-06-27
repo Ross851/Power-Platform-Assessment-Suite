@@ -24,20 +24,44 @@ const ProjectPage = ({ params: { projectName } }: Props) => {
   const supabase = createClientComponentClient()
   const { user } = useAuth()
   const isOwner = project?.owner_id === user?.id
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     const getProject = async () => {
-      const { data, error } = await supabase.from("projects").select("*").eq("name", projectName).single()
+      const decodedName = decodeURIComponent(projectName)
+
+      const { data, error } = await supabase
+        .from("projects")
+        .select("*")
+        .eq("name", decodedName)
+        .order("created_at", { ascending: false }) // newest first in case duplicates exist
+        .limit(1) // safeguard: return at most one row
+        .maybeSingle()
 
       if (error) {
-        console.error("Error fetching project:", error)
-      } else {
-        setProject(data)
+        console.error("Error fetching project:", error.message)
+        setError(error.message)
+      } else if (!data) {
+        console.warn(`No project found with name "${decodedName}".`)
+        setError(`No project found with name "${decodedName}".`)
       }
+
+      setProject(data ?? null)
     }
 
     getProject()
   }, [projectName, supabase])
+
+  if (!project && !isOwner && !error) {
+    return (
+      <div className="container mx-auto py-10 text-center">
+        <h2 className="text-xl font-semibold mb-4">Project not found</h2>
+        <a href="/" className="text-primary underline">
+          Back to dashboard
+        </a>
+      </div>
+    )
+  }
 
   if (!project) {
     return <div>Loading...</div>
