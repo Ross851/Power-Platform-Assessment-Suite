@@ -1,7 +1,6 @@
 "use client"
 
 import type React from "react"
-
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
@@ -48,11 +47,11 @@ export function LoginForm() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
       <Card className="w-full max-w-md">
-        <CardHeader>
-          <CardTitle>{isSignUp ? "Create Account" : "Sign In"}</CardTitle>
-          <CardDescription>
+        <CardHeader className="space-y-1">
+          <CardTitle className="text-2xl font-bold text-center">{isSignUp ? "Create Account" : "Sign In"}</CardTitle>
+          <CardDescription className="text-center">
             {isSignUp
               ? "Create your account to access the assessment suite"
               : "Enter your credentials to access your assessments"}
@@ -65,29 +64,47 @@ export function LoginForm() {
                 <Label htmlFor="fullName">Full Name</Label>
                 <Input
                   id="fullName"
+                  name="fullName"
                   type="text"
+                  placeholder="Enter your full name"
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
                   required={isSignUp}
+                  disabled={isLoading}
                 />
               </div>
             )}
 
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
-              <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+              <Input
+                id="email"
+                name="email"
+                type="email"
+                placeholder="Enter your email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                disabled={isLoading}
+                autoComplete="email"
+              />
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
               <Input
                 id="password"
+                name="password"
                 type="password"
+                placeholder="Enter your password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 minLength={6}
+                disabled={isLoading}
+                autoComplete={isSignUp ? "new-password" : "current-password"}
               />
+              {isSignUp && <p className="text-sm text-gray-500">Password must be at least 6 characters long</p>}
             </div>
 
             {error && (
@@ -96,18 +113,27 @@ export function LoginForm() {
               </Alert>
             )}
 
-            <Button type="submit" className="w-full" disabled={isLoading}>
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={isLoading || !email || !password || (isSignUp && !fullName)}
+            >
               {isLoading ? "Loading..." : isSignUp ? "Create Account" : "Sign In"}
             </Button>
           </form>
 
-          <div className="mt-4 text-center">
+          <div className="mt-6 text-center">
             <Button
+              type="button"
               variant="link"
               onClick={() => {
                 setIsSignUp(!isSignUp)
                 setError("")
+                setEmail("")
+                setPassword("")
+                setFullName("")
               }}
+              disabled={isLoading}
             >
               {isSignUp ? "Already have an account? Sign in" : "Don't have an account? Sign up"}
             </Button>
