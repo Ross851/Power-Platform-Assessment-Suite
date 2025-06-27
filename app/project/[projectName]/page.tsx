@@ -4,12 +4,12 @@ import { useEffect, useState } from "react"
 import { useParams, useRouter } from "next/navigation"
 import { useAuth } from "@/components/auth/auth-provider"
 import { useAssessmentStore } from "@/store/assessment-store"
+import { ProjectAccessManager } from "@/components/project-access-manager"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { ArrowLeft, Users, FileText, Play, AlertTriangle, CheckCircle, Clock, Shield } from "lucide-react"
+import { ArrowLeft, Users, FileText, Play, AlertTriangle, CheckCircle, Clock, ExternalLink } from "lucide-react"
 import Link from "next/link"
 
 interface Project {
@@ -129,7 +129,7 @@ export default function ProjectPage() {
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="assessments">Assessments</TabsTrigger>
             <TabsTrigger value="documents">Documents</TabsTrigger>
-            <TabsTrigger value="access">Access</TabsTrigger>
+            <TabsTrigger value="access">Team Access</TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="space-y-6">
@@ -187,13 +187,16 @@ export default function ProjectPage() {
                 <CardHeader>
                   <CardTitle className="flex items-center space-x-2">
                     <FileText className="h-5 w-5" />
-                    <span>Documents</span>
+                    <span>View Documentation</span>
                   </CardTitle>
-                  <CardDescription>Manage project documents and files</CardDescription>
+                  <CardDescription>Access assessment documentation and guides</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <Button variant="outline" className="w-full bg-transparent">
-                    View Documents
+                  <Button variant="outline" className="w-full bg-transparent" asChild>
+                    <Link href="/assessment/documentation-rulebooks">
+                      <ExternalLink className="mr-2 h-4 w-4" />
+                      View Documentation
+                    </Link>
                   </Button>
                 </CardContent>
               </Card>
@@ -255,38 +258,7 @@ export default function ProjectPage() {
           </TabsContent>
 
           <TabsContent value="access">
-            <Card>
-              <CardHeader>
-                <CardTitle>Project Access</CardTitle>
-                <CardDescription>
-                  {isOwner
-                    ? "Manage who has access to this project and their permissions."
-                    : "You can view who has access to this project, but only the owner can manage access."}
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Alert>
-                  <Shield className="h-4 w-4" />
-                  <AlertDescription>
-                    Access management features are being set up. The database tables for user access control need to be
-                    created. Please run the migration script to enable full access management.
-                  </AlertDescription>
-                </Alert>
-
-                <div className="mt-6">
-                  <h4 className="font-medium mb-3">Current Access</h4>
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between p-3 border rounded-lg">
-                      <div>
-                        <p className="font-medium">{user?.email}</p>
-                        <p className="text-sm text-gray-500">Project Owner</p>
-                      </div>
-                      <Badge>Owner</Badge>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            <ProjectAccessManager projectName={projectName} isOwner={isOwner} />
           </TabsContent>
         </Tabs>
       </main>
