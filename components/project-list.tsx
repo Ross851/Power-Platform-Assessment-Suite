@@ -1,56 +1,64 @@
 "use client"
 
 import { useState, useMemo, type ChangeEvent } from "react"
-import { FolderGit2, Search } from "lucide-react"
+import Link from "next/link"
+import { Search, FolderGit2 } from "lucide-react"
+import { formatDistanceToNow } from "date-fns"
+
 import { escapeRegExp } from "@/lib/escape-regexp"
+import { useAssessmentStore } from "@/store/assessment-store"
+import type { Project } from "@/lib/types"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
-import { useAssessmentStore } from "@/store/assessment-store"
-import { formatDistanceToNow } from "date-fns"
+import { Input } from "@/components/ui/input"
 import { cn } from "@/lib/utils"
-import type { Project } from "@/lib/types"
 
 interface ProjectListProps {
-  /** Optional – caller can pass its own list. Falls back to global store. */
+  /** Allows caller to supply its own list; falls back to global store. */
   projects?: Project[]
-  /** Optional – caller’s helper, else store helper. */
+  /** Optional helper to calculate progress; falls back to store’s helper. */
   getOverallProgress?: (projectName: string) => number
   className?: string
 }
 
 export function ProjectList({
   projects: incomingProjects,
-  getOverallProgress: incomingGetOverallProgress,
+  getOverallProgress: incomingProgressFn,
   className,
 }: ProjectListProps) {
-  /* -------- data source -------------------------------------------------- */
+  /* -----------------------------------------------------------------------
+   * Data source
+   * ---------------------------------------------------------------------*/
   const store = useAssessmentStore()
   const projects = incomingProjects ?? store.projects ?? []
-  const getOverallProgress = incomingGetOverallProgress ?? store.getOverallProgress
+  const getOverallProgress = incomingProgressFn ?? store.getOverallProgress
 
-  /* -------- search ------------------------------------------------------- */
+  /* -----------------------------------------------------------------------
+   * Search
+   * ---------------------------------------------------------------------*/
   const [query, setQuery] = useState("")
-  const filteredProjects = useMemo(() => {
+
+  const filtered = useMemo(() => {
     if (!query.trim()) return projects
 
-    // Make the pattern safe before building a RegExp.
-    const safePattern = escapeRegExp(query.trim())
+    const safe = escapeRegExp(query.trim())
 
     try {
-      const rx = new RegExp(safePattern, "i")
+      const rx = new RegExp(safe, "i")
       return projects.filter((p) => rx.test(p.name))
     } catch (err) {
-      // Should not happen after escaping, but stay resilient.
-      console.warn("[ProjectList] Bad RegExp – falling back to includes()", err)
-      const lower = query.toLowerCase()
-      return projects.filter((p) => p.name.toLowerCase().includes(lower))
+      // Shouldn’t happen after escaping, but stay resilient.
+      console.warn("[ProjectList] RegExp failure – falling back to includes()", err)
+      const q = query.toLowerCase()
+      return projects.filter((p) => p.name.toLowerCase().includes(q))
     }
   }, [projects, query])
 
-  /* -------- UI ----------------------------------------------------------- */
-  if (!projects.length) {
+  /* -----------------------------------------------------------------------
+   * Empty state
+   * ---------------------------------------------------------------------*/
+  if (projects.length === 0) {
     return (
       <div className={cn("text-center py-12 border-2 border-dashed rounded-lg", className)}>
         <h3 className="text-lg font-medium">No Projects Found</h3>
@@ -59,6 +67,9 @@ export function ProjectList({
     )
   }
 
+  /* -----------------------------------------------------------------------
+   * Render
+   * ---------------------------------------------------------------------*/
   return (
     <div className={cn("space-y-4", className)}>
       {/* Search bar */}
@@ -73,9 +84,9 @@ export function ProjectList({
         />
       </div>
 
-      {/* Project grid */}
+      {/* Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {filteredProjects.map((project) => {
+        {filtered.map((project) => {
           const progress = getOverallProgress(project.name)
           return (
             <Card key={project.name}>
@@ -83,6 +94,7 @@ export function ProjectList({
                 <CardTitle>{project.name}</CardTitle>
                 <CardDescription>Ref: {project.clientReferenceNumber}</CardDescription>
               </CardHeader>
+
               <CardContent>
                 <div className="flex justify-between items-center mb-2">
                   <span className="text-sm font-medium text-muted-foreground">Overall Progress</span>
@@ -90,21 +102,23 @@ export function ProjectList({
                 </div>
                 <Progress value={progress} className="h-2" />
                 <p className="text-xs text-muted-foreground mt-2">
-                  Last modified: {formatDistanceToNow(new Date(project.lastModifiedAt), { addSuffix: true })}
+                  Last modified {formatDistanceToNow(new Date(project.lastModifiedAt), { addSuffix: true })}
                 </p>
               </CardContent>
+
               <CardFooter>
                 <Button asChild className="w-full">
-                  <a href={`/project/${encodeURIComponent(project.name)}`}>
+                  <Link href={`/project/${encodeURIComponent(project.name)}`}>
                     Open Project
                     <FolderGit2 className="ml-2 h-4 w-4" />
-                  </a>
+                  </Link>
                 </Button>
               </CardFooter>
             </Card>
           )
         })}
-        {filteredProjects.length === 0 && (
+
+        {filtered.length === 0 && (
           <p className="col-span-full text-center text-sm text-muted-foreground">
             No projects match <span className="font-medium">&ldquo;{query}&rdquo;</span>
           </p>
