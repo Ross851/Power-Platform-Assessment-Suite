@@ -93,6 +93,8 @@ interface AssessmentState {
   createProject: (projectName: string, clientReferenceNumber: string) => Project | undefined
   setActiveProject: (projectName: string) => void
   getActiveProject: () => Project | undefined
+  getStandardProgress: (slug: string) => number
+  getStandardMaturityScore: (slug: string) => number
   getStandardBySlug: (slug: string) => AssessmentStandard | undefined
   setAnswer: (payload: AnswerPayload) => void
   calculateScoresAndRAG: (standardSlug: string) => void
@@ -143,6 +145,16 @@ export const useAssessmentStore = create<AssessmentState>()(
         const activeName = get().activeProjectName
         if (!activeName) return undefined
         return get().projects.find((p) => p.name === activeName)
+      },
+
+      getStandardProgress: (slug) => {
+        const std = get().getStandardBySlug(slug)
+        return std?.completion ?? 0
+      },
+
+      getStandardMaturityScore: (slug) => {
+        const std = get().getStandardBySlug(slug)
+        return std?.maturityScore ?? 0
       },
 
       getStandardBySlug: (slug: string) => {
