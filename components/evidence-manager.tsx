@@ -31,10 +31,15 @@ export function EvidenceManager({ projectName, questionId, standardSlug, initial
   const fetchEvidence = useCallback(async () => {
     setIsLoading(true)
     setError(null)
+
+    console.log("Fetching evidence for:", { projectName, questionId })
+
     const { evidence: fetchedEvidence, error: fetchError } = await getEvidenceForQuestion(projectName, questionId)
     if (fetchError) {
+      console.error("Evidence fetch error:", fetchError)
       setError(fetchError)
     } else {
+      console.log("Evidence fetched successfully:", fetchedEvidence)
       setEvidence(fetchedEvidence)
     }
     setIsLoading(false)

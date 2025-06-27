@@ -30,18 +30,19 @@ export async function getProjects(): Promise<Project[]> {
   const supabase = createClient()
   const user = await getCurrentUser()
 
+  if (!user) {
+    return []
+  }
+
   const { data, error } = await supabase
     .from("projects")
-    .select(`
-      *,
-      project_users!inner(role)
-    `)
-    .or(`owner_id.eq.${user.id},project_users.user_id.eq.${user.id}`)
+    .select("*")
+    .eq("owner_id", user.id)
     .order("created_at", { ascending: false })
 
   if (error) {
     console.error("Error fetching projects:", error)
-    throw new Error("Failed to fetch projects.")
+    return []
   }
 
   return data || []
@@ -140,7 +141,7 @@ export async function getProjectUsers(projectName: string) {
         role,
         created_at,
         user_id,
-        auth.users!inner(email, raw_user_meta_data)
+        profiles!inner(email, full_name)
       `)
       .eq("project_name", projectName)
 
@@ -153,7 +154,7 @@ export async function getProjectUsers(projectName: string) {
       .from("projects")
       .select(`
         owner_id,
-        auth.users!inner(email, raw_user_meta_data)
+        profiles!inner(email, full_name)
       `)
       .eq("name", projectName)
       .single()
@@ -164,8 +165,8 @@ export async function getProjectUsers(projectName: string) {
         ? [
             {
               id: projectData.owner_id,
-              email: projectData.auth.users.email,
-              full_name: projectData.auth.users.raw_user_meta_data?.full_name || null,
+              email: projectData.profiles.email,
+              full_name: projectData.profiles.full_name || null,
               role: "owner" as const,
               created_at: new Date().toISOString(),
             },
@@ -174,8 +175,8 @@ export async function getProjectUsers(projectName: string) {
       // Project users
       ...data.map((user) => ({
         id: user.user_id,
-        email: user.auth.users.email,
-        full_name: user.auth.users.raw_user_meta_data?.full_name || null,
+        email: user.profiles.email,
+        full_name: user.profiles.full_name || null,
         role: user.role,
         created_at: user.created_at,
       })),
@@ -191,7 +192,11 @@ export async function getProjectUsers(projectName: string) {
 
 export async function getDocumentsForProject(projectName: string): Promise<GeneralDocument[]> {
   const supabase = createClient()
-  await getCurrentUser() // Ensure authenticated
+  const user = await getCurrentUser(false)
+
+  if (!user) {
+    return []
+  }
 
   const { data, error } = await supabase
     .from("general_documents")
@@ -249,7 +254,11 @@ export async function uploadDocument(formData: FormData) {
 }
 
 export async function deleteDocument(documentId: string, filePath: string) {
-  await getCurrentUser() // Ensure authenticated
+  const user = await getCurrentUser(false)
+  if (!user) {
+    return { error: "Authentication required" }
+  }
+
   const supabase = createClient()
 
   const { error: storageError } = await supabase.storage.from("project_documents").remove([filePath])
@@ -270,14 +279,26 @@ export async function getEvidenceForQuestion(
 ): Promise<{ evidence: Evidence[]; error?: string }> {
   const supabase = createClient()
 
-  // ---------- 🛡  Auth check (no hard throw) ----------
+  // Check authentication first
   const user = await getCurrentUser(false)
   if (!user) {
-    return { evidence: [], error: "You must be signed in to view evidence for this question." }
+    console.log("No authenticated user found")
+    return { evidence: [], error: "Authentication required. Please sign in to view evidence." }
   }
-  // ----------------------------------------------------
+
+  console.log("User authenticated:", user.email)
 
   try {
+    // Check if the question_evidence table exists
+    const { error: tableError } = await supabase.from("question_evidence").select("id").limit(1)
+    if (tableError?.code === "42P01") {
+      console.warn("`question_evidence` table is missing.")
+      return {
+        evidence: [],
+        error: "Database table 'question_evidence' not found. Please run the initial schema script to resolve this.",
+      }
+    }
+
     const { data, error } = await supabase
       .from("question_evidence")
       .select("*")
@@ -285,7 +306,10 @@ export async function getEvidenceForQuestion(
       .eq("question_id", questionId)
       .order("uploaded_at", { ascending: true })
 
-    if (error) throw error
+    if (error) {
+      console.error("Error fetching evidence:", error)
+      return { evidence: [], error: `Database error: ${error.message}` }
+    }
 
     const evidenceWithUrls = await Promise.all(
       data.map(async (evi) => {
@@ -304,17 +328,10 @@ export async function getEvidenceForQuestion(
       }),
     )
 
+    console.log(`Found ${evidenceWithUrls.length} evidence items for question ${questionId}`)
     return { evidence: evidenceWithUrls }
   } catch (err: any) {
-    if (err?.code === "42P01") {
-      console.warn("`question_evidence` table is missing. Returning error to UI.")
-      return {
-        evidence: [],
-        error:
-          "Database table 'question_evidence' not found. Please run the initial schema script in 'scripts/01-initial-schema.sql' to resolve this.",
-      }
-    }
-    console.error("Error fetching evidence:", err.message)
+    console.error("Unexpected error fetching evidence:", err)
     return { evidence: [], error: `An unexpected error occurred: ${err.message}` }
   }
 }
@@ -323,7 +340,11 @@ export async function addQuestionEvidence(
   formData: FormData,
 ): Promise<{ success: boolean; newEvidence?: Evidence; error?: string }> {
   const supabase = createClient()
-  await getCurrentUser() // Ensure authenticated
+  const user = await getCurrentUser(false)
+
+  if (!user) {
+    return { success: false, error: "Authentication required" }
+  }
 
   const { error: tableError } = await supabase.from("question_evidence").select("id").limit(1)
   if (tableError?.code === "42P01") {
@@ -341,7 +362,7 @@ export async function addQuestionEvidence(
   const file = formData.get("file") as File | null
 
   if (!projectName || !questionId || !type) {
-    return { error: "Missing required fields." }
+    return { success: false, error: "Missing required fields." }
   }
 
   const newEvidenceId = uuidv4()
@@ -354,14 +375,14 @@ export async function addQuestionEvidence(
   const newEvidence: Partial<Evidence> = { id: newEvidenceId, type, uploadedAt: new Date().toISOString() }
 
   if (type === "snippet") {
-    if (!content) return { error: "Snippet content cannot be empty." }
+    if (!content) return { success: false, error: "Snippet content cannot be empty." }
     dbPayload.content = content
     newEvidence.content = content
   } else if (type === "file") {
-    if (!file) return { error: "File is required for file evidence." }
+    if (!file) return { success: false, error: "File is required for file evidence." }
     const filePath = `${projectName}/${questionId}/${Date.now()}-${file.name}`
     const { error: uploadError } = await supabase.storage.from("question_evidence_files").upload(filePath, file)
-    if (uploadError) return { error: `Upload failed: ${uploadError.message}` }
+    if (uploadError) return { success: false, error: `Upload failed: ${uploadError.message}` }
 
     dbPayload.content = file.name
     dbPayload.file_path = filePath
@@ -375,7 +396,7 @@ export async function addQuestionEvidence(
     if (type === "file" && dbPayload.file_path) {
       await supabase.storage.from("question_evidence_files").remove([dbPayload.file_path])
     }
-    return { error: `DB insert failed: ${dbError.message}` }
+    return { success: false, error: `DB insert failed: ${dbError.message}` }
   }
 
   revalidatePath(`/assessment/`)
@@ -384,7 +405,11 @@ export async function addQuestionEvidence(
 
 export async function deleteQuestionEvidence(evidenceId: string): Promise<{ success: boolean; error?: string }> {
   const supabase = createClient()
-  await getCurrentUser() // Ensure authenticated
+  const user = await getCurrentUser(false)
+
+  if (!user) {
+    return { success: false, error: "Authentication required" }
+  }
 
   const { error: tableError } = await supabase.from("question_evidence").select("id").limit(1)
   if (tableError?.code === "42P01") {
@@ -402,7 +427,7 @@ export async function deleteQuestionEvidence(evidenceId: string): Promise<{ succ
     .single()
 
   if (fetchError || !eviData) {
-    return { error: "Evidence not found." }
+    return { success: false, error: "Evidence not found." }
   }
 
   if (eviData.evidence_type === "file" && eviData.file_path) {
@@ -414,7 +439,7 @@ export async function deleteQuestionEvidence(evidenceId: string): Promise<{ succ
 
   const { error: dbError } = await supabase.from("question_evidence").delete().eq("id", evidenceId)
   if (dbError) {
-    return { error: `DB deletion failed: ${dbError.message}` }
+    return { success: false, error: `DB deletion failed: ${dbError.message}` }
   }
 
   revalidatePath(`/assessment/`)
