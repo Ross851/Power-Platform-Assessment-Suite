@@ -10,14 +10,14 @@ import { exportToClientWord, exportToTechnicalWord } from "@/lib/word-export"
 import { useToast } from "@/hooks/use-toast"
 
 export function OverallSummary() {
-  const { getActiveProject, getOverallMaturityScore, getOverallRagStatus, getRiskProfile } = useAssessmentStore()
+  const { getActiveProject, getOverallMaturityScore, getOverallRAGStatus, getRiskProfile } = useAssessmentStore()
   const [isClientExporting, setIsClientExporting] = useState(false)
   const [isTechExporting, setIsTechExporting] = useState(false)
   const { toast } = useToast()
 
   const activeProject = getActiveProject()
   const maturityScore = getOverallMaturityScore()
-  const ragStatus = getOverallRagStatus()
+  const ragStatus = getOverallRAGStatus()
   const riskProfile = getRiskProfile()
 
   const handleClientExport = async () => {
