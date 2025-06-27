@@ -5,9 +5,10 @@ import { useAssessmentStore } from "@/store/assessment-store"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { RiskProfileChart } from "@/components/risk-profile-chart"
 import { Button } from "@/components/ui/button"
-import { Download, Loader2 } from "lucide-react"
+import { Download, Loader2, FileText } from "lucide-react"
 import { exportToClientWord, exportToTechnicalWord } from "@/lib/word-export"
 import { useToast } from "@/hooks/use-toast"
+import Link from "next/link"
 
 export function OverallSummary() {
   const { getActiveProject, getOverallMaturityScore, getOverallRAGStatus, getRiskProfile } = useAssessmentStore()
@@ -116,6 +117,12 @@ export function OverallSummary() {
         </div>
       </CardContent>
       <CardFooter className="flex flex-col space-y-2">
+        <Link href="/documentation" className="w-full">
+          <Button variant="outline" className="w-full bg-transparent">
+            <FileText className="mr-2 h-4 w-4" />
+            View Documentation
+          </Button>
+        </Link>
         <Button onClick={handleClientExport} disabled={isClientExporting || isTechExporting} className="w-full">
           {isClientExporting ? (
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
