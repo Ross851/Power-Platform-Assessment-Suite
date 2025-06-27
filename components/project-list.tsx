@@ -1,122 +1,137 @@
 "use client"
 
-import { useState, useMemo, type ChangeEvent } from "react"
-import Link from "next/link"
-import { Search, FolderGit2 } from "lucide-react"
-import { formatDistanceToNow } from "date-fns"
-
-import { escapeRegExp } from "@/lib/escape-regexp"
-import { useAssessmentStore } from "@/store/assessment-store"
-import type { Project } from "@/lib/types"
+import { useState } from "react"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Progress } from "@/components/ui/progress"
 import { Input } from "@/components/ui/input"
-import { cn } from "@/lib/utils"
+import { Badge } from "@/components/ui/badge"
+import { Search, Calendar, User, ExternalLink } from "lucide-react"
+import Link from "next/link"
+import type { Project } from "@/lib/types"
+import { useAssessmentStore } from "@/store/assessment-store"
 
 interface ProjectListProps {
-  /** Optional – pass in a list manually, otherwise the global store is used. */
   projects?: Project[]
-  /** Optional – progress helper, otherwise pulled from the store. */
-  getOverallProgress?: (projectName: string) => number
-  className?: string
+  getOverallProgress?: (project: Project) => number
 }
 
-export function ProjectList({
-  projects: injectedProjects,
-  getOverallProgress: injectedProgress,
-  className,
-}: ProjectListProps) {
-  /* ──────────────────────────────── data ─────────────────────────────── */
-  const store = useAssessmentStore()
-  const projects = injectedProjects ?? store.projects ?? []
-  const getProgress = injectedProgress ?? store.getOverallProgress
+export function ProjectList({ projects: propProjects, getOverallProgress }: ProjectListProps) {
+  const [searchQuery, setSearchQuery] = useState("")
+  const { projects: storeProjects } = useAssessmentStore()
 
-  /* ─────────────────────────────── search ────────────────────────────── */
-  const [query, setQuery] = useState("")
+  // Use props if provided, otherwise fall back to store
+  const projects = propProjects || storeProjects || []
 
-  const filtered = useMemo(() => {
-    if (!query.trim()) return projects
+  // Simple string-based filtering - no regex to avoid parse errors
+  const filteredProjects = projects.filter((project) => {
+    if (!searchQuery.trim()) return true
 
-    const safe = escapeRegExp(query.trim())
+    const query = searchQuery.toLowerCase().trim()
+    const projectName = (project.name || "").toLowerCase()
+    const clientName = (project.client_name || "").toLowerCase()
 
-    try {
-      const rx = new RegExp(safe, "i")
-      return projects.filter((p) => rx.test(p.name))
-    } catch (err) {
-      /* Extremely rare after escaping, but keep the UI alive. */
-      console.warn("[ProjectList] RegExp failed – falling back to includes()", err)
-      const q = query.toLowerCase()
-      return projects.filter((p) => p.name.toLowerCase().includes(q))
+    return projectName.includes(query) || clientName.includes(query)
+  })
+
+  const calculateProgress = (project: Project) => {
+    if (getOverallProgress) {
+      return getOverallProgress(project)
     }
-  }, [projects, query])
 
-  /* ─────────────────────────── empty-state ───────────────────────────── */
-  if (projects.length === 0) {
-    return (
-      <div className={cn("text-center py-12 border-2 border-dashed rounded-lg", className)}>
-        <h3 className="text-lg font-medium">No Projects Found</h3>
-        <p className="text-sm text-muted-foreground mt-1">Create your first project to begin an assessment.</p>
-      </div>
+    // Default progress calculation
+    if (!project.standards || project.standards.length === 0) return 0
+
+    const totalQuestions = project.standards.reduce((sum, standard) => sum + standard.questions.length, 0)
+    if (totalQuestions === 0) return 0
+
+    const answeredQuestions = project.standards.reduce(
+      (sum, standard) =>
+        sum + standard.questions.filter((q) => q.answer !== undefined && q.answer !== null && q.answer !== "").length,
+      0,
     )
+
+    return Math.round((answeredQuestions / totalQuestions) * 100)
   }
 
-  /* ───────────────────────────── render ──────────────────────────────── */
   return (
-    <div className={cn("space-y-4", className)}>
-      {/* search bar */}
-      <div className="relative">
-        <Search className="absolute left-3 top-[10px] h-4 w-4 text-muted-foreground" />
-        <Input
-          aria-label="Search projects"
-          placeholder="Search projects…"
-          value={query}
-          onChange={(e: ChangeEvent<HTMLInputElement>) => setQuery(e.target.value)}
-          className="pl-9"
-        />
+    <div className="space-y-6">
+      <div className="flex items-center space-x-2">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+          <Input
+            placeholder="Search projects..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-10"
+          />
+        </div>
       </div>
 
-      {/* grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {filtered.map((p) => {
-          const progress = getProgress(p.name)
-          return (
-            <Card key={p.name}>
-              <CardHeader>
-                <CardTitle>{p.name}</CardTitle>
-                <CardDescription>Ref:&nbsp;{p.clientReferenceNumber}</CardDescription>
-              </CardHeader>
+      {filteredProjects.length === 0 ? (
+        <Card>
+          <CardContent className="flex flex-col items-center justify-center py-12">
+            <div className="text-center space-y-2">
+              <h3 className="text-lg font-semibold">No projects found</h3>
+              <p className="text-muted-foreground">
+                {searchQuery ? "Try adjusting your search terms" : "Create your first project to get started"}
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {filteredProjects.map((project) => {
+            const progress = calculateProgress(project)
 
-              <CardContent>
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-sm text-muted-foreground">Overall Progress</span>
-                  <span className="text-sm font-medium text-primary">{progress.toFixed(0)}%</span>
-                </div>
-                <Progress value={progress} className="h-2" />
-                <p className="text-xs text-muted-foreground mt-2">
-                  Last modified&nbsp;
-                  {formatDistanceToNow(new Date(p.lastModifiedAt), { addSuffix: true })}
-                </p>
-              </CardContent>
+            return (
+              <Card key={project.id} className="hover:shadow-md transition-shadow">
+                <CardHeader className="pb-3">
+                  <div className="flex items-start justify-between">
+                    <div className="space-y-1 flex-1">
+                      <CardTitle className="text-lg line-clamp-2">{project.name}</CardTitle>
+                      {project.client_name && (
+                        <CardDescription className="flex items-center gap-1">
+                          <User className="h-3 w-3" />
+                          {project.client_name}
+                        </CardDescription>
+                      )}
+                    </div>
+                    <Badge variant={progress === 100 ? "default" : progress > 50 ? "secondary" : "outline"}>
+                      {progress}%
+                    </Badge>
+                  </div>
+                </CardHeader>
 
-              <CardFooter>
-                <Button asChild className="w-full">
-                  <Link href={`/project/${encodeURIComponent(p.name)}`}>
-                    Open Project
-                    <FolderGit2 className="ml-2 h-4 w-4" />
-                  </Link>
-                </Button>
-              </CardFooter>
-            </Card>
-          )
-        })}
+                <CardContent className="space-y-4">
+                  <div className="flex items-center justify-between text-sm text-muted-foreground">
+                    <div className="flex items-center gap-1">
+                      <Calendar className="h-3 w-3" />
+                      {new Date(project.created_at).toLocaleDateString()}
+                    </div>
+                    <div>{project.standards?.length || 0} standards</div>
+                  </div>
 
-        {filtered.length === 0 && (
-          <p className="col-span-full text-center text-sm text-muted-foreground">
-            No projects match <span className="font-medium">&ldquo;{query}&rdquo;</span>
-          </p>
-        )}
-      </div>
+                  <div className="w-full bg-muted rounded-full h-2">
+                    <div
+                      className="bg-primary h-2 rounded-full transition-all duration-300"
+                      style={{ width: `${progress}%` }}
+                    />
+                  </div>
+
+                  <div className="flex gap-2">
+                    <Button asChild size="sm" className="flex-1">
+                      <Link href={`/project/${encodeURIComponent(project.name)}`}>
+                        <ExternalLink className="h-3 w-3 mr-1" />
+                        Open Project
+                      </Link>
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            )
+          })}
+        </div>
+      )}
     </div>
   )
 }

@@ -1,7 +1,6 @@
 /**
- * Escape any text that will be injected into `new RegExp()`.
- * Ref – MDN <https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_expressions#escaping>
+ * Escapes special regex characters in a string to make it safe for use in RegExp constructor
  */
-export function escapeRegExp(text: string): string {
-  return text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
+export function escapeRegExp(string: string): string {
+  return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
 }
