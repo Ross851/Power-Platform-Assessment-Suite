@@ -8,12 +8,13 @@ import { Badge } from "@/components/ui/badge"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { useAuth } from "@/components/auth/auth-provider"
 import { createClient } from "@/lib/supabase/client"
-import { CheckCircle, XCircle, AlertCircle, Play, User, Database, Shield, Settings } from "lucide-react"
+import { CheckCircle, XCircle, AlertCircle, Play, User, Database, Settings } from "lucide-react"
 
 interface TestResult {
   name: string
   status: "success" | "error" | "warning" | "pending"
   message: string
+  details?: string
 }
 
 export function TestDashboard() {
@@ -31,7 +32,8 @@ export function TestDashboard() {
         results.push({
           name: "Authentication",
           status: "success",
-          message: `User authenticated: ${user.email}`,
+          message: `User authenticated successfully`,
+          details: `User: ${user.email}`,
         })
       } else {
         results.push({
@@ -51,12 +53,13 @@ export function TestDashboard() {
     // Test 2: Database Connection
     try {
       const supabase = createClient()
-      const { data, error } = await supabase.from("projects").select("count").limit(1)
+      const { data, error } = await supabase.from("profiles").select("count").limit(1)
       if (error) {
         results.push({
           name: "Database Connection",
           status: "error",
-          message: `Database error: ${error.message}`,
+          message: `Database connection failed`,
+          details: error.message,
         })
       } else {
         results.push({
@@ -69,12 +72,49 @@ export function TestDashboard() {
       results.push({
         name: "Database Connection",
         status: "error",
-        message: `Connection failed: ${error}`,
+        message: `Database connection failed`,
+        details: `${error}`,
       })
     }
 
-    // Test 3: Environment Variables
-    const requiredEnvVars = ["NEXT_PUBLIC_SUPABASE_URL", "NEXT_PUBLIC_SUPABASE_ANON_KEY"]
+    // Test 3: Row Level Security
+    try {
+      const supabase = createClient()
+      const { data, error } = await supabase.from("profiles").select("*").limit(1)
+      if (error) {
+        if (error.message.includes("does not exist")) {
+          results.push({
+            name: "Row Level Security",
+            status: "warning",
+            message: "RLS policies may need configuration",
+            details: 'relation "public.profiles" does not exist',
+          })
+        } else {
+          results.push({
+            name: "Row Level Security",
+            status: "error",
+            message: "RLS configuration error",
+            details: error.message,
+          })
+        }
+      } else {
+        results.push({
+          name: "Row Level Security",
+          status: "success",
+          message: "RLS policies configured correctly",
+        })
+      }
+    } catch (error) {
+      results.push({
+        name: "Row Level Security",
+        status: "error",
+        message: "RLS test failed",
+        details: `${error}`,
+      })
+    }
+
+    // Test 4: Environment Variables
+    const requiredEnvVars = ["NEXT_PUBLIC_SUPABASE_URL", "NEXT_PUBLIC_SUPABASE_ANON_KEY", "NEXT_PUBLIC_CLIENT_DEMO"]
 
     const missingVars = requiredEnvVars.filter((varName) => !process.env[varName])
 
@@ -87,18 +127,39 @@ export function TestDashboard() {
     } else {
       results.push({
         name: "Environment Variables",
-        status: "error",
-        message: `Missing variables: ${missingVars.join(", ")}`,
+        status: "warning",
+        message: `${missingVars.length} variables missing`,
+        details: `Missing: ${missingVars.join(", ")}`,
       })
     }
 
-    // Test 4: Demo Mode Configuration
-    const demoMode = process.env.NEXT_PUBLIC_CLIENT_DEMO
-    results.push({
-      name: "Demo Mode Configuration",
-      status: demoMode !== undefined ? "success" : "warning",
-      message: `Demo mode: ${demoMode || "not configured"}`,
-    })
+    // Test 5: Storage Access
+    try {
+      const supabase = createClient()
+      const { data, error } = await supabase.storage.listBuckets()
+      if (error) {
+        results.push({
+          name: "Storage Access",
+          status: "error",
+          message: "Storage access failed",
+          details: error.message,
+        })
+      } else {
+        results.push({
+          name: "Storage Access",
+          status: "success",
+          message: "Storage access successful",
+          details: `Found ${data?.length || 0} storage buckets`,
+        })
+      }
+    } catch (error) {
+      results.push({
+        name: "Storage Access",
+        status: "error",
+        message: "Storage test failed",
+        details: `${error}`,
+      })
+    }
 
     setTestResults(results)
     setIsRunning(false)
@@ -117,82 +178,138 @@ export function TestDashboard() {
     }
   }
 
+  const getStatusBadge = (status: TestResult["status"]) => {
+    switch (status) {
+      case "success":
+        return (
+          <Badge variant="default" className="bg-green-100 text-green-800">
+            Passed
+          </Badge>
+        )
+      case "error":
+        return <Badge variant="destructive">Failed</Badge>
+      case "warning":
+        return (
+          <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">
+            Warning
+          </Badge>
+        )
+      default:
+        return <Badge variant="outline">Pending</Badge>
+    }
+  }
+
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">System Test Dashboard</h1>
-          <p className="text-muted-foreground">Test all authentication and access control features</p>
-        </div>
-        <Button onClick={runSystemTests} disabled={isRunning}>
-          {isRunning ? (
-            <>
-              <Play className="mr-2 h-4 w-4 animate-spin" />
-              Running Tests...
-            </>
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="flex items-center gap-2">
+                <Database className="h-5 w-5" />
+                Run System Tests
+              </CardTitle>
+              <CardDescription>Test authentication, database connectivity, and system configuration</CardDescription>
+            </div>
+            <Button onClick={runSystemTests} disabled={isRunning}>
+              {isRunning ? (
+                <>
+                  <Play className="mr-2 h-4 w-4 animate-spin" />
+                  Running...
+                </>
+              ) : (
+                <>
+                  <Play className="mr-2 h-4 w-4" />
+                  Run All Tests
+                </>
+              )}
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {testResults.length === 0 ? (
+            <Alert>
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>Click "Run All Tests" to check your system configuration</AlertDescription>
+            </Alert>
           ) : (
-            <>
-              <Play className="mr-2 h-4 w-4" />
-              Run System Tests
-            </>
+            <div className="space-y-3">
+              {testResults.map((result, index) => (
+                <div key={index} className="flex items-start justify-between p-4 border rounded-lg">
+                  <div className="flex items-start gap-3 flex-1">
+                    {getStatusIcon(result.status)}
+                    <div className="flex-1">
+                      <div className="flex items-center justify-between">
+                        <p className="font-medium">{result.name}</p>
+                        {getStatusBadge(result.status)}
+                      </div>
+                      <p className="text-sm text-muted-foreground mt-1">{result.message}</p>
+                      {result.details && (
+                        <p className="text-xs text-muted-foreground mt-1 font-mono bg-muted px-2 py-1 rounded">
+                          {result.details}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
           )}
-        </Button>
-      </div>
+        </CardContent>
+      </Card>
 
-      <Tabs defaultValue="tests" className="space-y-4">
+      <Tabs defaultValue="environment" className="space-y-4">
         <TabsList>
-          <TabsTrigger value="tests">System Tests</TabsTrigger>
+          <TabsTrigger value="environment">Environment</TabsTrigger>
           <TabsTrigger value="user">User Info</TabsTrigger>
-          <TabsTrigger value="demo">Demo Mode</TabsTrigger>
-          <TabsTrigger value="access">Access Control</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="tests" className="space-y-4">
+        <TabsContent value="environment">
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Database className="h-5 w-5" />
-                System Tests
+                <Settings className="h-5 w-5" />
+                Environment Configuration
               </CardTitle>
-              <CardDescription>Verify that all core systems are working correctly</CardDescription>
+              <CardDescription>Current environment settings and configuration</CardDescription>
             </CardHeader>
             <CardContent>
-              {testResults.length === 0 ? (
-                <Alert>
-                  <AlertCircle className="h-4 w-4" />
-                  <AlertDescription>Click "Run System Tests" to check your system configuration</AlertDescription>
-                </Alert>
-              ) : (
-                <div className="space-y-3">
-                  {testResults.map((result, index) => (
-                    <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
-                      <div className="flex items-center gap-3">
-                        {getStatusIcon(result.status)}
-                        <div>
-                          <p className="font-medium">{result.name}</p>
-                          <p className="text-sm text-muted-foreground">{result.message}</p>
-                        </div>
-                      </div>
-                      <Badge
-                        variant={
-                          result.status === "success"
-                            ? "default"
-                            : result.status === "error"
-                              ? "destructive"
-                              : "secondary"
-                        }
-                      >
-                        {result.status}
-                      </Badge>
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="flex items-center justify-between p-3 border rounded-lg">
+                    <div>
+                      <p className="font-medium">Supabase URL</p>
+                      <p className="text-sm text-muted-foreground">Database connection endpoint</p>
                     </div>
-                  ))}
+                    <Badge variant={process.env.NEXT_PUBLIC_SUPABASE_URL ? "default" : "destructive"}>
+                      {process.env.NEXT_PUBLIC_SUPABASE_URL ? "Set" : "Missing"}
+                    </Badge>
+                  </div>
+                  <div className="flex items-center justify-between p-3 border rounded-lg">
+                    <div>
+                      <p className="font-medium">Supabase Anon Key</p>
+                      <p className="text-sm text-muted-foreground">Public API key</p>
+                    </div>
+                    <Badge variant={process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? "default" : "destructive"}>
+                      {process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? "Set" : "Missing"}
+                    </Badge>
+                  </div>
+                  <div className="flex items-center justify-between p-3 border rounded-lg">
+                    <div>
+                      <p className="font-medium">Client Demo Mode</p>
+                      <p className="text-sm text-muted-foreground">Demo mode configuration</p>
+                    </div>
+                    <Badge variant={process.env.NEXT_PUBLIC_CLIENT_DEMO ? "default" : "secondary"}>
+                      {process.env.NEXT_PUBLIC_CLIENT_DEMO || "Not Set"}
+                    </Badge>
+                  </div>
                 </div>
-              )}
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
 
-        <TabsContent value="user" className="space-y-4">
+        <TabsContent value="user">
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -204,14 +321,14 @@ export function TestDashboard() {
             <CardContent>
               {user ? (
                 <div className="space-y-3">
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <p className="text-sm font-medium">Email</p>
                       <p className="text-sm text-muted-foreground">{user.email}</p>
                     </div>
                     <div>
                       <p className="text-sm font-medium">User ID</p>
-                      <p className="text-sm text-muted-foreground font-mono">{user.id}</p>
+                      <p className="text-sm text-muted-foreground font-mono text-xs">{user.id}</p>
                     </div>
                     <div>
                       <p className="text-sm font-medium">Full Name</p>
@@ -229,58 +346,6 @@ export function TestDashboard() {
                   <AlertDescription>No user authenticated</AlertDescription>
                 </Alert>
               )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="demo" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Settings className="h-5 w-5" />
-                Demo Mode Configuration
-              </CardTitle>
-              <CardDescription>Client demo mode settings and environment configuration</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between p-3 border rounded-lg">
-                  <div>
-                    <p className="font-medium">Client Demo Mode</p>
-                    <p className="text-sm text-muted-foreground">NEXT_PUBLIC_CLIENT_DEMO environment variable</p>
-                  </div>
-                  <Badge variant={process.env.NEXT_PUBLIC_CLIENT_DEMO === "true" ? "default" : "secondary"}>
-                    {process.env.NEXT_PUBLIC_CLIENT_DEMO || "not set"}
-                  </Badge>
-                </div>
-                <Alert>
-                  <AlertCircle className="h-4 w-4" />
-                  <AlertDescription>
-                    Set NEXT_PUBLIC_CLIENT_DEMO=true for client presentations, false for normal operation
-                  </AlertDescription>
-                </Alert>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="access" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Shield className="h-5 w-5" />
-                Access Control Testing
-              </CardTitle>
-              <CardDescription>Test user invitation and project access features</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Alert>
-                <AlertCircle className="h-4 w-4" />
-                <AlertDescription>
-                  Access control testing will be available once you create your first project. Go to the main dashboard
-                  to create a project and test user invitations.
-                </AlertDescription>
-              </Alert>
             </CardContent>
           </Card>
         </TabsContent>
