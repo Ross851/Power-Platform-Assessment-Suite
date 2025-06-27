@@ -17,6 +17,22 @@ export interface BestPractice {
   suggestedActions?: string[]
 }
 
+export interface DeveloperGuidance {
+  whatThisMeans: string
+  whenNeeded: string[]
+  implementationRequirements: string[]
+  evidenceToLookFor: string[]
+}
+
+export interface AssessmentFeedback {
+  howAssessed: string[]
+  assessmentDate?: string
+  reviewedBy?: string
+  findings?: string
+  limitations?: string
+  recommendations?: string
+}
+
 export type EvidenceType = "file" | "snippet"
 
 export interface Evidence {
@@ -35,6 +51,8 @@ export interface Question {
   category: string
   guidance?: string
   bestPractice?: BestPractice
+  developerGuidance?: DeveloperGuidance
+  assessmentFeedback?: AssessmentFeedback
   options?: string[]
   answer?: any
   score?: number
@@ -78,6 +96,7 @@ export interface AnswerPayload {
   documentData?: any
   riskOwner?: string
   evidence?: Evidence[]
+  assessmentFeedback?: AssessmentFeedback
 }
 
 export interface GeneralDocument {

@@ -2,77 +2,84 @@
 
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
 import { Textarea } from "@/components/ui/textarea"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-import { Edit3, Save } from "lucide-react"
+import { Label } from "@/components/ui/label"
+import type { Question } from "@/lib/types"
+import { Edit, Save } from "lucide-react"
 
 interface TextInputProps {
-  value?: string
-  onChange: (value: string) => void
-  placeholder?: string
-  label?: string
+  question: Question
+  onAnswerChange: (answer: string) => void
 }
 
-export function TextInput({
-  value = "",
-  onChange,
-  placeholder = "Enter your response...",
-  label = "Response",
-}: TextInputProps) {
+export function TextInput({ question, onAnswerChange }: TextInputProps) {
   const [isOpen, setIsOpen] = useState(false)
-  const [tempValue, setTempValue] = useState(value)
+  const [currentValue, setCurrentValue] = useState((question.answer as string) || "")
 
   const handleSave = () => {
-    onChange(tempValue)
+    onAnswerChange(currentValue)
     setIsOpen(false)
   }
 
   const handleCancel = () => {
-    setTempValue(value)
+    setCurrentValue((question.answer as string) || "")
     setIsOpen(false)
   }
 
   return (
-    <div className="space-y-2">
-      <div className="flex items-center gap-2">
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <div className="flex items-start gap-2">
         <Textarea
-          value={value}
+          value={(question.answer as string) || ""}
           readOnly
-          placeholder={placeholder}
-          className="min-h-[80px] cursor-pointer"
+          placeholder="Click to enter your detailed response..."
+          className="min-h-[120px] cursor-pointer resize-none"
           onClick={() => setIsOpen(true)}
         />
-        <Dialog open={isOpen} onOpenChange={setIsOpen}>
-          <DialogTrigger asChild>
-            <Button variant="outline" size="sm">
-              <Edit3 className="h-4 w-4" />
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-4xl max-h-[80vh]">
-            <DialogHeader>
-              <DialogTitle>{label}</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4">
-              <Textarea
-                value={tempValue}
-                onChange={(e) => setTempValue(e.target.value)}
-                placeholder={placeholder}
-                className="min-h-[400px] resize-none"
-                autoFocus
-              />
-              <div className="flex justify-end gap-2">
-                <Button variant="outline" onClick={handleCancel}>
-                  Cancel
-                </Button>
-                <Button onClick={handleSave}>
-                  <Save className="h-4 w-4 mr-2" />
-                  Save
-                </Button>
-              </div>
-            </div>
-          </DialogContent>
-        </Dialog>
+        <DialogTrigger asChild>
+          <Button variant="outline" size="icon">
+            <Edit className="h-4 w-4" />
+            <span className="sr-only">Edit Response</span>
+          </Button>
+        </DialogTrigger>
       </div>
-    </div>
+      <DialogContent className="max-w-4xl max-h-[80vh]">
+        <DialogHeader>
+          <DialogTitle>Detailed Response</DialogTitle>
+          <DialogDescription>{question.text}</DialogDescription>
+        </DialogHeader>
+        <div className="py-4">
+          <Label htmlFor="response-text" className="sr-only">
+            Detailed Response
+          </Label>
+          <Textarea
+            id="response-text"
+            value={currentValue}
+            onChange={(e) => setCurrentValue(e.target.value)}
+            placeholder="Enter your detailed response..."
+            className="min-h-[400px] resize-none"
+            autoFocus
+          />
+        </div>
+        <DialogFooter>
+          <Button type="button" variant="outline" onClick={handleCancel}>
+            Cancel
+          </Button>
+          <Button type="button" onClick={handleSave}>
+            <Save className="h-4 w-4 mr-2" />
+            Save Response
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   )
 }
