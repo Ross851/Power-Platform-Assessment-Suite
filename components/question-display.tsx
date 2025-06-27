@@ -36,12 +36,12 @@ import {
   Lightbulb,
   ExternalLink,
   Compass,
-  FileText,
   Calendar,
   User,
   AlertTriangle,
   CheckCircle2,
   Save,
+  ClipboardList,
 } from "lucide-react"
 
 interface QuestionDisplayProps {
@@ -251,19 +251,27 @@ export function QuestionDisplay({ question, standardSlug }: QuestionDisplayProps
               </Popover>
             )}
 
+            {/* === IN-DEPTH ASSESSMENT DOCUMENTATION === 
+                For formal assessment methodology and detailed analysis. Use this for:
+                - Documenting assessment procedures and steps taken
+                - Recording detailed findings and limitations
+                - Formal recommendations for audit trails
+                This is the "compliance and audit" documentation layer.
+            */}
             {/* Assessment Feedback */}
             <Dialog open={isFeedbackDialogOpen} onOpenChange={setIsFeedbackDialogOpen}>
               <DialogTrigger asChild>
                 <Button variant="ghost" size="icon" className="h-8 w-8">
-                  <FileText className="h-4 w-4" />
+                  <ClipboardList className="h-4 w-4" />
                   <span className="sr-only">Assessment Feedback</span>
                 </Button>
               </DialogTrigger>
               <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
                 <DialogHeader>
-                  <DialogTitle>Assessment Methodology & Feedback</DialogTitle>
+                  <DialogTitle>Assessment Methodology & Detailed Analysis</DialogTitle>
                   <DialogDescription>
-                    Document how this question was assessed and capture findings for future reference.
+                    Record the assessment approach, detailed findings, and recommendations. This creates an audit trail
+                    for compliance and future reviews.
                   </DialogDescription>
                 </DialogHeader>
 
@@ -364,6 +372,13 @@ export function QuestionDisplay({ question, standardSlug }: QuestionDisplayProps
         {/* Question Input */}
         <div>{renderQuestionInput()}</div>
 
+        {/* === QUICK OBSERVATIONS SECTION === 
+            For rapid note-taking during assessment. Use this for:
+            - Brief findings and observations
+            - Links to documentation
+            - Quick evidence summaries
+            This is the "fast track" for capturing essential information.
+        */}
         {/* Evidence Notes */}
         {question.type !== "document-review" && (
           <div>
@@ -411,6 +426,13 @@ export function QuestionDisplay({ question, standardSlug }: QuestionDisplayProps
           </div>
         )}
 
+        {/* === DETAILED EVIDENCE COLLECTION === 
+            For comprehensive documentation and file attachments. Use this for:
+            - Uploading screenshots, documents, config files
+            - Code snippets and technical evidence
+            - Structured evidence that supports scoring decisions
+            This provides the "deep dive" evidence trail.
+        */}
         {/* Evidence Manager */}
         {activeProjectName && (
           <EvidenceManager
@@ -421,6 +443,13 @@ export function QuestionDisplay({ question, standardSlug }: QuestionDisplayProps
           />
         )}
 
+        {/* === ASSESSMENT ANALYSIS & RECOMMENDATIONS === 
+            Auto-generated based on answers and manual risk assignments. Contains:
+            - Calculated risk levels and maturity scores
+            - Best practice recommendations and action items
+            - Risk ownership assignments
+            This is the "actionable insights" section for stakeholders.
+        */}
         {/* Risk Assessment Feedback */}
         {question.riskLevel && question.ragStatus !== "grey" && (
           <Card
