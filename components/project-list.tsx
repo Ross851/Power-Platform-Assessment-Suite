@@ -1,9 +1,11 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, type ChangeEvent } from "react"
 import Link from "next/link"
 import { Search, FolderGit2 } from "lucide-react"
 import { formatDistanceToNow } from "date-fns"
+
+import { escapeRegExp } from "@/lib/escape-regexp"
 import { useAssessmentStore } from "@/store/assessment-store"
 import type { Project } from "@/lib/types"
 import { Button } from "@/components/ui/button"
@@ -13,34 +15,43 @@ import { Input } from "@/components/ui/input"
 import { cn } from "@/lib/utils"
 
 interface ProjectListProps {
+  /** Optional – pass in a list manually, otherwise the global store is used. */
   projects?: Project[]
+  /** Optional – progress helper, otherwise pulled from the store. */
   getOverallProgress?: (projectName: string) => number
   className?: string
 }
 
 export function ProjectList({
-  projects: incomingProjects,
-  getOverallProgress: incomingGetOverallProgress,
+  projects: injectedProjects,
+  getOverallProgress: injectedProgress,
   className,
 }: ProjectListProps) {
+  /* ──────────────────────────────── data ─────────────────────────────── */
   const store = useAssessmentStore()
-  const projects = incomingProjects ?? store.projects ?? []
-  const getOverallProgress = incomingGetOverallProgress ?? store.getOverallProgress
+  const projects = injectedProjects ?? store.projects ?? []
+  const getProgress = injectedProgress ?? store.getOverallProgress
 
+  /* ─────────────────────────────── search ────────────────────────────── */
   const [query, setQuery] = useState("")
 
-  const filteredProjects = useMemo(() => {
+  const filtered = useMemo(() => {
     if (!query.trim()) return projects
 
-    // Use simple string matching instead of regex to avoid all regex errors
-    const searchTerm = query.toLowerCase().trim()
-    return projects.filter(
-      (project) =>
-        project.name.toLowerCase().includes(searchTerm) ||
-        project.clientReferenceNumber.toLowerCase().includes(searchTerm),
-    )
+    const safe = escapeRegExp(query.trim())
+
+    try {
+      const rx = new RegExp(safe, "i")
+      return projects.filter((p) => rx.test(p.name))
+    } catch (err) {
+      /* Extremely rare after escaping, but keep the UI alive. */
+      console.warn("[ProjectList] RegExp failed – falling back to includes()", err)
+      const q = query.toLowerCase()
+      return projects.filter((p) => p.name.toLowerCase().includes(q))
+    }
   }, [projects, query])
 
+  /* ─────────────────────────── empty-state ───────────────────────────── */
   if (projects.length === 0) {
     return (
       <div className={cn("text-center py-12 border-2 border-dashed rounded-lg", className)}>
@@ -50,50 +61,60 @@ export function ProjectList({
     )
   }
 
+  /* ───────────────────────────── render ──────────────────────────────── */
   return (
     <div className={cn("space-y-4", className)}>
+      {/* search bar */}
       <div className="relative">
         <Search className="absolute left-3 top-[10px] h-4 w-4 text-muted-foreground" />
         <Input
           aria-label="Search projects"
           placeholder="Search projects…"
           value={query}
-          onChange={(e) => setQuery(e.target.value)}
+          onChange={(e: ChangeEvent<HTMLInputElement>) => setQuery(e.target.value)}
           className="pl-9"
         />
       </div>
 
+      {/* grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {filteredProjects.map((project) => {
-          const progress = getOverallProgress(project.name)
+        {filtered.map((p) => {
+          const progress = getProgress(p.name)
           return (
-            <Card key={project.name}>
+            <Card key={p.name}>
               <CardHeader>
-                <CardTitle>{project.name}</CardTitle>
-                <CardDescription>Ref: {project.clientReferenceNumber}</CardDescription>
+                <CardTitle>{p.name}</CardTitle>
+                <CardDescription>Ref:&nbsp;{p.clientReferenceNumber}</CardDescription>
               </CardHeader>
+
               <CardContent>
                 <div className="flex justify-between items-center mb-2">
-                  <span className="text-sm font-medium text-muted-foreground">Overall Progress</span>
+                  <span className="text-sm text-muted-foreground">Overall Progress</span>
                   <span className="text-sm font-medium text-primary">{progress.toFixed(0)}%</span>
                 </div>
                 <Progress value={progress} className="h-2" />
                 <p className="text-xs text-muted-foreground mt-2">
-                  Last modified: {formatDistanceToNow(new Date(project.lastModifiedAt), { addSuffix: true })}
+                  Last modified&nbsp;
+                  {formatDistanceToNow(new Date(p.lastModifiedAt), { addSuffix: true })}
                 </p>
               </CardContent>
+
               <CardFooter>
                 <Button asChild className="w-full">
-                  <Link href={`/project/${encodeURIComponent(project.name)}`}>
-                    Open Project <FolderGit2 className="ml-2 h-4 w-4" />
+                  <Link href={`/project/${encodeURIComponent(p.name)}`}>
+                    Open Project
+                    <FolderGit2 className="ml-2 h-4 w-4" />
                   </Link>
                 </Button>
               </CardFooter>
             </Card>
           )
         })}
-        {filteredProjects.length === 0 && (
-          <p className="col-span-full text-center text-sm text-muted-foreground">No projects match "{query}"</p>
+
+        {filtered.length === 0 && (
+          <p className="col-span-full text-center text-sm text-muted-foreground">
+            No projects match <span className="font-medium">&ldquo;{query}&rdquo;</span>
+          </p>
         )}
       </div>
     </div>
