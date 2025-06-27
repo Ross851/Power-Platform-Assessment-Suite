@@ -3,67 +3,61 @@
 import type React from "react"
 
 import { useState } from "react"
+import { useAuth } from "./auth-provider"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Eye, EyeOff, Loader2, Mail, Lock, User, AlertCircle, CheckCircle } from "lucide-react"
-import { useAuth } from "./auth-provider"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Eye, EyeOff, Loader2, Mail, Lock, AlertCircle, CheckCircle, Shield } from "lucide-react"
 
 export function LoginForm() {
   const { signIn, signUp, resetPassword, loading, error } = useAuth()
-  const [activeTab, setActiveTab] = useState("signin")
-  const [showPassword, setShowPassword] = useState(false)
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [formData, setFormData] = useState({
     email: "",
     password: "",
     confirmPassword: "",
-    fullName: "",
   })
-  const [formErrors, setFormErrors] = useState<Record<string, string>>({})
-  const [successMessage, setSuccessMessage] = useState("")
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  const [activeTab, setActiveTab] = useState("signin")
+  const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  const validateForm = () => {
-    const errors: Record<string, string> = {}
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target
+    setFormData((prev) => ({ ...prev, [name]: value }))
+    setMessage(null)
+  }
 
-    if (!formData.email) {
-      errors.email = "Email is required"
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      errors.email = "Please enter a valid email address"
+  const validateForm = () => {
+    if (!formData.email.trim()) {
+      setMessage({ type: "error", text: "Email is required" })
+      return false
+    }
+
+    if (!formData.email.includes("@")) {
+      setMessage({ type: "error", text: "Please enter a valid email address" })
+      return false
     }
 
     if (!formData.password) {
-      errors.password = "Password is required"
-    } else if (formData.password.length < 6) {
-      errors.password = "Password must be at least 6 characters"
+      setMessage({ type: "error", text: "Password is required" })
+      return false
     }
 
-    if (activeTab === "signup") {
-      if (!formData.confirmPassword) {
-        errors.confirmPassword = "Please confirm your password"
-      } else if (formData.password !== formData.confirmPassword) {
-        errors.confirmPassword = "Passwords do not match"
-      }
-
-      if (!formData.fullName.trim()) {
-        errors.fullName = "Full name is required"
-      }
+    if (formData.password.length < 6) {
+      setMessage({ type: "error", text: "Password must be at least 6 characters" })
+      return false
     }
 
-    setFormErrors(errors)
-    return Object.keys(errors).length === 0
-  }
-
-  const handleInputChange = (field: string, value: string) => {
-    setFormData((prev) => ({ ...prev, [field]: value }))
-    if (formErrors[field]) {
-      setFormErrors((prev) => ({ ...prev, [field]: "" }))
+    if (activeTab === "signup" && formData.password !== formData.confirmPassword) {
+      setMessage({ type: "error", text: "Passwords do not match" })
+      return false
     }
-    if (successMessage) setSuccessMessage("")
+
+    return true
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -72,110 +66,126 @@ export function LoginForm() {
     if (!validateForm()) return
 
     setIsSubmitting(true)
-    setSuccessMessage("")
+    setMessage(null)
 
     try {
       if (activeTab === "signin") {
         await signIn(formData.email, formData.password)
-        setSuccessMessage("Successfully signed in!")
+        setMessage({ type: "success", text: "Successfully signed in!" })
       } else {
         await signUp(formData.email, formData.password)
-        setSuccessMessage("Account created! Please check your email to confirm your account.")
-        setFormData({ email: "", password: "", confirmPassword: "", fullName: "" })
+        setMessage({
+          type: "success",
+          text: "Account created! Please check your email to verify your account.",
+        })
       }
     } catch (err: any) {
-      console.error("Authentication error:", err)
+      setMessage({
+        type: "error",
+        text: err.message || `Failed to ${activeTab === "signin" ? "sign in" : "sign up"}`,
+      })
     } finally {
       setIsSubmitting(false)
     }
   }
 
   const handleForgotPassword = async () => {
-    if (!formData.email) {
-      setFormErrors({ email: "Please enter your email address" })
+    if (!formData.email.trim()) {
+      setMessage({ type: "error", text: "Please enter your email address first" })
       return
     }
 
     try {
       await resetPassword(formData.email)
-      setSuccessMessage("Password reset email sent! Check your inbox.")
+      setMessage({
+        type: "success",
+        text: "Password reset email sent! Check your inbox.",
+      })
     } catch (err: any) {
-      console.error("Reset password error:", err)
+      setMessage({ type: "error", text: err.message || "Failed to send reset email" })
     }
-  }
-
-  const handleTabChange = (value: string) => {
-    setActiveTab(value)
-    setFormErrors({})
-    setSuccessMessage("")
   }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
       <Card className="w-full max-w-md shadow-xl">
-        <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold text-gray-900">Power Platform Assessment</CardTitle>
-          <CardDescription className="text-gray-600">Sign in to your account or create a new one</CardDescription>
+        <CardHeader className="text-center space-y-2">
+          <div className="mx-auto w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center">
+            <Shield className="w-6 h-6 text-white" />
+          </div>
+          <CardTitle className="text-2xl font-bold text-gray-900">Power Platform Assessment Suite</CardTitle>
+          <CardDescription className="text-gray-600">Secure access to your assessment dashboard</CardDescription>
         </CardHeader>
+
         <CardContent>
-          <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="signin">Sign In</TabsTrigger>
-              <TabsTrigger value="signup">Sign Up</TabsTrigger>
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <TabsList className="grid w-full grid-cols-2 mb-6">
+              <TabsTrigger value="signin" className="text-sm">
+                Sign In
+              </TabsTrigger>
+              <TabsTrigger value="signup" className="text-sm">
+                Sign Up
+              </TabsTrigger>
             </TabsList>
 
-            <TabsContent value="signin" className="space-y-4">
-              <form onSubmit={handleSubmit} className="space-y-4">
+            {(message || error) && (
+              <Alert variant={message?.type === "error" || error ? "destructive" : "default"} className="mb-4">
+                {message?.type === "error" || error ? (
+                  <AlertCircle className="h-4 w-4" />
+                ) : (
+                  <CheckCircle className="h-4 w-4" />
+                )}
+                <AlertDescription>{message?.text || error}</AlertDescription>
+              </Alert>
+            )}
+
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <TabsContent value="signin" className="space-y-4 mt-0">
                 <div className="space-y-2">
-                  <Label htmlFor="signin-email">Email</Label>
+                  <Label htmlFor="signin-email" className="text-sm font-medium">
+                    Email Address
+                  </Label>
                   <div className="relative">
                     <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                     <Input
                       id="signin-email"
+                      name="email"
                       type="email"
                       placeholder="Enter your email"
                       value={formData.email}
-                      onChange={(e) => handleInputChange("email", e.target.value)}
-                      className={`pl-10 ${formErrors.email ? "border-red-500" : ""}`}
-                      disabled={loading || isSubmitting}
+                      onChange={handleInputChange}
+                      className="pl-10"
+                      required
+                      autoComplete="email"
                     />
                   </div>
-                  {formErrors.email && (
-                    <p className="text-sm text-red-600 flex items-center gap-1">
-                      <AlertCircle className="h-3 w-3" />
-                      {formErrors.email}
-                    </p>
-                  )}
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="signin-password">Password</Label>
+                  <Label htmlFor="signin-password" className="text-sm font-medium">
+                    Password
+                  </Label>
                   <div className="relative">
                     <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                     <Input
                       id="signin-password"
+                      name="password"
                       type={showPassword ? "text" : "password"}
                       placeholder="Enter your password"
                       value={formData.password}
-                      onChange={(e) => handleInputChange("password", e.target.value)}
-                      className={`pl-10 pr-10 ${formErrors.password ? "border-red-500" : ""}`}
-                      disabled={loading || isSubmitting}
+                      onChange={handleInputChange}
+                      className="pl-10 pr-10"
+                      required
+                      autoComplete="current-password"
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
                       className="absolute right-3 top-3 text-gray-400 hover:text-gray-600"
-                      disabled={loading || isSubmitting}
                     >
                       {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                     </button>
                   </div>
-                  {formErrors.password && (
-                    <p className="text-sm text-red-600 flex items-center gap-1">
-                      <AlertCircle className="h-3 w-3" />
-                      {formErrors.password}
-                    </p>
-                  )}
                 </div>
 
                 <Button type="submit" className="w-full" disabled={loading || isSubmitting}>
@@ -191,120 +201,88 @@ export function LoginForm() {
 
                 <Button
                   type="button"
-                  variant="ghost"
-                  className="w-full text-sm"
+                  variant="link"
                   onClick={handleForgotPassword}
-                  disabled={loading || isSubmitting}
+                  className="w-full text-sm text-blue-600 hover:text-blue-800"
+                  disabled={loading}
                 >
                   Forgot your password?
                 </Button>
-              </form>
-            </TabsContent>
+              </TabsContent>
 
-            <TabsContent value="signup" className="space-y-4">
-              <form onSubmit={handleSubmit} className="space-y-4">
+              <TabsContent value="signup" className="space-y-4 mt-0">
                 <div className="space-y-2">
-                  <Label htmlFor="signup-name">Full Name</Label>
-                  <div className="relative">
-                    <User className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                    <Input
-                      id="signup-name"
-                      type="text"
-                      placeholder="Enter your full name"
-                      value={formData.fullName}
-                      onChange={(e) => handleInputChange("fullName", e.target.value)}
-                      className={`pl-10 ${formErrors.fullName ? "border-red-500" : ""}`}
-                      disabled={loading || isSubmitting}
-                    />
-                  </div>
-                  {formErrors.fullName && (
-                    <p className="text-sm text-red-600 flex items-center gap-1">
-                      <AlertCircle className="h-3 w-3" />
-                      {formErrors.fullName}
-                    </p>
-                  )}
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="signup-email">Email</Label>
+                  <Label htmlFor="signup-email" className="text-sm font-medium">
+                    Email Address
+                  </Label>
                   <div className="relative">
                     <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                     <Input
                       id="signup-email"
+                      name="email"
                       type="email"
                       placeholder="Enter your email"
                       value={formData.email}
-                      onChange={(e) => handleInputChange("email", e.target.value)}
-                      className={`pl-10 ${formErrors.email ? "border-red-500" : ""}`}
-                      disabled={loading || isSubmitting}
+                      onChange={handleInputChange}
+                      className="pl-10"
+                      required
+                      autoComplete="email"
                     />
                   </div>
-                  {formErrors.email && (
-                    <p className="text-sm text-red-600 flex items-center gap-1">
-                      <AlertCircle className="h-3 w-3" />
-                      {formErrors.email}
-                    </p>
-                  )}
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="signup-password">Password</Label>
+                  <Label htmlFor="signup-password" className="text-sm font-medium">
+                    Password
+                  </Label>
                   <div className="relative">
                     <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                     <Input
                       id="signup-password"
+                      name="password"
                       type={showPassword ? "text" : "password"}
-                      placeholder="Create a password (min 6 characters)"
+                      placeholder="Create a password (min. 6 characters)"
                       value={formData.password}
-                      onChange={(e) => handleInputChange("password", e.target.value)}
-                      className={`pl-10 pr-10 ${formErrors.password ? "border-red-500" : ""}`}
-                      disabled={loading || isSubmitting}
+                      onChange={handleInputChange}
+                      className="pl-10 pr-10"
+                      required
+                      autoComplete="new-password"
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
                       className="absolute right-3 top-3 text-gray-400 hover:text-gray-600"
-                      disabled={loading || isSubmitting}
                     >
                       {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                     </button>
                   </div>
-                  {formErrors.password && (
-                    <p className="text-sm text-red-600 flex items-center gap-1">
-                      <AlertCircle className="h-3 w-3" />
-                      {formErrors.password}
-                    </p>
-                  )}
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="signup-confirm-password">Confirm Password</Label>
+                  <Label htmlFor="confirm-password" className="text-sm font-medium">
+                    Confirm Password
+                  </Label>
                   <div className="relative">
                     <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                     <Input
-                      id="signup-confirm-password"
+                      id="confirm-password"
+                      name="confirmPassword"
                       type={showConfirmPassword ? "text" : "password"}
                       placeholder="Confirm your password"
                       value={formData.confirmPassword}
-                      onChange={(e) => handleInputChange("confirmPassword", e.target.value)}
-                      className={`pl-10 pr-10 ${formErrors.confirmPassword ? "border-red-500" : ""}`}
-                      disabled={loading || isSubmitting}
+                      onChange={handleInputChange}
+                      className="pl-10 pr-10"
+                      required
+                      autoComplete="new-password"
                     />
                     <button
                       type="button"
                       onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                       className="absolute right-3 top-3 text-gray-400 hover:text-gray-600"
-                      disabled={loading || isSubmitting}
                     >
                       {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                     </button>
                   </div>
-                  {formErrors.confirmPassword && (
-                    <p className="text-sm text-red-600 flex items-center gap-1">
-                      <AlertCircle className="h-3 w-3" />
-                      {formErrors.confirmPassword}
-                    </p>
-                  )}
                 </div>
 
                 <Button type="submit" className="w-full" disabled={loading || isSubmitting}>
@@ -317,23 +295,22 @@ export function LoginForm() {
                     "Create Account"
                   )}
                 </Button>
-              </form>
-            </TabsContent>
+              </TabsContent>
+            </form>
           </Tabs>
 
-          {error && (
-            <Alert className="mt-4 border-red-200 bg-red-50">
-              <AlertCircle className="h-4 w-4 text-red-600" />
-              <AlertDescription className="text-red-700">{error}</AlertDescription>
-            </Alert>
-          )}
-
-          {successMessage && (
-            <Alert className="mt-4 border-green-200 bg-green-50">
-              <CheckCircle className="h-4 w-4 text-green-600" />
-              <AlertDescription className="text-green-700">{successMessage}</AlertDescription>
-            </Alert>
-          )}
+          <div className="mt-6 text-center text-sm text-gray-600">
+            <p>
+              By signing in, you agree to our{" "}
+              <a href="#" className="text-blue-600 hover:underline">
+                Terms of Service
+              </a>{" "}
+              and{" "}
+              <a href="#" className="text-blue-600 hover:underline">
+                Privacy Policy
+              </a>
+            </p>
+          </div>
         </CardContent>
       </Card>
     </div>

@@ -2,8 +2,8 @@
 
 import type React from "react"
 import { createContext, useContext, useEffect, useState } from "react"
+import { createClient } from "@/lib/supabase/client"
 import type { User } from "@supabase/supabase-js"
-import { supabase } from "@/lib/supabase/client"
 
 interface AuthContextType {
   user: User | null
@@ -21,6 +21,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const supabase = createClient()
 
   useEffect(() => {
     // Get initial session
@@ -52,12 +53,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } = supabase.auth.onAuthStateChange(async (event, session) => {
       console.log("Auth state changed:", event, session?.user?.email)
       setUser(session?.user ?? null)
-      setError(null)
       setLoading(false)
+      setError(null)
     })
 
     return () => subscription.unsubscribe()
-  }, [])
+  }, [supabase.auth])
 
   const signIn = async (email: string, password: string) => {
     try {
@@ -102,12 +103,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         throw error
       }
 
-      if (data.user && !data.user.email_confirmed_at) {
-        setError("Please check your email and click the confirmation link to complete registration.")
+      if (data.user) {
+        setUser(data.user)
       }
     } catch (err: any) {
       console.error("Sign up error:", err)
-      setError(err.message || "Failed to create account")
+      setError(err.message || "Failed to sign up")
       throw err
     } finally {
       setLoading(false)
@@ -125,7 +126,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } catch (err: any) {
       console.error("Sign out error:", err)
       setError(err.message || "Failed to sign out")
-      throw err
     } finally {
       setLoading(false)
     }

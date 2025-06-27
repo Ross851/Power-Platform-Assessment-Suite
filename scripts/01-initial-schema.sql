@@ -1,211 +1,227 @@
 -- Enable Row Level Security
 ALTER DATABASE postgres SET "app.jwt_secret" TO 'your-jwt-secret';
 
--- Create profiles table for user management
+-- Create profiles table
 CREATE TABLE IF NOT EXISTS public.profiles (
-    id uuid REFERENCES auth.users(id) ON DELETE CASCADE PRIMARY KEY,
-    email text UNIQUE NOT NULL,
-    full_name text,
-    avatar_url text,
-    created_at timestamp with time zone DEFAULT now() NOT NULL,
-    updated_at timestamp with time zone DEFAULT now() NOT NULL
+  id UUID REFERENCES auth.users(id) ON DELETE CASCADE PRIMARY KEY,
+  email TEXT UNIQUE NOT NULL,
+  full_name TEXT,
+  avatar_url TEXT,
+  role TEXT DEFAULT 'user',
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
 -- Create projects table
 CREATE TABLE IF NOT EXISTS public.projects (
-    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-    name text NOT NULL,
-    description text,
-    owner_id uuid REFERENCES public.profiles(id) ON DELETE CASCADE NOT NULL,
-    created_at timestamp with time zone DEFAULT now() NOT NULL,
-    updated_at timestamp with time zone DEFAULT now() NOT NULL
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  name TEXT NOT NULL,
+  description TEXT,
+  owner_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Create project_access table for user permissions
+-- Create project_access table for role-based access
 CREATE TABLE IF NOT EXISTS public.project_access (
-    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-    project_id uuid REFERENCES public.projects(id) ON DELETE CASCADE NOT NULL,
-    user_id uuid REFERENCES public.profiles(id) ON DELETE CASCADE NOT NULL,
-    role text NOT NULL CHECK (role IN ('owner', 'editor', 'viewer')),
-    granted_by uuid REFERENCES public.profiles(id) NOT NULL,
-    granted_at timestamp with time zone DEFAULT now() NOT NULL,
-    UNIQUE(project_id, user_id)
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  project_id UUID REFERENCES public.projects(id) ON DELETE CASCADE NOT NULL,
+  user_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE NOT NULL,
+  role TEXT NOT NULL CHECK (role IN ('owner', 'editor', 'viewer')),
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  UNIQUE(project_id, user_id)
 );
 
--- Create the table for general project-level documents
-CREATE TABLE IF NOT EXISTS public.general_documents (
-    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-    project_name text NOT NULL,
-    file_path text NOT NULL,
-    name text NOT NULL,
-    type text,
-    size bigint,
-    description text,
-    uploaded_at timestamp with time zone DEFAULT now() NOT NULL,
-    uploaded_by uuid REFERENCES public.profiles(id)
+-- Create assessments table
+CREATE TABLE IF NOT EXISTS public.assessments (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  project_id UUID REFERENCES public.projects(id) ON DELETE CASCADE NOT NULL,
+  standard_slug TEXT NOT NULL,
+  title TEXT NOT NULL,
+  status TEXT DEFAULT 'draft' CHECK (status IN ('draft', 'in_progress', 'completed')),
+  data JSONB DEFAULT '{}',
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Create the table for question-specific evidence
-CREATE TABLE IF NOT EXISTS public.question_evidence (
-    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-    project_name text NOT NULL,
-    question_id text NOT NULL,
-    evidence_type text NOT NULL,
-    content text NOT NULL,
-    file_path text,
-    uploaded_at timestamp with time zone DEFAULT now() NOT NULL,
-    uploaded_by uuid REFERENCES public.profiles(id)
+-- Create documents table for file storage
+CREATE TABLE IF NOT EXISTS public.documents (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  project_id UUID REFERENCES public.projects(id) ON DELETE CASCADE NOT NULL,
+  name TEXT NOT NULL,
+  file_path TEXT NOT NULL,
+  file_size INTEGER,
+  mime_type TEXT,
+  uploaded_by UUID REFERENCES public.profiles(id) ON DELETE SET NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Enable Row Level Security on all tables
+-- Enable RLS on all tables
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.projects ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.project_access ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.general_documents ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.question_evidence ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.assessments ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.documents ENABLE ROW LEVEL SECURITY;
 
--- Create policies for profiles table
-CREATE POLICY "Users can view their own profile" ON public.profiles
-    FOR SELECT USING (auth.uid() = id);
+-- Profiles policies
+CREATE POLICY "Users can view own profile" ON public.profiles
+  FOR SELECT USING (auth.uid() = id);
 
-CREATE POLICY "Users can update their own profile" ON public.profiles
-    FOR UPDATE USING (auth.uid() = id);
+CREATE POLICY "Users can update own profile" ON public.profiles
+  FOR UPDATE USING (auth.uid() = id);
 
-CREATE POLICY "Users can insert their own profile" ON public.profiles
-    FOR INSERT WITH CHECK (auth.uid() = id);
+CREATE POLICY "Users can insert own profile" ON public.profiles
+  FOR INSERT WITH CHECK (auth.uid() = id);
 
--- Create policies for projects table
+-- Projects policies
 CREATE POLICY "Users can view projects they have access to" ON public.projects
-    FOR SELECT USING (
-        owner_id = auth.uid() OR 
-        EXISTS (
-            SELECT 1 FROM public.project_access 
-            WHERE project_id = projects.id AND user_id = auth.uid()
-        )
-    );
+  FOR SELECT USING (
+    owner_id = auth.uid() OR
+    EXISTS (
+      SELECT 1 FROM public.project_access
+      WHERE project_id = projects.id AND user_id = auth.uid()
+    )
+  );
 
-CREATE POLICY "Users can create their own projects" ON public.projects
-    FOR INSERT WITH CHECK (owner_id = auth.uid());
+CREATE POLICY "Users can create projects" ON public.projects
+  FOR INSERT WITH CHECK (owner_id = auth.uid());
 
-CREATE POLICY "Project owners can update their projects" ON public.projects
-    FOR UPDATE USING (owner_id = auth.uid());
+CREATE POLICY "Project owners can update projects" ON public.projects
+  FOR UPDATE USING (owner_id = auth.uid());
 
-CREATE POLICY "Project owners can delete their projects" ON public.projects
-    FOR DELETE USING (owner_id = auth.uid());
+CREATE POLICY "Project owners can delete projects" ON public.projects
+  FOR DELETE USING (owner_id = auth.uid());
 
--- Create policies for project_access table
-CREATE POLICY "Users can view access for projects they own or have access to" ON public.project_access
-    FOR SELECT USING (
-        user_id = auth.uid() OR 
-        EXISTS (
-            SELECT 1 FROM public.projects 
-            WHERE id = project_id AND owner_id = auth.uid()
-        )
-    );
+-- Project access policies
+CREATE POLICY "Users can view project access for their projects" ON public.project_access
+  FOR SELECT USING (
+    user_id = auth.uid() OR
+    EXISTS (
+      SELECT 1 FROM public.projects
+      WHERE id = project_access.project_id AND owner_id = auth.uid()
+    )
+  );
 
 CREATE POLICY "Project owners can manage access" ON public.project_access
-    FOR ALL USING (
+  FOR ALL USING (
+    EXISTS (
+      SELECT 1 FROM public.projects
+      WHERE id = project_access.project_id AND owner_id = auth.uid()
+    )
+  );
+
+-- Assessments policies
+CREATE POLICY "Users can view assessments for accessible projects" ON public.assessments
+  FOR SELECT USING (
+    EXISTS (
+      SELECT 1 FROM public.projects
+      WHERE id = assessments.project_id AND (
+        owner_id = auth.uid() OR
         EXISTS (
-            SELECT 1 FROM public.projects 
-            WHERE id = project_id AND owner_id = auth.uid()
+          SELECT 1 FROM public.project_access
+          WHERE project_id = projects.id AND user_id = auth.uid()
         )
-    );
+      )
+    )
+  );
 
--- Create policies for general_documents table
-CREATE POLICY "Users can view documents for projects they have access to" ON public.general_documents
-    FOR SELECT USING (
+CREATE POLICY "Users can create assessments for accessible projects" ON public.assessments
+  FOR INSERT WITH CHECK (
+    EXISTS (
+      SELECT 1 FROM public.projects
+      WHERE id = assessments.project_id AND (
+        owner_id = auth.uid() OR
         EXISTS (
-            SELECT 1 FROM public.projects p
-            LEFT JOIN public.project_access pa ON p.id = pa.project_id
-            WHERE p.name = project_name 
-            AND (p.owner_id = auth.uid() OR pa.user_id = auth.uid())
+          SELECT 1 FROM public.project_access
+          WHERE project_id = projects.id AND user_id = auth.uid() AND role IN ('owner', 'editor')
         )
-    );
+      )
+    )
+  );
 
-CREATE POLICY "Users can upload documents to projects they have editor+ access to" ON public.general_documents
-    FOR INSERT WITH CHECK (
+CREATE POLICY "Users can update assessments for accessible projects" ON public.assessments
+  FOR UPDATE USING (
+    EXISTS (
+      SELECT 1 FROM public.projects
+      WHERE id = assessments.project_id AND (
+        owner_id = auth.uid() OR
         EXISTS (
-            SELECT 1 FROM public.projects p
-            LEFT JOIN public.project_access pa ON p.id = pa.project_id
-            WHERE p.name = project_name 
-            AND (
-                p.owner_id = auth.uid() OR 
-                (pa.user_id = auth.uid() AND pa.role IN ('owner', 'editor'))
-            )
+          SELECT 1 FROM public.project_access
+          WHERE project_id = projects.id AND user_id = auth.uid() AND role IN ('owner', 'editor')
         )
-    );
+      )
+    )
+  );
 
--- Create policies for question_evidence table
-CREATE POLICY "Users can view evidence for projects they have access to" ON public.question_evidence
-    FOR SELECT USING (
+-- Documents policies
+CREATE POLICY "Users can view documents for accessible projects" ON public.documents
+  FOR SELECT USING (
+    EXISTS (
+      SELECT 1 FROM public.projects
+      WHERE id = documents.project_id AND (
+        owner_id = auth.uid() OR
         EXISTS (
-            SELECT 1 FROM public.projects p
-            LEFT JOIN public.project_access pa ON p.id = pa.project_id
-            WHERE p.name = project_name 
-            AND (p.owner_id = auth.uid() OR pa.user_id = auth.uid())
+          SELECT 1 FROM public.project_access
+          WHERE project_id = projects.id AND user_id = auth.uid()
         )
-    );
+      )
+    )
+  );
 
-CREATE POLICY "Users can add evidence to projects they have editor+ access to" ON public.question_evidence
-    FOR INSERT WITH CHECK (
+CREATE POLICY "Users can upload documents to accessible projects" ON public.documents
+  FOR INSERT WITH CHECK (
+    uploaded_by = auth.uid() AND
+    EXISTS (
+      SELECT 1 FROM public.projects
+      WHERE id = documents.project_id AND (
+        owner_id = auth.uid() OR
         EXISTS (
-            SELECT 1 FROM public.projects p
-            LEFT JOIN public.project_access pa ON p.id = pa.project_id
-            WHERE p.name = project_name 
-            AND (
-                p.owner_id = auth.uid() OR 
-                (pa.user_id = auth.uid() AND pa.role IN ('owner', 'editor'))
-            )
+          SELECT 1 FROM public.project_access
+          WHERE project_id = projects.id AND user_id = auth.uid() AND role IN ('owner', 'editor')
         )
-    );
+      )
+    )
+  );
 
--- Create Storage Buckets
-INSERT INTO storage.buckets (id, name, public)
-VALUES ('project_documents', 'project_documents', false)
-ON CONFLICT (id) DO NOTHING;
-
-INSERT INTO storage.buckets (id, name, public)
-VALUES ('question_evidence_files', 'question_evidence_files', false)
-ON CONFLICT (id) DO NOTHING;
-
--- Create Storage Policies
-CREATE POLICY "Users can view files for projects they have access to" ON storage.objects
-    FOR SELECT USING (
-        bucket_id IN ('project_documents', 'question_evidence_files') AND
-        auth.role() = 'authenticated'
-    );
-
-CREATE POLICY "Users can upload files for projects they have access to" ON storage.objects
-    FOR INSERT WITH CHECK (
-        bucket_id IN ('project_documents', 'question_evidence_files') AND
-        auth.role() = 'authenticated'
-    );
-
-CREATE POLICY "Users can delete files for projects they have access to" ON storage.objects
-    FOR DELETE USING (
-        bucket_id IN ('project_documents', 'question_evidence_files') AND
-        auth.role() = 'authenticated'
-    );
-
--- Create function to handle new user registration
+-- Function to automatically create profile on user signup
 CREATE OR REPLACE FUNCTION public.handle_new_user()
-RETURNS trigger AS $$
+RETURNS TRIGGER AS $$
 BEGIN
-    INSERT INTO public.profiles (id, email, full_name)
-    VALUES (new.id, new.email, new.raw_user_meta_data->>'full_name');
-    RETURN new;
+  INSERT INTO public.profiles (id, email, full_name)
+  VALUES (NEW.id, NEW.email, NEW.raw_user_meta_data->>'full_name');
+  RETURN NEW;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
--- Create trigger for new user registration
+-- Trigger to create profile on signup
 DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
 CREATE TRIGGER on_auth_user_created
-    AFTER INSERT ON auth.users
-    FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
+  AFTER INSERT ON auth.users
+  FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
 
--- Add comments for documentation
-COMMENT ON TABLE public.profiles IS 'User profiles linked to auth.users';
-COMMENT ON TABLE public.projects IS 'Assessment projects owned by users';
-COMMENT ON TABLE public.project_access IS 'User access permissions for projects';
-COMMENT ON TABLE public.general_documents IS 'General documents uploaded for projects';
-COMMENT ON TABLE public.question_evidence IS 'Evidence linked to specific assessment questions';
+-- Storage policies for file uploads
+INSERT INTO storage.buckets (id, name, public) VALUES ('documents', 'documents', false) ON CONFLICT DO NOTHING;
+
+CREATE POLICY "Users can upload documents" ON storage.objects
+  FOR INSERT WITH CHECK (
+    bucket_id = 'documents' AND
+    auth.uid()::text = (storage.foldername(name))[1]
+  );
+
+CREATE POLICY "Users can view documents they have access to" ON storage.objects
+  FOR SELECT USING (
+    bucket_id = 'documents' AND (
+      auth.uid()::text = (storage.foldername(name))[1] OR
+      EXISTS (
+        SELECT 1 FROM public.documents d
+        JOIN public.projects p ON d.project_id = p.id
+        WHERE d.file_path = name AND (
+          p.owner_id = auth.uid() OR
+          EXISTS (
+            SELECT 1 FROM public.project_access pa
+            WHERE pa.project_id = p.id AND pa.user_id = auth.uid()
+          )
+        )
+      )
+    )
+  );
