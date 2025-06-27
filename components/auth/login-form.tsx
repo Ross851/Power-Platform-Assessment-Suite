@@ -4,17 +4,18 @@ import type React from "react"
 
 import { useState } from "react"
 import { useAuth } from "./auth-provider"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button"
+import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Eye, EyeOff, Shield, AlertCircle, CheckCircle } from "lucide-react"
+import { Eye, EyeOff, AlertCircle, CheckCircle, Loader2 } from "lucide-react"
 
 export function LoginForm() {
   const { signIn, signUp, error, loading } = useAuth()
   const [showPassword, setShowPassword] = useState(false)
+  const [isSignUp, setIsSignUp] = useState(false)
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -23,7 +24,7 @@ export function LoginForm() {
   const [formErrors, setFormErrors] = useState<Record<string, string>>({})
   const [successMessage, setSuccessMessage] = useState("")
 
-  const validateForm = (isSignUp = false) => {
+  const validateForm = () => {
     const errors: Record<string, string> = {}
 
     if (!formData.email) {
@@ -46,26 +47,24 @@ export function LoginForm() {
     return Object.keys(errors).length === 0
   }
 
-  const handleSignIn = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+
     if (!validateForm()) return
 
     try {
-      await signIn(formData.email, formData.password)
-    } catch (err) {
-      console.error("Sign in error:", err)
-    }
-  }
+      setSuccessMessage("")
 
-  const handleSignUp = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!validateForm(true)) return
-
-    try {
-      await signUp(formData.email, formData.password)
-      setSuccessMessage("Account created! Please check your email for a confirmation link.")
+      if (isSignUp) {
+        await signUp(formData.email, formData.password)
+        setSuccessMessage("Account created! Please check your email for a confirmation link.")
+        setIsSignUp(false)
+        setFormData({ email: formData.email, password: "", confirmPassword: "" })
+      } else {
+        await signIn(formData.email, formData.password)
+      }
     } catch (err) {
-      console.error("Sign up error:", err)
+      console.error("Authentication error:", err)
     }
   }
 
@@ -80,86 +79,107 @@ export function LoginForm() {
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <div className="flex justify-center mb-4">
-            <Shield className="h-12 w-12 text-blue-600" />
-          </div>
           <CardTitle className="text-2xl font-bold">Power Platform Assessment Suite</CardTitle>
-          <CardDescription>Sign in to your account or create a new one</CardDescription>
+          <CardDescription>
+            {isSignUp ? "Create your account to get started" : "Sign in to your account"}
+          </CardDescription>
         </CardHeader>
         <CardContent>
-          <Tabs defaultValue="signin" className="w-full">
+          <Tabs value={isSignUp ? "signup" : "signin"} className="w-full">
             <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="signin">Sign In</TabsTrigger>
-              <TabsTrigger value="signup">Sign Up</TabsTrigger>
+              <TabsTrigger
+                value="signin"
+                onClick={() => {
+                  setIsSignUp(false)
+                  setFormErrors({})
+                  setSuccessMessage("")
+                }}
+              >
+                Sign In
+              </TabsTrigger>
+              <TabsTrigger
+                value="signup"
+                onClick={() => {
+                  setIsSignUp(true)
+                  setFormErrors({})
+                  setSuccessMessage("")
+                }}
+              >
+                Sign Up
+              </TabsTrigger>
             </TabsList>
 
-            <TabsContent value="signin">
-              <form onSubmit={handleSignIn} className="space-y-4">
+            <TabsContent value="signin" className="space-y-4 mt-6">
+              <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="signin-email">Email</Label>
+                  <Label htmlFor="email">Email</Label>
                   <Input
-                    id="signin-email"
+                    id="email"
+                    name="email"
                     type="email"
+                    autoComplete="email"
                     value={formData.email}
                     onChange={(e) => handleInputChange("email", e.target.value)}
-                    placeholder="Enter your email"
-                    disabled={loading}
                     className={formErrors.email ? "border-red-500" : ""}
+                    placeholder="Enter your email"
                   />
                   {formErrors.email && <p className="text-sm text-red-600">{formErrors.email}</p>}
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="signin-password">Password</Label>
+                  <Label htmlFor="password">Password</Label>
                   <div className="relative">
                     <Input
-                      id="signin-password"
+                      id="password"
+                      name="password"
                       type={showPassword ? "text" : "password"}
+                      autoComplete="current-password"
                       value={formData.password}
                       onChange={(e) => handleInputChange("password", e.target.value)}
+                      className={formErrors.password ? "border-red-500 pr-10" : "pr-10"}
                       placeholder="Enter your password"
-                      disabled={loading}
-                      className={formErrors.password ? "border-red-500" : ""}
                     />
-                    <Button
+                    <button
                       type="button"
-                      variant="ghost"
-                      size="sm"
-                      className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                      className="absolute inset-y-0 right-0 pr-3 flex items-center"
                       onClick={() => setShowPassword(!showPassword)}
-                      disabled={loading}
                     >
-                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                    </Button>
+                      {showPassword ? (
+                        <EyeOff className="h-4 w-4 text-gray-400" />
+                      ) : (
+                        <Eye className="h-4 w-4 text-gray-400" />
+                      )}
+                    </button>
                   </div>
                   {formErrors.password && <p className="text-sm text-red-600">{formErrors.password}</p>}
                 </div>
 
-                {error && (
-                  <Alert variant="destructive">
-                    <AlertCircle className="h-4 w-4" />
-                    <AlertDescription>{error}</AlertDescription>
-                  </Alert>
-                )}
-
                 <Button type="submit" className="w-full" disabled={loading}>
-                  {loading ? "Signing in..." : "Sign In"}
+                  {loading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Signing in...
+                    </>
+                  ) : (
+                    "Sign In"
+                  )}
                 </Button>
               </form>
             </TabsContent>
 
-            <TabsContent value="signup">
-              <form onSubmit={handleSignUp} className="space-y-4">
+            <TabsContent value="signup" className="space-y-4 mt-6">
+              <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="signup-email">Email</Label>
                   <Input
                     id="signup-email"
+                    name="email"
                     type="email"
+                    autoComplete="email"
                     value={formData.email}
                     onChange={(e) => handleInputChange("email", e.target.value)}
-                    placeholder="Enter your email"
-                    disabled={loading}
                     className={formErrors.email ? "border-red-500" : ""}
+                    placeholder="Enter your email"
                   />
                   {formErrors.email && <p className="text-sm text-red-600">{formErrors.email}</p>}
                 </div>
@@ -169,23 +189,25 @@ export function LoginForm() {
                   <div className="relative">
                     <Input
                       id="signup-password"
+                      name="password"
                       type={showPassword ? "text" : "password"}
+                      autoComplete="new-password"
                       value={formData.password}
                       onChange={(e) => handleInputChange("password", e.target.value)}
-                      placeholder="Create a password (min. 6 characters)"
-                      disabled={loading}
-                      className={formErrors.password ? "border-red-500" : ""}
+                      className={formErrors.password ? "border-red-500 pr-10" : "pr-10"}
+                      placeholder="Create a password (6+ characters)"
                     />
-                    <Button
+                    <button
                       type="button"
-                      variant="ghost"
-                      size="sm"
-                      className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                      className="absolute inset-y-0 right-0 pr-3 flex items-center"
                       onClick={() => setShowPassword(!showPassword)}
-                      disabled={loading}
                     >
-                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                    </Button>
+                      {showPassword ? (
+                        <EyeOff className="h-4 w-4 text-gray-400" />
+                      ) : (
+                        <Eye className="h-4 w-4 text-gray-400" />
+                      )}
+                    </button>
                   </div>
                   {formErrors.password && <p className="text-sm text-red-600">{formErrors.password}</p>}
                 </div>
@@ -194,36 +216,44 @@ export function LoginForm() {
                   <Label htmlFor="confirm-password">Confirm Password</Label>
                   <Input
                     id="confirm-password"
+                    name="confirmPassword"
                     type="password"
+                    autoComplete="new-password"
                     value={formData.confirmPassword}
                     onChange={(e) => handleInputChange("confirmPassword", e.target.value)}
-                    placeholder="Confirm your password"
-                    disabled={loading}
                     className={formErrors.confirmPassword ? "border-red-500" : ""}
+                    placeholder="Confirm your password"
                   />
                   {formErrors.confirmPassword && <p className="text-sm text-red-600">{formErrors.confirmPassword}</p>}
                 </div>
 
-                {error && (
-                  <Alert variant="destructive">
-                    <AlertCircle className="h-4 w-4" />
-                    <AlertDescription>{error}</AlertDescription>
-                  </Alert>
-                )}
-
-                {successMessage && (
-                  <Alert>
-                    <CheckCircle className="h-4 w-4" />
-                    <AlertDescription>{successMessage}</AlertDescription>
-                  </Alert>
-                )}
-
                 <Button type="submit" className="w-full" disabled={loading}>
-                  {loading ? "Creating account..." : "Create Account"}
+                  {loading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Creating account...
+                    </>
+                  ) : (
+                    "Create Account"
+                  )}
                 </Button>
               </form>
             </TabsContent>
           </Tabs>
+
+          {error && (
+            <Alert variant="destructive" className="mt-4">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
+
+          {successMessage && (
+            <Alert className="mt-4">
+              <CheckCircle className="h-4 w-4" />
+              <AlertDescription>{successMessage}</AlertDescription>
+            </Alert>
+          )}
         </CardContent>
       </Card>
     </div>

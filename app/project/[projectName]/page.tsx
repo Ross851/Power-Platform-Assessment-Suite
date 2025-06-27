@@ -50,6 +50,7 @@ export default function ProjectPage() {
         created_at: foundProject.created_at || new Date().toISOString(),
         owner_id: foundProject.owner_id || user.id,
       })
+      setError(null)
     } else {
       setError("Project not found")
     }
