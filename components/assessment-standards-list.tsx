@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { RAGIndicator } from "./rag-indicator"
-import { ChevronRight, FileText, Shield, Cog, DollarSign, Building, Zap } from "lucide-react"
+import { ChevronRight, FileText, Shield, Cog, Building, Zap } from "lucide-react"
 
 const getStandardIcon = (slug: string) => {
   switch (slug) {
@@ -20,7 +20,7 @@ const getStandardIcon = (slug: string) => {
     case "security-access":
       return <Shield className="h-5 w-5" />
     case "licensing-cost-management":
-      return <DollarSign className="h-5 w-5" />
+      return <Cog className="h-5 w-5" />
     case "management-coe":
       return <Building className="h-5 w-5" />
     case "policy-governance-improvements":
