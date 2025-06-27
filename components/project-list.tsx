@@ -1,4 +1,5 @@
 import Link from "next/link"
+import { useAssessmentStore } from "@/store/assessment-store"
 import type { Project } from "@/lib/types"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
@@ -7,12 +8,22 @@ import { ArrowRight } from "lucide-react"
 import { formatDistanceToNow } from "date-fns"
 
 interface ProjectListProps {
-  projects: Project[]
-  getOverallProgress: (projectName: string) => number
+  /** Optional list – if omitted we read from the global store */
+  projects?: Project[]
+  /** Optional helper – if omitted we read from the global store */
+  getOverallProgress?: (projectName: string) => number
 }
 
-export function ProjectList({ projects, getOverallProgress }: ProjectListProps) {
-  if (projects.length === 0) {
+export function ProjectList({
+  projects: incomingProjects,
+  getOverallProgress: incomingGetOverallProgress,
+}: ProjectListProps) {
+  /* Fallback to store when props are not passed */
+  const store = useAssessmentStore()
+  const projects = incomingProjects ?? store.projects ?? []
+  const getOverallProgress = incomingGetOverallProgress ?? store.getOverallProgress
+
+  if (!projects.length) {
     return (
       <div className="text-center py-12 border-2 border-dashed rounded-lg">
         <h3 className="text-lg font-medium">No Projects Found</h3>
