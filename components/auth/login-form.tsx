@@ -2,46 +2,58 @@
 
 import type React from "react"
 import { useState } from "react"
+import { useAuth } from "./auth-provider"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { useAuth } from "./auth-provider"
 import { Loader2 } from "lucide-react"
 
 export function LoginForm() {
-  const { signIn, signUp, loading } = useAuth()
+  const [isSignUp, setIsSignUp] = useState(false)
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [error, setError] = useState("")
-  const [message, setMessage] = useState("")
-  const [isSignUp, setIsSignUp] = useState(false)
+  const [success, setSuccess] = useState("")
+  const { signIn, signUp, loading } = useAuth()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError("")
-    setMessage("")
+    setSuccess("")
+
+    if (!email || !password) {
+      setError("Please fill in all fields")
+      return
+    }
+
+    if (password.length < 6) {
+      setError("Password must be at least 6 characters")
+      return
+    }
 
     try {
       if (isSignUp) {
         await signUp(email, password)
-        setMessage("Check your email for the confirmation link!")
+        setSuccess("Check your email for a confirmation link!")
+        setEmail("")
+        setPassword("")
       } else {
         await signIn(email, password)
       }
     } catch (err: any) {
-      setError(err.message || `Failed to ${isSignUp ? "sign up" : "sign in"}`)
+      setError(err.message || "An error occurred")
     }
   }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <Card className="w-full max-w-md">
-        <CardHeader>
-          <CardTitle className="text-center text-2xl font-bold">Power Platform Assessment Suite</CardTitle>
-          <CardDescription className="text-center">
-            {isSignUp ? "Create your account" : "Sign in to your account"}
+        <CardHeader className="text-center">
+          <CardTitle className="text-2xl font-bold">{isSignUp ? "Create Account" : "Sign In"}</CardTitle>
+          <CardDescription>
+            {isSignUp ? "Create a new account to get started" : "Sign in to your account to continue"}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -50,73 +62,68 @@ export function LoginForm() {
               <Label htmlFor="email">Email</Label>
               <Input
                 id="email"
-                name="email"
                 type="email"
-                autoComplete="email"
-                required
+                placeholder="Enter your email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="Enter your email"
                 disabled={loading}
+                required
               />
             </div>
-
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
               <Input
                 id="password"
-                name="password"
                 type="password"
-                autoComplete={isSignUp ? "new-password" : "current-password"}
-                required
-                minLength={6}
+                placeholder="Enter your password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="Enter your password (6+ characters)"
                 disabled={loading}
+                required
+                minLength={6}
               />
             </div>
 
-            <Button type="submit" className="w-full" disabled={loading || !email || password.length < 6}>
+            {error && (
+              <Alert variant="destructive">
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
+
+            {success && (
+              <Alert>
+                <AlertDescription>{success}</AlertDescription>
+              </Alert>
+            )}
+
+            <Button type="submit" className="w-full" disabled={loading}>
               {loading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  {isSignUp ? "Creating account..." : "Signing in..."}
+                  {isSignUp ? "Creating Account..." : "Signing In..."}
                 </>
               ) : isSignUp ? (
-                "Sign Up"
+                "Create Account"
               ) : (
                 "Sign In"
               )}
             </Button>
           </form>
 
-          <div className="mt-6 text-center">
-            <Button
+          <div className="mt-4 text-center">
+            <button
               type="button"
-              variant="link"
               onClick={() => {
                 setIsSignUp(!isSignUp)
                 setError("")
-                setMessage("")
+                setSuccess("")
               }}
+              className="text-sm text-blue-600 hover:text-blue-500"
               disabled={loading}
             >
               {isSignUp ? "Already have an account? Sign in" : "Don't have an account? Sign up"}
-            </Button>
+            </button>
           </div>
-
-          {error && (
-            <Alert className="mt-4" variant="destructive">
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          )}
-
-          {message && (
-            <Alert className="mt-4">
-              <AlertDescription>{message}</AlertDescription>
-            </Alert>
-          )}
         </CardContent>
       </Card>
     </div>

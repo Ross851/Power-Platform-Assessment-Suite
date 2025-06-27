@@ -4,7 +4,7 @@ import { useAuth } from "@/components/auth/auth-provider"
 import { LoginForm } from "@/components/auth/login-form"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Loader2, FileText, Users, TestTube, LogOut } from "lucide-react"
+import { Loader2, TestTube, FolderOpen, Settings, LogOut } from "lucide-react"
 import Link from "next/link"
 
 export default function HomePage() {
@@ -45,7 +45,7 @@ export default function HomePage() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center">
-                  <FileText className="mr-2 h-5 w-5" />
+                  <TestTube className="mr-2 h-5 w-5" />
                   Start Assessment
                 </CardTitle>
                 <CardDescription>Begin a new Power Platform assessment</CardDescription>
@@ -60,10 +60,10 @@ export default function HomePage() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center">
-                  <Users className="mr-2 h-5 w-5" />
-                  My Projects
+                  <FolderOpen className="mr-2 h-5 w-5" />
+                  View Projects
                 </CardTitle>
-                <CardDescription>View and manage your assessment projects</CardDescription>
+                <CardDescription>Manage your existing assessment projects</CardDescription>
               </CardHeader>
               <CardContent>
                 <Link href="/projects">
@@ -77,10 +77,10 @@ export default function HomePage() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center">
-                  <TestTube className="mr-2 h-5 w-5" />
-                  System Test
+                  <Settings className="mr-2 h-5 w-5" />
+                  Test System
                 </CardTitle>
-                <CardDescription>Test authentication and system features</CardDescription>
+                <CardDescription>Run system tests and check configuration</CardDescription>
               </CardHeader>
               <CardContent>
                 <Link href="/test">
@@ -88,6 +88,48 @@ export default function HomePage() {
                     Run Tests
                   </Button>
                 </Link>
+              </CardContent>
+            </Card>
+          </div>
+
+          <div className="mt-8">
+            <Card>
+              <CardHeader>
+                <CardTitle>Getting Started</CardTitle>
+                <CardDescription>Quick guide to using the Power Platform Assessment Suite</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-start space-x-3">
+                  <div className="flex-shrink-0 w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center">
+                    <span className="text-sm font-medium text-blue-600">1</span>
+                  </div>
+                  <div>
+                    <h4 className="font-medium">Create a Project</h4>
+                    <p className="text-sm text-gray-600">
+                      Start by creating a new assessment project for your organization.
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-start space-x-3">
+                  <div className="flex-shrink-0 w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center">
+                    <span className="text-sm font-medium text-blue-600">2</span>
+                  </div>
+                  <div>
+                    <h4 className="font-medium">Complete Assessment</h4>
+                    <p className="text-sm text-gray-600">
+                      Answer questions across different assessment standards and frameworks.
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-start space-x-3">
+                  <div className="flex-shrink-0 w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center">
+                    <span className="text-sm font-medium text-blue-600">3</span>
+                  </div>
+                  <div>
+                    <h4 className="font-medium">Generate Reports</h4>
+                    <p className="text-sm text-gray-600">Export comprehensive reports and share with stakeholders.</p>
+                  </div>
+                </div>
               </CardContent>
             </Card>
           </div>

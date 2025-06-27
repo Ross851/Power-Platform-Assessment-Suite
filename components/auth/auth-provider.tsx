@@ -18,9 +18,23 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined)
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
-  const supabase = createClient()
+
+  // Initialize Supabase client
+  const [supabase] = useState(() => {
+    try {
+      return createClient()
+    } catch (error) {
+      console.error("Failed to create Supabase client:", error)
+      return null
+    }
+  })
 
   useEffect(() => {
+    if (!supabase) {
+      setLoading(false)
+      return
+    }
+
     // Get initial session
     const getSession = async () => {
       try {
@@ -51,9 +65,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     })
 
     return () => subscription.unsubscribe()
-  }, [supabase.auth])
+  }, [supabase])
 
   const signIn = async (email: string, password: string) => {
+    if (!supabase) throw new Error("Supabase client not initialized")
+
     setLoading(true)
     try {
       const { error } = await supabase.auth.signInWithPassword({
@@ -67,6 +83,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   const signUp = async (email: string, password: string) => {
+    if (!supabase) throw new Error("Supabase client not initialized")
+
     setLoading(true)
     try {
       const { error } = await supabase.auth.signUp({
@@ -80,6 +98,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   const signOut = async () => {
+    if (!supabase) throw new Error("Supabase client not initialized")
+
     setLoading(true)
     try {
       const { error } = await supabase.auth.signOut()
@@ -87,6 +107,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } finally {
       setLoading(false)
     }
+  }
+
+  // Show error state if Supabase client failed to initialize
+  if (!supabase) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-red-50">
+        <div className="text-center p-8 bg-white rounded-lg shadow-lg max-w-md">
+          <h2 className="text-xl font-semibold text-red-600 mb-4">Configuration Error</h2>
+          <p className="text-gray-600 mb-4">Supabase environment variables are missing or invalid.</p>
+          <p className="text-sm text-gray-500">
+            Please check that NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY are set correctly.
+          </p>
+        </div>
+      </div>
+    )
   }
 
   const value = {
