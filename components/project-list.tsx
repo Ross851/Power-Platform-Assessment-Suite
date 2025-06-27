@@ -15,43 +15,43 @@ import { Input } from "@/components/ui/input"
 import { cn } from "@/lib/utils"
 
 interface ProjectListProps {
-  /** Optional – list can be injected; otherwise pulled from global store */
+  /** Optional – external list. Defaults to the global store. */
   projects?: Project[]
-  /** Optional – helper to compute progress; otherwise pulled from store */
+  /** Optional – external progress helper. Defaults to the store helper. */
   getOverallProgress?: (projectName: string) => number
   className?: string
 }
 
 export function ProjectList({
-  projects: incomingProjects,
-  getOverallProgress: incomingProgress,
+  projects: injectedProjects,
+  getOverallProgress: injectedProgressFn,
   className,
 }: ProjectListProps) {
   /* ------------------------------------------------------------------ */
   /* Data source                                                         */
   /* ------------------------------------------------------------------ */
   const store = useAssessmentStore()
-  const projects = incomingProjects ?? store.projects ?? []
-  const getOverallProgress = incomingProgress ?? store.getOverallProgress
+  const projects = injectedProjects ?? store.projects ?? []
+  const getOverallProgress = injectedProgressFn ?? store.getOverallProgress
 
   /* ------------------------------------------------------------------ */
-  /* Search handling                                                     */
+  /* Search state & filter                                               */
   /* ------------------------------------------------------------------ */
   const [query, setQuery] = useState("")
 
   const filteredProjects = useMemo(() => {
     if (!query.trim()) return projects
 
-    const safePattern = escapeRegExp(query.trim())
+    const safe = escapeRegExp(query.trim())
 
     try {
-      const re = new RegExp(safePattern, "i")
-      return projects.filter((p) => re.test(p.name))
+      const rx = new RegExp(safe, "i")
+      return projects.filter((p) => rx.test(p.name))
     } catch (err) {
-      /* Extremely rare after escaping, but remain resilient. */
-      console.warn("[ProjectList] RegExp construction failed – falling back to includes().", err)
-      const lower = query.toLowerCase()
-      return projects.filter((p) => p.name.toLowerCase().includes(lower))
+      /* Unlikely after escaping, but keep the UI alive regardless. */
+      console.warn("[ProjectList] RegExp construction failed. Falling back to includes().", err)
+      const q = query.toLowerCase()
+      return projects.filter((p) => p.name.toLowerCase().includes(q))
     }
   }, [projects, query])
 
@@ -102,10 +102,7 @@ export function ProjectList({
                 </div>
                 <Progress value={progress} className="h-2" />
                 <p className="text-xs text-muted-foreground mt-2">
-                  Last modified{" "}
-                  {formatDistanceToNow(new Date(project.lastModifiedAt), {
-                    addSuffix: true,
-                  })}
+                  Last modified {formatDistanceToNow(new Date(project.lastModifiedAt), { addSuffix: true })}
                 </p>
               </CardContent>
 
