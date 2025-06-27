@@ -21,13 +21,79 @@ const createDummyProject = (): Project => {
   }
 }
 
+// --- Helper function to calculate scores for a standard ---
+const calculateStandardMetrics = (standard: AssessmentStandard): AssessmentStandard => {
+  let totalWeightedScore = 0
+  let totalWeight = 0
+  let standardHasRed = false
+  let standardHasAmber = false
+  let answeredQuestionsInStandard = 0
+
+  const updatedQuestions = standard.questions.map((q) => {
+    if (q.answer === undefined || q.answer === "" || q.answer === null) {
+      return { ...q, score: 0, riskLevel: undefined, ragStatus: "grey" }
+    }
+
+    answeredQuestionsInStandard++
+    let questionScore = 0
+    let riskLevel: "low" | "medium" | "high" | undefined = undefined
+
+    switch (q.type) {
+      case "boolean":
+        questionScore = q.answer ? 5 : 1
+        riskLevel = q.answer ? "low" : "high"
+        break
+      case "scale":
+        questionScore = Number(q.answer)
+        if (questionScore <= 2) riskLevel = "high"
+        else if (questionScore <= 3) riskLevel = "medium"
+        else riskLevel = "low"
+        break
+      case "percentage":
+        const perc = Number(q.answer)
+        if (perc >= 75) questionScore = 5
+        else if (perc >= 50) questionScore = 3
+        else if (perc >= 25) questionScore = 2
+        else questionScore = 1
+        if (perc < 25) riskLevel = "high"
+        else if (perc < 75) riskLevel = "medium"
+        else riskLevel = "low"
+        break
+      default:
+        questionScore = 3 // Default for text, numeric, doc-review if answered
+        riskLevel = "medium"
+    }
+
+    const ragStatus: RAGStatus = riskLevel === "high" ? "red" : riskLevel === "medium" ? "amber" : "green"
+    if (ragStatus === "red") standardHasRed = true
+    if (ragStatus === "amber") standardHasAmber = true
+
+    totalWeightedScore += questionScore * q.weight
+    totalWeight += q.weight
+
+    return { ...q, score: questionScore, riskLevel, ragStatus }
+  })
+
+  const maturityScore = totalWeight > 0 ? totalWeightedScore / totalWeight : 0
+  let standardRagStatus: RAGStatus = "grey"
+  if (answeredQuestionsInStandard > 0) {
+    if (standardHasRed) standardRagStatus = "red"
+    else if (standardHasAmber) standardRagStatus = "amber"
+    else standardRagStatus = "green"
+  }
+
+  const completion = standard.questions.length > 0 ? (answeredQuestionsInStandard / standard.questions.length) * 100 : 0
+
+  return { ...standard, questions: updatedQuestions, maturityScore, ragStatus: standardRagStatus, completion }
+}
+
 interface AssessmentState {
   projects: Project[]
   activeProjectName: string | null
   createProject: (projectName: string, clientReferenceNumber: string) => Project | undefined
   setActiveProject: (projectName: string) => void
   getActiveProject: () => Project | undefined
-  deleteProject: (projectName: string) => void
+  getStandardBySlug: (slug: string) => AssessmentStandard | undefined
   setAnswer: (payload: AnswerPayload) => void
   getOverallProgress: (projectName?: string) => number
   getOverallMaturityScore: () => number
@@ -78,11 +144,9 @@ export const useAssessmentStore = create<AssessmentState>()(
         return get().projects.find((p) => p.name === activeName)
       },
 
-      deleteProject: (projectName) => {
-        set((state) => ({
-          projects: state.projects.filter((p) => p.name !== projectName),
-          activeProjectName: state.activeProjectName === projectName ? null : state.activeProjectName,
-        }))
+      getStandardBySlug: (slug: string) => {
+        const activeProject = get().getActiveProject()
+        return activeProject?.standards.find((s) => s.slug === slug)
       },
 
       setAnswer: ({ standardSlug, questionId, answer, evidenceNotes, riskOwner }) => {
@@ -92,32 +156,22 @@ export const useAssessmentStore = create<AssessmentState>()(
 
           const updatedStandards = activeProject.standards.map((standard) => {
             if (standard.slug === standardSlug) {
+              let standardNeedsRecalc = false
               const updatedQuestions = standard.questions.map((q) => {
                 if (q.id === questionId) {
-                  const updatedQ = { ...q, answer, evidenceNotes, riskOwner }
-                  // Recalculate score and RAG for the specific question
-                  let score = 0
-                  let ragStatus: RAGStatus = "grey"
-                  if (answer !== undefined && answer !== null && answer !== "") {
-                    switch (q.type) {
-                      case "boolean":
-                        score = answer ? 5 : 1
-                        break
-                      case "scale":
-                        score = Number(answer)
-                        break
-                      default:
-                        score = 3
-                    }
-                    if (score <= 2) ragStatus = "red"
-                    else if (score <= 3) ragStatus = "amber"
-                    else ragStatus = "green"
-                  }
-                  return { ...updatedQ, score, ragStatus }
+                  standardNeedsRecalc = true
+                  const updatedQ = { ...q }
+                  if (answer !== undefined) updatedQ.answer = answer
+                  if (evidenceNotes !== undefined) updatedQ.evidenceNotes = evidenceNotes
+                  if (riskOwner !== undefined) updatedQ.riskOwner = riskOwner
+                  return updatedQ
                 }
                 return q
               })
-              return { ...standard, questions: updatedQuestions }
+
+              if (standardNeedsRecalc) {
+                return calculateStandardMetrics({ ...standard, questions: updatedQuestions })
+              }
             }
             return standard
           })
@@ -132,39 +186,27 @@ export const useAssessmentStore = create<AssessmentState>()(
       getOverallProgress: (projectName) => {
         const project = projectName ? get().projects.find((p) => p.name === projectName) : get().getActiveProject()
         if (!project) return 0
-        const totalQuestions = project.standards.reduce((sum, std) => sum + std.questions.length, 0)
-        if (totalQuestions === 0) return 0
-        const answeredQuestions = project.standards.reduce(
-          (sum, std) =>
-            sum + std.questions.filter((q) => q.answer !== undefined && q.answer !== "" && q.answer !== null).length,
-          0,
-        )
-        return (answeredQuestions / totalQuestions) * 100
+        const totalCompletion = project.standards.reduce((sum, std) => sum + (std.completion || 0), 0)
+        return project.standards.length > 0 ? totalCompletion / project.standards.length : 0
       },
 
       getOverallMaturityScore: () => {
         const project = get().getActiveProject()
-        if (!project) return 0
-        const totalWeightedScore = project.standards.reduce((sum, std) => {
-          const standardScore = std.questions.reduce((qSum, q) => qSum + (q.score || 0) * q.weight, 0)
-          const standardMaxScore = std.questions.reduce((qSum, q) => qSum + 5 * q.weight, 0)
-          if (standardMaxScore === 0) return sum
-          return sum + (standardScore / standardMaxScore) * 5 * std.weight
-        }, 0)
+        if (!project || project.standards.length === 0) return 0
+        const totalWeightedMaturity = project.standards.reduce(
+          (sum, std) => sum + (std.maturityScore || 0) * std.weight,
+          0,
+        )
         const totalWeight = project.standards.reduce((sum, std) => sum + std.weight, 0)
-        if (totalWeight === 0) return 0
-        return totalWeightedScore / totalWeight
+        return totalWeight > 0 ? totalWeightedMaturity / totalWeight : 0
       },
 
       getOverallRAGStatus: () => {
         const project = get().getActiveProject()
         if (!project) return "grey"
-        const hasRed = project.standards.some((std) => std.questions.some((q) => q.ragStatus === "red"))
-        if (hasRed) return "red"
-        const hasAmber = project.standards.some((std) => std.questions.some((q) => q.ragStatus === "amber"))
-        if (hasAmber) return "amber"
-        const hasGreen = project.standards.some((std) => std.questions.some((q) => q.ragStatus === "green"))
-        if (hasGreen) return "green"
+        if (project.standards.some((s) => s.ragStatus === "red")) return "red"
+        if (project.standards.some((s) => s.ragStatus === "amber")) return "amber"
+        if (project.standards.some((s) => s.ragStatus === "green")) return "green"
         return "grey"
       },
 
@@ -235,11 +277,10 @@ export const useAssessmentStore = create<AssessmentState>()(
       },
     }),
     {
-      name: "power-platform-assessment-storage-v5",
+      name: "power-platform-assessment-storage-v6", // Version bump for new structure
       storage: createJSONStorage(() => localStorage),
       onRehydrateStorage: () => (state) => {
         if (state && state.projects.length === 0) {
-          // If the store is empty after rehydration, add the dummy project.
           state.projects.push(createDummyProject())
         }
       },
