@@ -1,6 +1,6 @@
 import { create } from "zustand"
 import { persist } from "zustand/middleware"
-import type { Project, Question, AnswerPayload, RAGStatus } from "@/lib/types"
+import type { Project, Question, AnswerPayload, RAGStatus, AssessmentStandard } from "@/lib/types"
 import { ASSESSMENT_STANDARDS } from "@/lib/constants"
 
 interface AssessmentState {
@@ -35,6 +35,7 @@ interface AssessmentState {
   getStandardProgress: (standardSlug: string) => number
   getStandardMaturityScore: (standardSlug: string) => number
   getStandardRAGStatus: (standardSlug: string) => RAGStatus
+  getStandardBySlug: (standardSlug: string) => AssessmentStandard | undefined
 }
 
 const calculateQuestionScore = (question: Question): number => {
@@ -97,6 +98,11 @@ export const useAssessmentStore = create<AssessmentState>()(
       getActiveProject: () => {
         const { projects, activeProjectName } = get()
         return projects.find((p) => p.name === activeProjectName) || null
+      },
+
+      getStandardBySlug: (standardSlug) => {
+        const activeProject = get().getActiveProject()
+        return activeProject?.standards.find((s) => s.slug === standardSlug)
       },
 
       getProjectProgress: (projectName) => {
