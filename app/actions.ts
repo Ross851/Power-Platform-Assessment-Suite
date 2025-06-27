@@ -6,11 +6,35 @@ import type { GeneralDocument, Evidence, Project } from "@/lib/types"
 import { v4 as uuidv4 } from "uuid"
 import { z } from "zod"
 
+// --- Authentication Helper ---
+async function getCurrentUser() {
+  const supabase = createClient()
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.getUser()
+
+  if (error || !user) {
+    throw new Error("Authentication required")
+  }
+
+  return user
+}
+
 // --- Project Actions ---
 
 export async function getProjects(): Promise<Project[]> {
   const supabase = createClient()
-  const { data, error } = await supabase.from("projects").select("*").order("created_at", { ascending: false })
+  const user = await getCurrentUser()
+
+  const { data, error } = await supabase
+    .from("projects")
+    .select(`
+      *,
+      project_users!inner(role)
+    `)
+    .or(`owner_id.eq.${user.id},project_users.user_id.eq.${user.id}`)
+    .order("created_at", { ascending: false })
 
   if (error) {
     console.error("Error fetching projects:", error)
@@ -26,6 +50,8 @@ const CreateProjectSchema = z.object({
 })
 
 export async function createProject(_: unknown, formData: FormData) {
+  const user = await getCurrentUser()
+
   const parsed = CreateProjectSchema.safeParse({
     name: formData.get("name"),
     client_name: formData.get("client_name"),
@@ -41,6 +67,7 @@ export async function createProject(_: unknown, formData: FormData) {
     .insert({
       name: parsed.data.name,
       client_name: parsed.data.client_name ?? null,
+      owner_id: user.id,
     })
     .select()
     .single()
@@ -54,10 +81,115 @@ export async function createProject(_: unknown, formData: FormData) {
   return { success: true, project: data }
 }
 
-// --- General Document Actions ---
+// --- Project Access Management ---
+
+export async function inviteUserToProject(
+  projectName: string,
+  userEmail: string,
+  role: "editor" | "viewer" = "viewer",
+) {
+  const supabase = createClient()
+
+  try {
+    const { data, error } = await supabase.rpc("invite_user_to_project", {
+      project_name_param: projectName,
+      user_email: userEmail,
+      role_param: role,
+    })
+
+    if (error) {
+      return { success: false, error: error.message }
+    }
+
+    return data
+  } catch (error) {
+    return { success: false, error: "Failed to invite user" }
+  }
+}
+
+export async function removeUserFromProject(projectName: string, userEmail: string) {
+  const supabase = createClient()
+
+  try {
+    const { data, error } = await supabase.rpc("remove_user_from_project", {
+      project_name_param: projectName,
+      user_email: userEmail,
+    })
+
+    if (error) {
+      return { success: false, error: error.message }
+    }
+
+    return data
+  } catch (error) {
+    return { success: false, error: "Failed to remove user" }
+  }
+}
+
+export async function getProjectUsers(projectName: string) {
+  const supabase = createClient()
+
+  try {
+    const { data, error } = await supabase
+      .from("project_users")
+      .select(`
+        id,
+        role,
+        created_at,
+        user_id,
+        auth.users!inner(email, raw_user_meta_data)
+      `)
+      .eq("project_name", projectName)
+
+    if (error) {
+      return { users: [], error: error.message }
+    }
+
+    // Also get the project owner
+    const { data: projectData, error: projectError } = await supabase
+      .from("projects")
+      .select(`
+        owner_id,
+        auth.users!inner(email, raw_user_meta_data)
+      `)
+      .eq("name", projectName)
+      .single()
+
+    const users = [
+      // Project owner
+      ...(projectData
+        ? [
+            {
+              id: projectData.owner_id,
+              email: projectData.auth.users.email,
+              full_name: projectData.auth.users.raw_user_meta_data?.full_name || null,
+              role: "owner" as const,
+              created_at: new Date().toISOString(),
+            },
+          ]
+        : []),
+      // Project users
+      ...data.map((user) => ({
+        id: user.user_id,
+        email: user.auth.users.email,
+        full_name: user.auth.users.raw_user_meta_data?.full_name || null,
+        role: user.role,
+        created_at: user.created_at,
+      })),
+    ]
+
+    return { users }
+  } catch (error) {
+    return { users: [], error: "Failed to fetch project users" }
+  }
+}
+
+// --- Document Management Actions ---
 
 export async function getDocumentsForProject(projectName: string): Promise<GeneralDocument[]> {
   const supabase = createClient()
+  await getCurrentUser() // Ensure authenticated
+
   const { data, error } = await supabase
     .from("general_documents")
     .select("*")
@@ -88,6 +220,7 @@ export async function uploadDocument(formData: FormData) {
     return { error: "File and project name are required." }
   }
 
+  const user = await getCurrentUser()
   const supabase = createClient()
   const filePath = `${projectName}/${Date.now()}-${file.name}`
 
@@ -113,7 +246,9 @@ export async function uploadDocument(formData: FormData) {
 }
 
 export async function deleteDocument(documentId: string, filePath: string) {
+  await getCurrentUser() // Ensure authenticated
   const supabase = createClient()
+
   const { error: storageError } = await supabase.storage.from("project_documents").remove([filePath])
   if (storageError) return { error: `Failed to delete file from storage: ${storageError.message}` }
 
@@ -131,6 +266,8 @@ export async function getEvidenceForQuestion(
   questionId: string,
 ): Promise<{ evidence: Evidence[]; error?: string }> {
   const supabase = createClient()
+  await getCurrentUser() // Ensure authenticated
+
   try {
     const { data, error } = await supabase
       .from("question_evidence")
@@ -177,6 +314,7 @@ export async function addQuestionEvidence(
   formData: FormData,
 ): Promise<{ success: boolean; newEvidence?: Evidence; error?: string }> {
   const supabase = createClient()
+  await getCurrentUser() // Ensure authenticated
 
   const { error: tableError } = await supabase.from("question_evidence").select("id").limit(1)
   if (tableError?.code === "42P01") {
@@ -237,6 +375,7 @@ export async function addQuestionEvidence(
 
 export async function deleteQuestionEvidence(evidenceId: string): Promise<{ success: boolean; error?: string }> {
   const supabase = createClient()
+  await getCurrentUser() // Ensure authenticated
 
   const { error: tableError } = await supabase.from("question_evidence").select("id").limit(1)
   if (tableError?.code === "42P01") {
