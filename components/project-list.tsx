@@ -35,15 +35,17 @@ export function ProjectList({
   const filteredProjects = useMemo(() => {
     if (!query.trim()) return projects
 
-    const safe = escapeRegExp(query.trim())
+    // Make the pattern safe before building a RegExp.
+    const safePattern = escapeRegExp(query.trim())
+
     try {
-      const rx = new RegExp(safe, "i")
+      const rx = new RegExp(safePattern, "i")
       return projects.filter((p) => rx.test(p.name))
     } catch (err) {
-      // Shouldn’t happen after escaping, but we’ll be extra safe.
+      // Should not happen after escaping, but stay resilient.
       console.warn("[ProjectList] Bad RegExp – falling back to includes()", err)
-      const q = query.toLowerCase()
-      return projects.filter((p) => p.name.toLowerCase().includes(q))
+      const lower = query.toLowerCase()
+      return projects.filter((p) => p.name.toLowerCase().includes(lower))
     }
   }, [projects, query])
 
