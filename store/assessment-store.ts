@@ -1,92 +1,71 @@
 import { create } from "zustand"
-import { persist, type StateStorage } from "zustand/middleware"
-import type { AssessmentStandard, AnswerPayload, RAGStatus, GeneralDocument, Project } from "@/lib/types" // Added Project
+import { persist } from "zustand/middleware"
+import type { Project, Question, AnswerPayload, RAGStatus, AssessmentStandard } from "@/lib/types"
 import { ASSESSMENT_STANDARDS } from "@/lib/constants"
 
-// Helper function to create a fresh set of standards for a new project
-const createInitialProjectStandards = (): AssessmentStandard[] =>
-  ASSESSMENT_STANDARDS.map((standard) => ({
-    ...standard,
-    questions: standard.questions.map((q) => ({
-      ...q,
-      answer: undefined,
-      score: 0,
-      riskLevel: undefined,
-      ragStatus: "grey" as RAGStatus,
-      evidenceNotes: "",
-      document: q.type === "document-review" ? { file: null, fileName: "", annotations: [] } : undefined,
-    })),
-    completion: 0,
-    maturityScore: 0,
-    ragStatus: "grey" as RAGStatus,
-  }))
-
 interface AssessmentState {
-  projects: Project[] // Store multiple projects
-  activeProjectName: string | null // Name of the currently active project
+  projects: Project[]
+  activeProjectName: string | null
 
-  // Project Management Actions
-  createProject: (projectName: string) => void
+  // Project management
+  addProject: (project: Omit<Project, "standards" | "lastModifiedAt" | "versions">) => void
   setActiveProject: (projectName: string) => void
-  getActiveProject: () => Project | undefined
-  deleteProject: (projectName: string) => void // Optional: for later
+  getActiveProject: () => Project | null
+  getProjectProgress: (projectName?: string) => number
 
-  // Existing actions, now need to be context-aware of the active project
+  // Answer management
   setAnswer: (payload: AnswerPayload) => void
-  getStandardBySlug: (slug: string) => AssessmentStandard | undefined
-  getStandardProgress: (slug: string) => number
+
+  // Scoring and analysis
+  calculateScoresAndRAG: () => void
   getOverallProgress: () => number
-  calculateScoresAndRAG: (standardSlug: string) => void
-  getStandardMaturityScore: (slug: string) => number
   getOverallMaturityScore: () => number
-  getRiskProfile: () => { high: number; medium: number; low: number }
   getOverallRAGStatus: () => RAGStatus
+  getRiskProfile: () => { high: number; medium: number; low: number }
   getHighPriorityAreas: () => Array<{
     standardName: string
     standardSlug: string
-    questionText?: string
     questionId?: string
+    questionText?: string
     ragStatus: RAGStatus
+    riskOwner?: string
   }>
-  addGeneralDocument: (file: File, description?: string) => void
-  removeGeneralDocument: (documentId: string) => void
+
+  // Standard-specific functions
+  getStandardProgress: (standardSlug: string) => number
+  getStandardMaturityScore: (standardSlug: string) => number
+  getStandardRAGStatus: (standardSlug: string) => RAGStatus
+  getStandardBySlug: (standardSlug: string) => AssessmentStandard | undefined
 }
 
-const customStorage: StateStorage = {
-  getItem: (name) => {
-    const str = localStorage.getItem(name)
-    if (!str) return null
-    const { state, version } = JSON.parse(str)
-    // Revive Date objects and handle generalDocuments within each project
-    const revivedState = {
-      ...state,
-      projects: (state.projects || []).map((project: any) => ({
-        ...project,
-        createdAt: new Date(project.createdAt),
-        lastModifiedAt: new Date(project.lastModifiedAt),
-        generalDocuments: (project.generalDocuments || []).map((doc: any) => ({
-          ...doc,
-          uploadedAt: new Date(doc.uploadedAt),
-          file: null, // File object is not persisted
-        })),
-        // Potentially revive dates within standards/questions if any were added
-      })),
-    }
-    return { state: revivedState, version }
-  },
-  setItem: (name, newValue) => {
-    const modifiedState = {
-      ...newValue.state,
-      projects: newValue.state.projects.map((project: Project) => ({
-        ...project,
-        generalDocuments: project.generalDocuments.map(
-          ({ file, ...restOfDoc }: GeneralDocument) => restOfDoc, // eslint-disable-line @typescript-eslint/no-unused-vars
-        ),
-      })),
-    }
-    localStorage.setItem(name, JSON.stringify({ state: modifiedState, version: newValue.version }))
-  },
-  removeItem: (name) => localStorage.removeItem(name),
+const calculateQuestionScore = (question: Question): number => {
+  if (question.answer === undefined || question.answer === null || question.answer === "") {
+    return 0
+  }
+
+  switch (question.type) {
+    case "boolean":
+      return question.answer === true ? 5 : 1
+    case "scale":
+      return typeof question.answer === "number" ? question.answer : 0
+    case "percentage":
+      return typeof question.answer === "number" ? Math.round((question.answer / 100) * 5) : 0
+    case "text":
+      return question.answer && question.answer.length > 10 ? 3 : 1
+    case "numeric":
+      return typeof question.answer === "number" && question.answer > 0 ? 4 : 1
+    case "document-review":
+      return typeof question.answer === "number" ? question.answer : 0
+    default:
+      return 0
+  }
+}
+
+const calculateRAGStatus = (score: number): RAGStatus => {
+  if (score >= 4) return "green"
+  if (score >= 2.5) return "amber"
+  if (score > 0) return "red"
+  return "grey"
 }
 
 export const useAssessmentStore = create<AssessmentState>()(
@@ -95,357 +74,278 @@ export const useAssessmentStore = create<AssessmentState>()(
       projects: [],
       activeProjectName: null,
 
-      createProject: (projectName) => {
-        if (get().projects.find((p) => p.name === projectName)) {
-          alert(`Project "${projectName}" already exists.`) // Or handle more gracefully
-          return
-        }
+      addProject: (projectData) => {
         const newProject: Project = {
-          name: projectName,
-          standards: createInitialProjectStandards(),
-          generalDocuments: [],
-          createdAt: new Date(),
+          ...projectData,
+          standards: ASSESSMENT_STANDARDS.map((standard) => ({
+            ...standard,
+            questions: standard.questions.map((q) => ({ ...q, evidence: [] })),
+          })),
           lastModifiedAt: new Date(),
+          versions: [],
         }
+
         set((state) => ({
           projects: [...state.projects, newProject],
-          activeProjectName: projectName,
+          activeProjectName: newProject.name,
         }))
       },
 
       setActiveProject: (projectName) => {
-        if (get().projects.find((p) => p.name === projectName)) {
-          set({ activeProjectName: projectName })
-        } else {
-          console.warn(`Project "${projectName}" not found.`)
-        }
-      },
-
-      deleteProject: (projectName) => {
-        set((state) => ({
-          projects: state.projects.filter((p) => p.name !== projectName),
-          activeProjectName: state.activeProjectName === projectName ? null : state.activeProjectName,
-        }))
+        set({ activeProjectName: projectName })
       },
 
       getActiveProject: () => {
-        const activeName = get().activeProjectName
-        if (!activeName) return undefined
-        return get().projects.find((p) => p.name === activeName)
+        const { projects, activeProjectName } = get()
+        return projects.find((p) => p.name === activeProjectName) || null
       },
 
-      setAnswer: ({ standardSlug, questionId, answer, evidenceNotes, documentData, riskOwner }) =>
-        set((state) => {
-          const activeProject = state.projects.find((p) => p.name === state.activeProjectName)
-          if (!activeProject) return state
+      getStandardBySlug: (standardSlug) => {
+        const activeProject = get().getActiveProject()
+        return activeProject?.standards.find((s) => s.slug === standardSlug)
+      },
 
-          const newStandards = activeProject.standards.map((standard) => {
-            if (standard.slug === standardSlug) {
-              const newQuestions = standard.questions.map((q) =>
-                q.id === questionId
-                  ? {
-                      ...q,
-                      answer,
-                      evidenceNotes: evidenceNotes || q.evidenceNotes,
-                      document: documentData ? { ...q.document, ...documentData } : q.document,
-                      riskOwner: riskOwner !== undefined ? riskOwner : q.riskOwner,
+      getProjectProgress: (projectName) => {
+        const { projects, activeProjectName } = get()
+        const targetProject = projectName
+          ? projects.find((p) => p.name === projectName)
+          : projects.find((p) => p.name === activeProjectName)
+
+        if (!targetProject) return 0
+
+        const totalQuestions = targetProject.standards.reduce((sum, standard) => sum + standard.questions.length, 0)
+        const answeredQuestions = targetProject.standards.reduce(
+          (sum, standard) =>
+            sum +
+            standard.questions.filter((q) => q.answer !== undefined && q.answer !== null && q.answer !== "").length,
+          0,
+        )
+
+        return totalQuestions > 0 ? (answeredQuestions / totalQuestions) * 100 : 0
+      },
+
+      setAnswer: (payload) => {
+        set((state) => {
+          const updatedProjects = state.projects.map((project) => {
+            if (project.name !== state.activeProjectName) return project
+
+            return {
+              ...project,
+              lastModifiedAt: new Date(),
+              standards: project.standards.map((standard) => {
+                if (standard.slug !== payload.standardSlug) return standard
+
+                return {
+                  ...standard,
+                  questions: standard.questions.map((question) => {
+                    if (question.id !== payload.questionId) return question
+
+                    const updatedQuestion = { ...question }
+
+                    if (payload.answer !== undefined) {
+                      updatedQuestion.answer = payload.answer
                     }
-                  : q,
-              )
-              const answeredQuestions = newQuestions.filter(
-                (q) =>
-                  (q.answer !== undefined && q.answer !== "") || (q.type === "document-review" && q.document?.file),
-              ).length
-              const completion = newQuestions.length > 0 ? (answeredQuestions / newQuestions.length) * 100 : 0
-              return { ...standard, questions: newQuestions, completion }
+                    if (payload.evidenceNotes !== undefined) {
+                      updatedQuestion.evidenceNotes = payload.evidenceNotes
+                    }
+                    if (payload.riskOwner !== undefined) {
+                      updatedQuestion.riskOwner = payload.riskOwner
+                    }
+                    if (payload.evidence !== undefined) {
+                      updatedQuestion.evidence = payload.evidence
+                    }
+                    if (payload.assessmentFeedback !== undefined) {
+                      updatedQuestion.assessmentFeedback = payload.assessmentFeedback
+                    }
+
+                    // Recalculate score and RAG status
+                    updatedQuestion.score = calculateQuestionScore(updatedQuestion)
+                    updatedQuestion.ragStatus = calculateRAGStatus(updatedQuestion.score)
+
+                    // Determine risk level
+                    if (updatedQuestion.score >= 4) {
+                      updatedQuestion.riskLevel = "low"
+                    } else if (updatedQuestion.score >= 2.5) {
+                      updatedQuestion.riskLevel = "medium"
+                    } else {
+                      updatedQuestion.riskLevel = "high"
+                    }
+
+                    return updatedQuestion
+                  }),
+                }
+              }),
             }
-            return standard
           })
 
-          const updatedProject = { ...activeProject, standards: newStandards, lastModifiedAt: new Date() }
-          return {
-            projects: state.projects.map((p) => (p.name === state.activeProjectName ? updatedProject : p)),
-          }
-        }),
+          return { projects: updatedProjects }
+        })
 
-      getStandardBySlug: (slug) => {
-        const activeProject = get().getActiveProject()
-        return activeProject?.standards.find((s) => s.slug === slug)
+        // Trigger recalculation
+        get().calculateScoresAndRAG()
       },
 
-      getStandardProgress: (slug) => {
-        const standard = get().getStandardBySlug(slug)
-        if (!standard) return 0
-        const answeredQuestions = standard.questions.filter(
-          (q) => (q.answer !== undefined && q.answer !== "") || (q.type === "document-review" && q.document?.file),
-        ).length
-        if (standard.questions.length === 0) return 0
-        return (answeredQuestions / standard.questions.length) * 100
+      calculateScoresAndRAG: () => {
+        set((state) => {
+          const updatedProjects = state.projects.map((project) => ({
+            ...project,
+            standards: project.standards.map((standard) => {
+              const answeredQuestions = standard.questions.filter(
+                (q) => q.answer !== undefined && q.answer !== null && q.answer !== "",
+              )
+
+              const completion =
+                standard.questions.length > 0 ? (answeredQuestions.length / standard.questions.length) * 100 : 0
+
+              const totalScore = answeredQuestions.reduce((sum, q) => sum + (q.score || 0), 0)
+              const maturityScore = answeredQuestions.length > 0 ? totalScore / answeredQuestions.length : 0
+
+              const ragStatus = calculateRAGStatus(maturityScore)
+
+              return {
+                ...standard,
+                completion,
+                maturityScore,
+                ragStatus,
+              }
+            }),
+          }))
+
+          return { projects: updatedProjects }
+        })
       },
 
       getOverallProgress: () => {
         const activeProject = get().getActiveProject()
-        if (!activeProject || activeProject.standards.length === 0) return 0
-        const totalProgress = activeProject.standards.reduce((acc, curr) => acc + (curr.completion || 0), 0)
-        return totalProgress / activeProject.standards.length
-      },
+        if (!activeProject) return 0
 
-      calculateScoresAndRAG: (standardSlug) =>
-        set((state) => {
-          const activeProject = state.projects.find((p) => p.name === state.activeProjectName)
-          if (!activeProject) return state
+        const totalQuestions = activeProject.standards.reduce((sum, standard) => sum + standard.questions.length, 0)
+        const answeredQuestions = activeProject.standards.reduce(
+          (sum, standard) =>
+            sum +
+            standard.questions.filter((q) => q.answer !== undefined && q.answer !== null && q.answer !== "").length,
+          0,
+        )
 
-          let projectOverallRagStatus: RAGStatus = "grey"
-          let projectHasRed = false
-          let projectHasAmber = false
-          let projectHasGreen = false
-          let projectAnsweredQuestions = 0
-
-          const newStandards = activeProject.standards.map((std) => {
-            if (std.slug === standardSlug) {
-              let totalWeightedScore = 0
-              let totalWeight = 0
-              let standardHasRed = false
-              let standardHasAmber = false
-              let answeredQuestionsInStandard = 0
-
-              const updatedQuestions = std.questions.map((q) => {
-                let questionScore = 0
-                let riskLevel: "low" | "medium" | "high" | undefined = undefined
-                let ragStatus: RAGStatus = "grey"
-
-                if ((q.answer !== undefined && q.answer !== "") || (q.type === "document-review" && q.document?.file)) {
-                  answeredQuestionsInStandard++
-                  projectAnsweredQuestions++
-                  switch (q.type) {
-                    case "boolean":
-                      questionScore = q.answer ? 5 : 1
-                      riskLevel = q.answer ? "low" : "high"
-                      break
-                    case "scale":
-                      questionScore = Number(q.answer)
-                      if (questionScore <= 2) riskLevel = "high"
-                      else if (questionScore <= 3) riskLevel = "medium"
-                      else riskLevel = "low"
-                      break
-                    case "percentage":
-                      const perc = Number(q.answer)
-                      if (perc >= 75) questionScore = 5
-                      else if (perc >= 50) questionScore = 3
-                      else if (perc >= 25) questionScore = 2
-                      else questionScore = 1
-                      if (perc < 25) riskLevel = "high"
-                      else if (perc < 75) riskLevel = "medium"
-                      else riskLevel = "low"
-                      break
-                    case "document-review": // Assuming document review implies some level of maturity if present
-                      const hasContent = q.answer || (q.document?.annotations && q.document.annotations.length > 0)
-                      questionScore = hasContent ? 3 : 1 // Simplified: 3 if assessed, 1 if not/empty
-                      riskLevel = hasContent ? "medium" : "low" // Or high if absence is critical
-                      break
-                    default:
-                      questionScore = 3
-                      riskLevel = "medium"
-                  }
-
-                  if (riskLevel === "high") ragStatus = "red"
-                  else if (riskLevel === "medium") ragStatus = "amber"
-                  else if (riskLevel === "low") ragStatus = "green"
-                }
-
-                if (ragStatus === "red") {
-                  standardHasRed = true
-                  projectHasRed = true
-                }
-                if (ragStatus === "amber") {
-                  standardHasAmber = true
-                  projectHasAmber = true
-                }
-                if (ragStatus === "green" && !standardHasRed && !standardHasAmber) projectHasGreen = true
-
-                totalWeightedScore += questionScore * q.weight
-                totalWeight += q.weight
-                return { ...q, score: questionScore, riskLevel, ragStatus }
-              })
-
-              const maturityScore = totalWeight > 0 ? (totalWeightedScore / (totalWeight * 5)) * 5 : 0
-              let standardRagStatus: RAGStatus = "grey"
-              if (answeredQuestionsInStandard > 0) {
-                if (standardHasRed) standardRagStatus = "red"
-                else if (standardHasAmber) standardRagStatus = "amber"
-                else standardRagStatus = "green"
-              }
-              return { ...std, questions: updatedQuestions, maturityScore, ragStatus: standardRagStatus }
-            }
-            // Accumulate RAG for overall project status from other standards too
-            if (std.ragStatus === "red") projectHasRed = true
-            if (std.ragStatus === "amber") projectHasAmber = true
-            if (std.ragStatus === "green" && !projectHasRed && !projectHasAmber) projectHasGreen = true
-            if (
-              std.questions.some(
-                (q) =>
-                  (q.answer !== undefined && q.answer !== "") || (q.type === "document-review" && q.document?.file),
-              )
-            )
-              projectAnsweredQuestions++
-            return std
-          })
-
-          if (projectAnsweredQuestions > 0) {
-            if (projectHasRed) projectOverallRagStatus = "red"
-            else if (projectHasAmber) projectOverallRagStatus = "amber"
-            else if (projectHasGreen) projectOverallRagStatus = "green"
-            else projectOverallRagStatus = "grey" // All answered are grey (e.g. text only)
-          } else {
-            projectOverallRagStatus = "grey" // No questions answered in the project
-          }
-
-          // Note: This simple overall RAG might need more nuance, e.g. weighting standards
-          // For now, any red makes project red, any amber (no red) makes it amber.
-
-          const updatedProject = { ...activeProject, standards: newStandards, lastModifiedAt: new Date() }
-          return {
-            projects: state.projects.map((p) => (p.name === state.activeProjectName ? updatedProject : p)),
-          }
-        }),
-
-      getStandardMaturityScore: (slug) => {
-        const standard = get().getStandardBySlug(slug)
-        return standard?.maturityScore || 0
+        return totalQuestions > 0 ? (answeredQuestions / totalQuestions) * 100 : 0
       },
 
       getOverallMaturityScore: () => {
         const activeProject = get().getActiveProject()
-        if (!activeProject || activeProject.standards.length === 0) return 0
+        if (!activeProject) return 0
 
-        let totalWeightedMaturity = 0
-        let totalOverallWeight = 0
-        activeProject.standards.forEach((std) => {
-          if (std.maturityScore !== undefined && (std.completion || 0) > 0) {
-            totalWeightedMaturity += std.maturityScore * std.weight
-            totalOverallWeight += std.weight
-          }
-        })
-        if (totalOverallWeight === 0) return 0
-        return totalWeightedMaturity / totalOverallWeight
+        const allAnsweredQuestions = activeProject.standards.flatMap((standard) =>
+          standard.questions.filter((q) => q.answer !== undefined && q.answer !== null && q.answer !== ""),
+        )
+
+        if (allAnsweredQuestions.length === 0) return 0
+
+        const totalScore = allAnsweredQuestions.reduce((sum, q) => sum + (q.score || 0), 0)
+        return totalScore / allAnsweredQuestions.length
+      },
+
+      getOverallRAGStatus: () => {
+        const maturityScore = get().getOverallMaturityScore()
+        return calculateRAGStatus(maturityScore)
       },
 
       getRiskProfile: () => {
         const activeProject = get().getActiveProject()
         if (!activeProject) return { high: 0, medium: 0, low: 0 }
 
-        let high = 0,
-          medium = 0,
-          low = 0
-        activeProject.standards.forEach((std) => {
-          std.questions.forEach((q) => {
-            if (q.riskLevel === "high") high++
-            else if (q.riskLevel === "medium") medium++
-            else if (q.riskLevel === "low" && q.answer !== undefined && q.answer !== "") low++
-          })
-        })
-        return { high, medium, low }
-      },
+        const allQuestions = activeProject.standards.flatMap((standard) => standard.questions)
+        const answeredQuestions = allQuestions.filter(
+          (q) => q.answer !== undefined && q.answer !== null && q.answer !== "",
+        )
 
-      getOverallRAGStatus: () => {
-        const activeProject = get().getActiveProject()
-        if (!activeProject || activeProject.standards.every((s) => s.ragStatus === "grey" || s.completion === 0))
-          return "grey"
-        if (activeProject.standards.some((s) => s.ragStatus === "red" && (s.completion || 0) > 0)) return "red"
-        if (activeProject.standards.some((s) => s.ragStatus === "amber" && (s.completion || 0) > 0)) return "amber"
-        if (activeProject.standards.some((s) => s.ragStatus === "green" && (s.completion || 0) > 0)) return "green"
-        return "grey"
+        return answeredQuestions.reduce(
+          (profile, question) => {
+            if (question.riskLevel === "high") profile.high++
+            else if (question.riskLevel === "medium") profile.medium++
+            else if (question.riskLevel === "low") profile.low++
+            return profile
+          },
+          { high: 0, medium: 0, low: 0 },
+        )
       },
 
       getHighPriorityAreas: () => {
         const activeProject = get().getActiveProject()
         if (!activeProject) return []
 
-        const highPriority: Array<{
+        const highPriorityAreas: Array<{
           standardName: string
           standardSlug: string
-          questionText?: string
           questionId?: string
+          questionText?: string
           ragStatus: RAGStatus
+          riskOwner?: string
         }> = []
-        activeProject.standards.forEach((std) => {
-          if (std.ragStatus === "red" || std.ragStatus === "amber") {
-            std.questions.forEach((q) => {
-              if (q.ragStatus === "red" || q.ragStatus === "amber") {
-                highPriority.push({
-                  standardName: std.name,
-                  standardSlug: std.slug,
-                  questionText: q.text,
-                  questionId: q.id,
-                  ragStatus: q.ragStatus,
-                })
-              }
-            })
-            // If the standard itself is red/amber but no specific question is, add the standard
-            if (
-              !std.questions.some((q) => q.ragStatus === "red" || q.ragStatus === "amber") &&
-              (std.completion || 0) > 0
-            ) {
-              highPriority.push({
-                standardName: std.name,
-                standardSlug: std.slug,
-                ragStatus: std.ragStatus!,
+
+        activeProject.standards.forEach((standard) => {
+          standard.questions.forEach((question) => {
+            if (question.ragStatus === "red" || (question.ragStatus === "amber" && question.riskLevel === "high")) {
+              highPriorityAreas.push({
+                standardName: standard.name,
+                standardSlug: standard.slug,
+                questionId: question.id,
+                questionText: question.text,
+                ragStatus: question.ragStatus,
+                riskOwner: question.riskOwner,
               })
             }
-          }
+          })
         })
-        // Sort by RAG status (red first), then by standard name
-        return highPriority.sort((a, b) => {
+
+        return highPriorityAreas.sort((a, b) => {
           if (a.ragStatus === "red" && b.ragStatus !== "red") return -1
-          if (a.ragStatus !== "red" && b.ragStatus === "red") return 1
-          if (a.ragStatus === "amber" && b.ragStatus === "green") return -1
-          if (a.ragStatus === "green" && b.ragStatus === "amber") return 1
-          return a.standardName.localeCompare(b.standardName)
+          if (b.ragStatus === "red" && a.ragStatus !== "red") return 1
+          return 0
         })
       },
 
-      addGeneralDocument: (file, description) =>
-        set((state) => {
-          const activeProject = state.projects.find((p) => p.name === state.activeProjectName)
-          if (!activeProject) return state
+      getStandardProgress: (standardSlug) => {
+        const activeProject = get().getActiveProject()
+        if (!activeProject) return 0
 
-          const newDoc: GeneralDocument = {
-            id: crypto.randomUUID(),
-            file,
-            name: file.name,
-            type: file.type,
-            size: file.size,
-            uploadedAt: new Date(),
-            description,
-          }
-          const updatedProject = {
-            ...activeProject,
-            generalDocuments: [...activeProject.generalDocuments, newDoc],
-            lastModifiedAt: new Date(),
-          }
-          return {
-            projects: state.projects.map((p) => (p.name === state.activeProjectName ? updatedProject : p)),
-          }
-        }),
+        const standard = activeProject.standards.find((s) => s.slug === standardSlug)
+        if (!standard) return 0
 
-      removeGeneralDocument: (documentId) =>
-        set((state) => {
-          const activeProject = state.projects.find((p) => p.name === state.activeProjectName)
-          if (!activeProject) return state
+        const answeredQuestions = standard.questions.filter(
+          (q) => q.answer !== undefined && q.answer !== null && q.answer !== "",
+        )
 
-          const updatedProject = {
-            ...activeProject,
-            generalDocuments: activeProject.generalDocuments.filter((doc) => doc.id !== documentId),
-            lastModifiedAt: new Date(),
-          }
-          return {
-            projects: state.projects.map((p) => (p.name === state.activeProjectName ? updatedProject : p)),
-          }
-        }),
+        return standard.questions.length > 0 ? (answeredQuestions.length / standard.questions.length) * 100 : 0
+      },
+
+      getStandardMaturityScore: (standardSlug) => {
+        const activeProject = get().getActiveProject()
+        if (!activeProject) return 0
+
+        const standard = activeProject.standards.find((s) => s.slug === standardSlug)
+        if (!standard) return 0
+
+        const answeredQuestions = standard.questions.filter(
+          (q) => q.answer !== undefined && q.answer !== null && q.answer !== "",
+        )
+
+        if (answeredQuestions.length === 0) return 0
+
+        const totalScore = answeredQuestions.reduce((sum, q) => sum + (q.score || 0), 0)
+        return totalScore / answeredQuestions.length
+      },
+
+      getStandardRAGStatus: (standardSlug) => {
+        const maturityScore = get().getStandardMaturityScore(standardSlug)
+        return calculateRAGStatus(maturityScore)
+      },
     }),
     {
-      name: "power-platform-assessment-storage-v2", // Changed name to avoid conflicts with old structure
-      storage: customStorage,
+      name: "assessment-storage",
+      partialize: (state) => ({
+        projects: state.projects,
+        activeProjectName: state.activeProjectName,
+      }),
     },
   ),
 )
