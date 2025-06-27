@@ -17,13 +17,19 @@ interface ProjectListProps {
   projects: Project[]
 }
 
-export function ProjectList({ projects }: ProjectListProps) {
+export function ProjectList({ projects: incomingProjects }: ProjectListProps) {
+  /* ------------------------------------------------------------------
+   *  1. Normalise input so we ALWAYS have an array, never undefined.
+   * ----------------------------------------------------------------- */
+  const projects = incomingProjects ?? []
+
   const [query, setQuery] = useState("")
 
-  /** ------------------------------------------------------------
-   *  SAFER FILTER: we avoid RegExp altogether to prevent the
-   *  “Invalid regular expression: missing /” runtime error.
-   *  ---------------------------------------------------------- */
+  /**
+   * SAFER FILTER:
+   *  - operates on the guaranteed array `projects`
+   *  - avoids RegExp-related runtime errors
+   */
   const filtered = useMemo(() => {
     if (!query.trim()) return projects
     const q = query.toLowerCase()
