@@ -1,5 +1,4 @@
 import { createServerClient } from "@/lib/supabase/server"
-import { cookies, headers } from "next/headers"
 import { redirect } from "next/navigation"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { BadgeCheck, Database, Info } from "lucide-react"
@@ -15,7 +14,7 @@ export default async function ProjectPage({
   params: { projectName: string }
 }) {
   // 1) Set up the server-side Supabase client
-  const supabase = createServerClient(cookies(), headers())
+  const supabase = createServerClient()
 
   // 2) Get the current signed-in user
   const {
