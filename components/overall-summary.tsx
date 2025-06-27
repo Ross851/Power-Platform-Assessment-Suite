@@ -1,153 +1,118 @@
 "use client"
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Progress } from "@/components/ui/progress"
+import { useState } from "react"
 import { useAssessmentStore } from "@/store/assessment-store"
-import { useEffect, useState } from "react"
-import { RAGIndicator } from "./rag-indicator"
-import { AlertTriangle } from "lucide-react"
-import Link from "next/link"
-import { Button } from "./ui/button"
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { RiskProfileChart } from "@/components/risk-profile-chart"
+import { Button } from "@/components/ui/button"
+import { Download, Loader2 } from "lucide-react"
+import { exportToClientWord, exportToTechnicalWord } from "@/lib/word-export"
+import { useToast } from "@/hooks/use-toast"
 
 export function OverallSummary() {
-  const { getOverallProgress, getOverallMaturityScore, getRiskProfile, getOverallRAGStatus, getHighPriorityAreas } =
-    useAssessmentStore()
-  const [isClient, setIsClient] = useState(false)
-  const activeProject = useAssessmentStore((state) => state.getActiveProject())
+  const { getActiveProject, getOverallMaturityScore, getOverallRagStatus, getRiskProfile } = useAssessmentStore()
+  const [isClientExporting, setIsClientExporting] = useState(false)
+  const [isTechExporting, setIsTechExporting] = useState(false)
+  const { toast } = useToast()
 
-  useEffect(() => {
-    setIsClient(true)
-  }, [])
-
-  if (!isClient || !activeProject) {
-    return (
-      <Card className="mb-8">
-        <CardHeader>
-          <CardTitle>Overall Progress & Maturity</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p>Loading summary or no active project selected...</p>
-        </CardContent>
-      </Card>
-    )
-  }
-
-  const overallProgress = getOverallProgress()
+  const activeProject = getActiveProject()
   const maturityScore = getOverallMaturityScore()
+  const ragStatus = getOverallRagStatus()
   const riskProfile = getRiskProfile()
-  const overallRAG = getOverallRAGStatus()
-  const highPriorityAreas = getHighPriorityAreas()
 
-  const getMaturityLevelText = (score: number) => {
-    if (score < 1.5) return "1 - Initial"
-    if (score < 2.5) return "2 - Managed"
-    if (score < 3.5) return "3 - Defined"
-    if (score < 4.5) return "4 - Quantitatively Managed"
-    return "5 - Optimising"
+  const handleClientExport = async () => {
+    if (!activeProject) return
+    setIsClientExporting(true)
+    try {
+      await exportToClientWord(activeProject)
+      toast({
+        title: "Export Successful",
+        description: "The Executive Summary has been downloaded.",
+      })
+    } catch (error) {
+      console.error("Failed to export client document:", error)
+      toast({
+        title: "Export Failed",
+        description: "There was an error generating the document.",
+        variant: "destructive",
+      })
+    } finally {
+      setIsClientExporting(false)
+    }
   }
 
-  const ragColorClasses = {
-    red: "text-red-600 dark:text-red-400",
-    amber: "text-yellow-600 dark:text-yellow-400",
-    green: "text-green-600 dark:text-green-400",
-    grey: "text-gray-600 dark:text-gray-400",
+  const handleTechExport = async () => {
+    if (!activeProject) return
+    setIsTechExporting(true)
+    try {
+      await exportToTechnicalWord(activeProject)
+      toast({
+        title: "Export Successful",
+        description: "The Technical Guide has been downloaded.",
+      })
+    } catch (error) {
+      console.error("Failed to export technical document:", error)
+      toast({
+        title: "Export Failed",
+        description: "There was an error generating the document.",
+        variant: "destructive",
+      })
+    } finally {
+      setIsTechExporting(false)
+    }
+  }
+
+  const getStatusColor = () => {
+    switch (ragStatus) {
+      case "red":
+        return "text-red-500"
+      case "amber":
+        return "text-amber-500"
+      case "green":
+        return "text-green-500"
+      default:
+        return "text-gray-500"
+    }
   }
 
   return (
-    <>
-      <Card className="mb-8">
-        <CardHeader>
-          <div className="flex justify-between items-start">
-            <div>
-              <CardTitle>Overall Progress & Maturity</CardTitle>
-              {activeProject.clientReferenceNumber && (
-                <CardDescription>Ref: {activeProject.clientReferenceNumber}</CardDescription>
-              )}
-            </div>
-            <RAGIndicator status={overallRAG} size="lg" showText />
+    <Card className="sticky top-8">
+      <CardHeader>
+        <CardTitle>Overall Summary</CardTitle>
+        <CardDescription>A high-level overview of the assessment results.</CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        <div className="text-center">
+          <p className="text-sm text-muted-foreground">Overall Maturity Score</p>
+          <p className="text-5xl font-bold">{maturityScore.toFixed(2)}</p>
+          <p className={`text-lg font-semibold ${getStatusColor()}`}>{ragStatus.toUpperCase()}</p>
+        </div>
+        <div>
+          <h4 className="text-md font-semibold mb-2 text-center">Risk Profile</h4>
+          <div className="h-48">
+            <RiskProfileChart data={riskProfile} />
           </div>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div>
-            <div className="flex justify-between mb-1">
-              <span className="text-sm font-medium">Overall Assessment Progress</span>
-              <span className="text-sm font-medium">{overallProgress.toFixed(0)}%</span>
-            </div>
-            <Progress value={overallProgress} className="w-full h-3" />
-          </div>
-          <div>
-            <span className="text-sm font-medium">Estimated Maturity Level: </span>
-            <span className={`font-semibold ${ragColorClasses[overallRAG] || "text-primary"}`}>
-              {getMaturityLevelText(maturityScore)} (Score: {maturityScore.toFixed(1)})
-            </span>
-          </div>
-          <div>
-            <span className="text-sm font-medium">Risk Profile: </span>
-            <span className="text-red-500">High: {riskProfile.high}</span>,{" "}
-            <span className="text-yellow-500">Medium: {riskProfile.medium}</span>,{" "}
-            <span className="text-green-500">Low: {riskProfile.low}</span>
-          </div>
-        </CardContent>
-      </Card>
-
-      {highPriorityAreas.length > 0 && (
-        <Card className="mb-8">
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <AlertTriangle className="mr-2 h-5 w-5 text-yellow-500" />
-              Key Areas for Improvement
-            </CardTitle>
-            <CardDescription>
-              Focus on these areas to enhance your Power Platform maturity and mitigate risks.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ul className="space-y-3">
-              {highPriorityAreas.slice(0, 5).map(
-                (
-                  area,
-                  index, // Show top 5 for brevity
-                ) => (
-                  <li key={index} className="flex items-start space-x-3 p-3 border rounded-md bg-muted/50">
-                    <RAGIndicator status={area.ragStatus} size="md" />
-                    <div>
-                      <p className="font-semibold text-sm">{area.standardName}</p>
-                      {area.questionText && (
-                        <p
-                          className="text-xs text-muted-foreground truncate hover:whitespace-normal"
-                          title={area.questionText}
-                        >
-                          {area.questionText.length > 100
-                            ? area.questionText.substring(0, 97) + "..."
-                            : area.questionText}
-                        </p>
-                      )}
-                      {area.riskOwner && ( // Display Risk Owner if present
-                        <p className="text-xs text-muted-foreground mt-0.5">
-                          <span className="font-medium">Owner:</span> {area.riskOwner}
-                        </p>
-                      )}
-                      <Link
-                        href={`/assessment/${area.standardSlug}${area.questionId ? `#q-${area.questionId}` : ""}`}
-                        passHref
-                      >
-                        <Button variant="link" size="sm" className="p-0 h-auto text-xs">
-                          View Details
-                        </Button>
-                      </Link>
-                    </div>
-                  </li>
-                ),
-              )}
-              {highPriorityAreas.length > 5 && (
-                <li className="text-center text-sm text-muted-foreground">
-                  ...and {highPriorityAreas.length - 5} more areas.
-                </li>
-              )}
-            </ul>
-          </CardContent>
-        </Card>
-      )}
-    </>
+        </div>
+      </CardContent>
+      <CardFooter className="flex flex-col space-y-2">
+        <Button onClick={handleClientExport} disabled={isClientExporting || isTechExporting} className="w-full">
+          {isClientExporting ? (
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          ) : (
+            <Download className="mr-2 h-4 w-4" />
+          )}
+          Export Executive Summary
+        </Button>
+        <Button
+          onClick={handleTechExport}
+          disabled={isClientExporting || isTechExporting}
+          variant="outline"
+          className="w-full bg-transparent"
+        >
+          {isTechExporting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
+          Export Technical Guide
+        </Button>
+      </CardFooter>
+    </Card>
   )
 }

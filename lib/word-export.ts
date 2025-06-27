@@ -123,7 +123,7 @@ export const exportToClientWord = async (project: Project) => {
             children: [
               createCell(area.standardName),
               createCell(area.questionText || "Overall standard weakness"),
-              createCell(area.ragStatus.toUpperCase()),
+              createCell(area.ragStatus!.toUpperCase()),
               createCell(area.riskOwner || "TBA"),
             ],
           }),
@@ -233,7 +233,7 @@ export const exportToTechnicalWord = async (project: Project) => {
             children: [createCell("Category", true), createCell(gap.category)],
           }),
           new TableRow({
-            children: [createCell("Status", true), createCell(gap.ragStatus.toUpperCase())],
+            children: [createCell("Status", true), createCell(gap.ragStatus!.toUpperCase())],
           }),
           new TableRow({
             children: [createCell("Current Answer", true), createCell(JSON.stringify(gap.answer) || "N/A")],
@@ -306,14 +306,14 @@ export const exportToTechnicalWord = async (project: Project) => {
 }
 
 // --- Data Helper Functions ---
-type HighPriorityArea = Question & { standardName: string; category: string }
+type HighPriorityArea = Question & { standardName: string; questionText: string }
 
 const getHighPriorityAreas = (project: Project): HighPriorityArea[] => {
   const areas: HighPriorityArea[] = []
   project.standards.forEach((std) => {
     std.questions.forEach((q) => {
       if (q.ragStatus === "red" || q.ragStatus === "amber") {
-        areas.push({ ...q, standardName: std.name, category: q.category })
+        areas.push({ ...q, standardName: std.name, questionText: q.text })
       }
     })
   })
@@ -325,7 +325,7 @@ const getAllGaps = (project: Project): HighPriorityArea[] => {
   project.standards.forEach((std) => {
     std.questions.forEach((q) => {
       if (q.ragStatus === "red" || q.ragStatus === "amber") {
-        gaps.push({ ...q, standardName: std.name, category: q.category })
+        gaps.push({ ...q, standardName: std.name, questionText: q.text })
       }
     })
   })
