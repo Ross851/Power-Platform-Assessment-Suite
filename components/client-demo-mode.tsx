@@ -1,77 +1,56 @@
 "use client"
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Eye, EyeOff, Shield, Clock, Users } from "lucide-react"
-import { useAuth } from "./auth/auth-provider"
+import { Eye, EyeOff, Info } from "lucide-react"
 
-interface DemoModeProps {
-  projectName: string
-  isOwner: boolean
-}
-
-export function ClientDemoMode({ projectName, isOwner }: DemoModeProps) {
+export function ClientDemoMode() {
   const [isDemoMode, setIsDemoMode] = useState(false)
-  const { user } = useAuth()
+  const [envDemoMode, setEnvDemoMode] = useState<string | undefined>()
 
-  if (!isOwner) return null
+  useEffect(() => {
+    const demoMode = process.env.NEXT_PUBLIC_CLIENT_DEMO
+    setEnvDemoMode(demoMode)
+    setIsDemoMode(demoMode === "true")
+  }, [])
 
   return (
-    <Card className="border-blue-200 bg-blue-50/50">
+    <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Shield className="h-5 w-5 text-blue-600" />
+          {isDemoMode ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
           Client Demo Mode
         </CardTitle>
-        <CardDescription>Enable a safe demo environment for client presentations with anonymized data.</CardDescription>
+        <CardDescription>Control data visibility for client presentations</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="text-sm font-medium">Demo Mode</span>
-            <Badge variant={isDemoMode ? "default" : "secondary"}>{isDemoMode ? "Active" : "Inactive"}</Badge>
+          <div className="space-y-0.5">
+            <div className="text-base">Demo Mode Status</div>
+            <div className="text-sm text-muted-foreground">Environment: NEXT_PUBLIC_CLIENT_DEMO</div>
           </div>
-          <Button variant={isDemoMode ? "destructive" : "default"} size="sm" onClick={() => setIsDemoMode(!isDemoMode)}>
-            {isDemoMode ? (
-              <>
-                <EyeOff className="h-4 w-4 mr-2" />
-                Disable Demo
-              </>
-            ) : (
-              <>
-                <Eye className="h-4 w-4 mr-2" />
-                Enable Demo
-              </>
-            )}
-          </Button>
+          <Badge variant={isDemoMode ? "default" : "secondary"}>{envDemoMode || "not set"}</Badge>
         </div>
 
-        {isDemoMode && (
-          <Alert>
-            <Shield className="h-4 w-4" />
-            <AlertDescription>
-              Demo mode is active. Sensitive data is hidden and the interface shows sample data for presentation
-              purposes.
-            </AlertDescription>
-          </Alert>
-        )}
+        <Alert>
+          <Info className="h-4 w-4" />
+          <AlertDescription>
+            {isDemoMode
+              ? "Demo mode is ACTIVE. Data will be anonymized for client safety."
+              : "Demo mode is INACTIVE. Full data access is available."}
+          </AlertDescription>
+        </Alert>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-          <div className="flex items-center gap-2">
-            <Users className="h-4 w-4 text-green-600" />
-            <span>Client-safe viewing</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <Eye className="h-4 w-4 text-blue-600" />
-            <span>Anonymized data</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <Clock className="h-4 w-4 text-purple-600" />
-            <span>Read-only mode</span>
-          </div>
+        <div className="space-y-2">
+          <h4 className="text-sm font-medium">Demo Mode Features:</h4>
+          <ul className="text-sm text-muted-foreground space-y-1">
+            <li>• Anonymizes server names and IP addresses</li>
+            <li>• Hides sensitive technical details</li>
+            <li>• Shows sample data instead of real data</li>
+            <li>• Enables read-only mode for presentations</li>
+          </ul>
         </div>
       </CardContent>
     </Card>

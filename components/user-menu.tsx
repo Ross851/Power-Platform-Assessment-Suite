@@ -16,12 +16,12 @@ import { User, LogOut, Settings } from "lucide-react"
 export function UserMenu() {
   const { user, signOut, loading } = useAuth()
 
-  if (loading) {
-    return <div className="w-8 h-8 rounded-full bg-gray-200 animate-pulse" />
-  }
-
-  if (!user) {
-    return null
+  if (loading || !user) {
+    return (
+      <Button variant="ghost" size="sm" disabled>
+        <User className="h-4 w-4" />
+      </Button>
+    )
   }
 
   const userInitials = user.user_metadata?.full_name
@@ -50,10 +50,6 @@ export function UserMenu() {
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem>
-          <User className="mr-2 h-4 w-4" />
-          <span>Profile</span>
-        </DropdownMenuItem>
         <DropdownMenuItem>
           <Settings className="mr-2 h-4 w-4" />
           <span>Settings</span>
