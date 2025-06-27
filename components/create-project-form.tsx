@@ -17,24 +17,20 @@ interface FormState {
 
 export function CreateProjectForm() {
   const router = useRouter()
-  const createProjectInStore = useAssessmentStore((state) => state.createProject)
+  const addProject = useAssessmentStore((state) => state.addProject)
 
   const handleCreateProject = async (prevState: FormState, formData: FormData): Promise<FormState> => {
-    const name = formData.get("name") as string
-    const clientRef = formData.get("client_name") as string
+    const name = (formData.get("name") as string)?.trim()
+    const clientRef = (formData.get("client_name") as string)?.trim()
 
     if (!name) {
       return { error: "Project name is required." }
     }
 
-    // This now calls the zustand action directly
-    const newProject = createProjectInStore(name, clientRef)
+    // Add the project to the store
+    addProject({ name, client_name: clientRef || null, clientReferenceNumber: clientRef || "" })
 
-    if (newProject) {
-      return { success: true, projectName: newProject.name }
-    } else {
-      return { error: `Project "${name}" already exists.` }
-    }
+    return { success: true, projectName: name }
   }
 
   const initialState: FormState = { error: undefined, success: false }
