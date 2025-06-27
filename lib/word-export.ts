@@ -59,6 +59,10 @@ export const exportToClientWord = async (project: Project) => {
           createHeading(`Power Platform Assessment: Executive Summary`),
           createSubHeading(project.name),
           createParagraph(`Date: ${format(new Date(), "dd MMMM yyyy")}`),
+          ...(project.assessmentMetadata ? [
+            createParagraph(`Assessed by: ${project.assessmentMetadata.assessorName}${project.assessmentMetadata.assessorRole ? ` (${project.assessmentMetadata.assessorRole})` : ''}`),
+            ...(project.assessmentMetadata.assessorEmail ? [createParagraph(`Contact: ${project.assessmentMetadata.assessorEmail}`)] : []),
+          ] : []),
           new Paragraph({ text: "" }), // Spacer
 
           createSubHeading("1. Key Findings & Strategic Recommendations"),
@@ -166,6 +170,10 @@ export const exportToTechnicalWord = async (project: Project) => {
           createHeading("Power Platform Assessment: Technical Implementation Guide"),
           createSubHeading(project.name),
           createParagraph(`Generated on: ${format(new Date(), "dd MMMM yyyy")}`),
+          ...(project.assessmentMetadata ? [
+            createParagraph(`Assessed by: ${project.assessmentMetadata.assessorName}${project.assessmentMetadata.assessorRole ? ` (${project.assessmentMetadata.assessorRole})` : ''}`),
+            ...(project.assessmentMetadata.assessorEmail ? [createParagraph(`Contact: ${project.assessmentMetadata.assessorEmail}`)] : []),
+          ] : []),
           new Paragraph({ text: "" }),
 
           createSubHeading("1. Introduction"),
@@ -211,6 +219,34 @@ export const exportToTechnicalWord = async (project: Project) => {
               ],
             }),
             new Paragraph({ text: "" }),
+            
+            // Developer Documentation Section
+            ...(gap.codeSnippets || gap.developerFeedback || gap.developerRecommendations ? [
+              new Paragraph({ children: [new TextRun({ text: "Developer Documentation:", bold: true })] }),
+              ...(gap.codeSnippets ? [
+                new Paragraph({ children: [new TextRun({ text: "Code Snippets:", bold: true })] }),
+                new Paragraph({
+                  children: [
+                    new TextRun({
+                      text: gap.codeSnippets,
+                      font: "Consolas",
+                      size: 20,
+                    }),
+                  ],
+                }),
+                new Paragraph({ text: "" }),
+              ] : []),
+              ...(gap.developerFeedback ? [
+                new Paragraph({ children: [new TextRun({ text: "Developer Findings:", bold: true })] }),
+                createParagraph(gap.developerFeedback),
+                new Paragraph({ text: "" }),
+              ] : []),
+              ...(gap.developerRecommendations ? [
+                new Paragraph({ children: [new TextRun({ text: "Developer Recommendations:", bold: true })] }),
+                createParagraph(gap.developerRecommendations),
+                new Paragraph({ text: "" }),
+              ] : []),
+            ] : []),
           ]),
         ],
       },

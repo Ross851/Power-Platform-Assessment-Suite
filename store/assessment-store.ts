@@ -1,6 +1,6 @@
 import { create } from "zustand"
 import { persist, type StateStorage } from "zustand/middleware"
-import type { AssessmentStandard, AnswerPayload, RAGStatus, GeneralDocument, Project } from "@/lib/types" // Added Project
+import type { AssessmentStandard, AnswerPayload, RAGStatus, GeneralDocument, Project, AssessmentMetadata } from "@/lib/types" // Added Project
 import { ASSESSMENT_STANDARDS } from "@/lib/constants"
 
 // Helper function to create a fresh set of standards for a new project
@@ -30,6 +30,10 @@ interface AssessmentState {
   setActiveProject: (projectName: string) => void
   getActiveProject: () => Project | undefined
   deleteProject: (projectName: string) => void // Optional: for later
+
+  // Assessor Management
+  setAssessmentMetadata: (metadata: AssessmentMetadata) => void
+  getAssessmentMetadata: () => AssessmentMetadata | undefined
 
   // Existing actions, now need to be context-aware of the active project
   setAnswer: (payload: AnswerPayload) => void
@@ -69,6 +73,10 @@ const customStorage: StateStorage = {
           uploadedAt: new Date(doc.uploadedAt),
           file: null, // File object is not persisted
         })),
+        assessmentMetadata: project.assessmentMetadata ? {
+          ...project.assessmentMetadata,
+          assessmentDate: new Date(project.assessmentMetadata.assessmentDate)
+        } : undefined,
         // Potentially revive dates within standards/questions if any were added
       })),
     }
@@ -134,6 +142,26 @@ export const useAssessmentStore = create<AssessmentState>()(
         return get().projects.find((p) => p.name === activeName)
       },
 
+      setAssessmentMetadata: (metadata) =>
+        set((state) => {
+          const activeProject = state.projects.find((p) => p.name === state.activeProjectName)
+          if (!activeProject) return state
+
+          const updatedProject = { 
+            ...activeProject, 
+            assessmentMetadata: metadata,
+            lastModifiedAt: new Date() 
+          }
+          return {
+            projects: state.projects.map((p) => (p.name === state.activeProjectName ? updatedProject : p)),
+          }
+        }),
+
+      getAssessmentMetadata: () => {
+        const activeProject = get().getActiveProject()
+        return activeProject?.assessmentMetadata
+      },
+
       setAnswer: ({ standardSlug, questionId, answer, evidenceNotes, documentData, riskOwner }) =>
         set((state) => {
           const activeProject = state.projects.find((p) => p.name === state.activeProjectName)
@@ -147,8 +175,16 @@ export const useAssessmentStore = create<AssessmentState>()(
                       ...q,
                       answer,
                       evidenceNotes: evidenceNotes || q.evidenceNotes,
+                      codeSnippets: documentData?.codeSnippets || q.codeSnippets,
+                      codeSnippetsList: documentData?.codeSnippetsList || q.codeSnippetsList,
+                      developerFeedback: documentData?.developerFeedback || q.developerFeedback,
+                      developerFeedbackList: documentData?.developerFeedbackList || q.developerFeedbackList,
+                      developerRecommendations: documentData?.developerRecommendations || q.developerRecommendations,
+                      developerRecommendationsList: documentData?.developerRecommendationsList || q.developerRecommendationsList,
                       document: documentData ? { ...q.document, ...documentData } : q.document,
                       riskOwner: riskOwner !== undefined ? riskOwner : q.riskOwner,
+                      isNotApplicable: documentData?.isNotApplicable || q.isNotApplicable,
+                      adoptionTimeline: documentData?.adoptionTimeline || q.adoptionTimeline,
                     }
                   : q,
               )
