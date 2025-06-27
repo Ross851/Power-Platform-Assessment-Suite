@@ -137,6 +137,16 @@ export function QuestionDisplay({ question, standardSlug }: QuestionDisplayProps
     return <CheckCircle2 className="w-6 h-6 text-green-500" />
   }
 
+  const hasAssessmentFeedback = () => {
+    return (
+      question.assessmentFeedback &&
+      (question.assessmentFeedback.howAssessed?.length > 0 ||
+        question.assessmentFeedback.findings ||
+        question.assessmentFeedback.recommendations ||
+        question.assessmentFeedback.reviewedBy)
+    )
+  }
+
   return (
     <Card className="mb-6">
       <CardHeader>
@@ -158,6 +168,11 @@ export function QuestionDisplay({ question, standardSlug }: QuestionDisplayProps
                 {question.score !== undefined && (
                   <Badge variant="outline" className="text-xs">
                     Score: {question.score}/5
+                  </Badge>
+                )}
+                {hasAssessmentFeedback() && (
+                  <Badge variant="outline" className="text-xs bg-green-50 text-green-700 border-green-200">
+                    Assessment Documented
                   </Badge>
                 )}
               </div>
@@ -261,9 +276,13 @@ export function QuestionDisplay({ question, standardSlug }: QuestionDisplayProps
             {/* Assessment Feedback */}
             <Dialog open={isFeedbackDialogOpen} onOpenChange={setIsFeedbackDialogOpen}>
               <DialogTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-8 w-8">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className={`h-8 w-8 ${hasAssessmentFeedback() ? "text-green-600 bg-green-50 hover:bg-green-100" : ""}`}
+                >
                   <ClipboardList className="h-4 w-4" />
-                  <span className="sr-only">Assessment Feedback</span>
+                  <span className="sr-only">Assessment Feedback {hasAssessmentFeedback() ? "(Completed)" : ""}</span>
                 </Button>
               </DialogTrigger>
               <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
