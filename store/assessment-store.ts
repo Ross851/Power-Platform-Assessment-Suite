@@ -1,41 +1,48 @@
 import { create } from "zustand"
 import { persist } from "zustand/middleware"
-import type { Project, Question, AnswerPayload, RAGStatus, AssessmentStandard } from "@/lib/types"
+import type { Project, AssessmentStandard, Question, AnswerPayload } from "@/lib/types"
 import { ASSESSMENT_STANDARDS } from "@/lib/constants"
 
 interface AssessmentState {
   projects: Project[]
   activeProjectName: string | null
+  currentProject: string | null
 
   // Project management
   addProject: (project: Omit<Project, "standards" | "lastModifiedAt" | "versions">) => void
+  createProject: (project: Project) => void
+  updateProject: (projectName: string, updates: Partial<Project>) => void
+  deleteProject: (projectName: string) => void
   setActiveProject: (projectName: string) => void
+  setCurrentProject: (projectName: string | null) => void
   getActiveProject: () => Project | null
+  getProject: (projectName: string) => Project | undefined
   getProjectProgress: (projectName?: string) => number
+  getOverallProgress: (projectName: string) => number
 
   // Answer management
   setAnswer: (payload: AnswerPayload) => void
+  updateAnswer: (projectName: string, standardSlug: string, questionId: string, answer: any) => void
 
   // Scoring and analysis
   calculateScoresAndRAG: () => void
-  getOverallProgress: () => number
   getOverallMaturityScore: () => number
-  getOverallRAGStatus: () => RAGStatus
+  getOverallRAGStatus: () => string
   getRiskProfile: () => { high: number; medium: number; low: number }
   getHighPriorityAreas: () => Array<{
     standardName: string
     standardSlug: string
     questionId?: string
     questionText?: string
-    ragStatus: RAGStatus
+    ragStatus: string
     riskOwner?: string
   }>
 
   // Standard-specific functions
+  getStandardBySlug: (standardSlug: string) => AssessmentStandard | undefined
   getStandardProgress: (standardSlug: string) => number
   getStandardMaturityScore: (standardSlug: string) => number
-  getStandardRAGStatus: (standardSlug: string) => RAGStatus
-  getStandardBySlug: (standardSlug: string) => AssessmentStandard | undefined
+  getStandardRAGStatus: (standardSlug: string) => string
 }
 
 const calculateQuestionScore = (question: Question): number => {
@@ -61,7 +68,7 @@ const calculateQuestionScore = (question: Question): number => {
   }
 }
 
-const calculateRAGStatus = (score: number): RAGStatus => {
+const calculateRAGStatus = (score: number): string => {
   if (score >= 4) return "green"
   if (score >= 2.5) return "amber"
   if (score > 0) return "red"
@@ -73,6 +80,7 @@ export const useAssessmentStore = create<AssessmentState>()(
     (set, get) => ({
       projects: [],
       activeProjectName: null,
+      currentProject: null,
 
       addProject: (projectData) => {
         const newProject: Project = {
@@ -88,21 +96,45 @@ export const useAssessmentStore = create<AssessmentState>()(
         set((state) => ({
           projects: [...state.projects, newProject],
           activeProjectName: newProject.name,
+          currentProject: newProject.name,
         }))
       },
+
+      createProject: (project) =>
+        set((state) => ({
+          projects: [...state.projects, project],
+          currentProject: project.name,
+        })),
+
+      updateProject: (projectName, updates) =>
+        set((state) => ({
+          projects: state.projects.map((p) => (p.name === projectName ? { ...p, ...updates } : p)),
+          currentProject: state.currentProject === projectName ? updates.name : state.currentProject,
+        })),
+
+      deleteProject: (projectName) =>
+        set((state) => ({
+          projects: state.projects.filter((p) => p.name !== projectName),
+          currentProject: state.currentProject === projectName ? null : state.currentProject,
+        })),
 
       setActiveProject: (projectName) => {
         set({ activeProjectName: projectName })
       },
+
+      setCurrentProject: (projectName) =>
+        set(() => ({
+          currentProject: projectName,
+        })),
 
       getActiveProject: () => {
         const { projects, activeProjectName } = get()
         return projects.find((p) => p.name === activeProjectName) || null
       },
 
-      getStandardBySlug: (standardSlug) => {
-        const activeProject = get().getActiveProject()
-        return activeProject?.standards.find((s) => s.slug === standardSlug)
+      getProject: (projectName) => {
+        const state = get()
+        return state.projects.find((p) => p.name === projectName)
       },
 
       getProjectProgress: (projectName) => {
@@ -122,6 +154,24 @@ export const useAssessmentStore = create<AssessmentState>()(
         )
 
         return totalQuestions > 0 ? (answeredQuestions / totalQuestions) * 100 : 0
+      },
+
+      getOverallProgress: (projectName) => {
+        const state = get()
+        const project = state.projects.find((p) => p.name === projectName)
+        if (!project || !project.standards || project.standards.length === 0) return 0
+
+        const totalQuestions = project.standards.reduce((sum, standard) => sum + standard.questions.length, 0)
+        if (totalQuestions === 0) return 0
+
+        const answeredQuestions = project.standards.reduce(
+          (sum, standard) =>
+            sum +
+            standard.questions.filter((q) => q.answer !== undefined && q.answer !== null && q.answer !== "").length,
+          0,
+        )
+
+        return Math.round((answeredQuestions / totalQuestions) * 100)
       },
 
       setAnswer: (payload) => {
@@ -185,6 +235,34 @@ export const useAssessmentStore = create<AssessmentState>()(
         get().calculateScoresAndRAG()
       },
 
+      updateAnswer: (projectName, standardSlug, questionId, answer) =>
+        set((state) => ({
+          projects: state.projects.map((project) => {
+            if (project.name !== projectName) return project
+
+            return {
+              ...project,
+              standards: project.standards.map((standard) => {
+                if (standard.slug !== standardSlug) return standard
+
+                return {
+                  ...standard,
+                  questions: standard.questions.map((question) => {
+                    if (question.id !== questionId) return question
+
+                    return {
+                      ...question,
+                      answer,
+                      lastModified: new Date().toISOString(),
+                    }
+                  }),
+                }
+              }),
+              lastModifiedAt: new Date().toISOString(),
+            }
+          }),
+        })),
+
       calculateScoresAndRAG: () => {
         set((state) => {
           const updatedProjects = state.projects.map((project) => ({
@@ -213,21 +291,6 @@ export const useAssessmentStore = create<AssessmentState>()(
 
           return { projects: updatedProjects }
         })
-      },
-
-      getOverallProgress: () => {
-        const activeProject = get().getActiveProject()
-        if (!activeProject) return 0
-
-        const totalQuestions = activeProject.standards.reduce((sum, standard) => sum + standard.questions.length, 0)
-        const answeredQuestions = activeProject.standards.reduce(
-          (sum, standard) =>
-            sum +
-            standard.questions.filter((q) => q.answer !== undefined && q.answer !== null && q.answer !== "").length,
-          0,
-        )
-
-        return totalQuestions > 0 ? (answeredQuestions / totalQuestions) * 100 : 0
       },
 
       getOverallMaturityScore: () => {
@@ -278,7 +341,7 @@ export const useAssessmentStore = create<AssessmentState>()(
           standardSlug: string
           questionId?: string
           questionText?: string
-          ragStatus: RAGStatus
+          ragStatus: string
           riskOwner?: string
         }> = []
 
@@ -302,6 +365,11 @@ export const useAssessmentStore = create<AssessmentState>()(
           if (b.ragStatus === "red" && a.ragStatus !== "red") return 1
           return 0
         })
+      },
+
+      getStandardBySlug: (standardSlug) => {
+        const activeProject = get().getActiveProject()
+        return activeProject?.standards.find((s) => s.slug === standardSlug)
       },
 
       getStandardProgress: (standardSlug) => {
@@ -345,6 +413,7 @@ export const useAssessmentStore = create<AssessmentState>()(
       partialize: (state) => ({
         projects: state.projects,
         activeProjectName: state.activeProjectName,
+        currentProject: state.currentProject,
       }),
     },
   ),

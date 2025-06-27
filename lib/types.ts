@@ -33,14 +33,15 @@ export interface AssessmentFeedback {
   recommendations?: string
 }
 
-export type EvidenceType = "file" | "snippet"
+export type EvidenceType = "file" | "snippet" | "link"
 
 export interface Evidence {
   id: string // UUID from database
   type: EvidenceType
+  title: string
   content: string // File name for 'file', text content for 'snippet'
-  url?: string // Public URL for files
   uploadedAt: string
+  uploadedBy: string
 }
 
 export interface Question {
@@ -49,6 +50,7 @@ export interface Question {
   type: QuestionType
   weight: number
   category: string
+  subcategory?: string
   guidance?: string
   bestPractice?: BestPractice
   developerGuidance?: DeveloperGuidance
@@ -68,9 +70,13 @@ export interface Question {
     annotations?: Array<{ page: number; text: string; tags?: string[] }>
   }
   evidence: Evidence[]
+  lastModified?: string
+  required?: boolean
+  helpText?: string
 }
 
 export interface AssessmentStandard {
+  id: string
   slug: string
   name: string
   weight: number
@@ -117,7 +123,15 @@ export interface Project {
   client_name: string | null // from DB
   created_at: string // from DB
   clientReferenceNumber: string
+  description?: string
+  lastModifiedAt: string
   standards: AssessmentStandard[]
-  lastModifiedAt: Date
   versions: ProjectVersion[]
+}
+
+export interface RAGIndicator {
+  status: "red" | "amber" | "green"
+  score: number
+  reasoning: string
+  recommendations: string[]
 }
