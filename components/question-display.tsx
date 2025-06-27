@@ -1,210 +1,215 @@
 "use client"
-import { useState } from "react"
-import type { Question } from "@/lib/types"
-import { useAssessmentStore } from "@/store/assessment-store"
 
+import { useState } from "react"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Textarea } from "@/components/ui/textarea"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Badge } from "@/components/ui/badge"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Compass, Save, Edit3, AlertCircle, CheckCircle, Clock } from "lucide-react"
 import { BooleanInput } from "./question-types/boolean-input"
 import { ScaleInput } from "./question-types/scale-input"
 import { PercentageInput } from "./question-types/percentage-input"
 import { TextInput } from "./question-types/text-input"
 import { NumericInput } from "./question-types/numeric-input"
 import { DocumentReviewInput } from "./question-types/document-review-input"
-import { EvidenceManager } from "./evidence-manager"
-
-import { Label } from "@/components/ui/label"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-import { Textarea } from "@/components/ui/textarea"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog"
 import { RAGIndicator } from "./rag-indicator"
-import { Edit } from "lucide-react"
+import type { Question } from "@/lib/types"
 
 interface QuestionDisplayProps {
   question: Question
-  standardSlug: string
+  onAnswerChange: (answer: any) => void
+  onEvidenceNotesChange: (notes: string) => void
+  onRiskOwnerChange: (owner: string) => void
 }
 
-export function QuestionDisplay({ question, standardSlug }: QuestionDisplayProps) {
-  const { setAnswer } = useAssessmentStore()
-  const activeProjectName = useAssessmentStore((state) => state.activeProjectName)
-
-  const [riskOwnerInput, setRiskOwnerInput] = useState(question.riskOwner || "")
+export function QuestionDisplay({
+  question,
+  onAnswerChange,
+  onEvidenceNotesChange,
+  onRiskOwnerChange,
+}: QuestionDisplayProps) {
   const [isEvidenceDialogOpen, setIsEvidenceDialogOpen] = useState(false)
-  const [evidenceNotes, setEvidenceNotes] = useState(question.evidenceNotes || "")
+  const [tempEvidenceNotes, setTempEvidenceNotes] = useState(question.evidenceNotes || "")
 
-  const handleAnswerChange = (answer: any) => {
-    setAnswer({ standardSlug, questionId: question.id, answer })
-  }
-
-  const handleEvidenceSave = () => {
-    setAnswer({ standardSlug, questionId: question.id, evidenceNotes })
+  const handleSaveEvidence = () => {
+    onEvidenceNotesChange(tempEvidenceNotes)
     setIsEvidenceDialogOpen(false)
   }
 
-  const handleRiskOwnerBlur = () => {
-    if (riskOwnerInput !== (question.riskOwner || "")) {
-      setAnswer({
-        standardSlug,
-        questionId: question.id,
-        riskOwner: riskOwnerInput,
-      })
-    }
+  const handleCancelEvidence = () => {
+    setTempEvidenceNotes(question.evidenceNotes || "")
+    setIsEvidenceDialogOpen(false)
   }
 
   const renderQuestionInput = () => {
     switch (question.type) {
       case "boolean":
-        return <BooleanInput question={question} onAnswerChange={handleAnswerChange} />
+        return <BooleanInput value={question.answer} onChange={onAnswerChange} />
       case "scale":
-        return <ScaleInput question={question} onAnswerChange={handleAnswerChange} />
+        return <ScaleInput value={question.answer} onChange={onAnswerChange} />
       case "percentage":
-        return <PercentageInput question={question} onAnswerChange={handleAnswerChange} />
+        return <PercentageInput value={question.answer} onChange={onAnswerChange} />
       case "text":
-        return <TextInput question={question} onAnswerChange={handleAnswerChange} />
-      case "numeric":
-        return <NumericInput question={question} onAnswerChange={handleAnswerChange} />
-      case "document-review":
         return (
-          <DocumentReviewInput
-            question={question}
-            onAnswerChange={(qId, overallAssessment) =>
-              setAnswer({ standardSlug, questionId: qId, answer: overallAssessment })
-            }
-          />
+          <TextInput value={question.answer} onChange={onAnswerChange} placeholder="Enter your detailed response..." />
         )
+      case "numeric":
+        return <NumericInput value={question.answer} onChange={onAnswerChange} />
+      case "document-review":
+        return <DocumentReviewInput question={question} onChange={onAnswerChange} />
       default:
-        return <p>Unsupported question type: {question.type}</p>
+        return <div>Unsupported question type: {question.type}</div>
     }
   }
 
+  const getStatusIcon = () => {
+    if (question.answer === undefined || question.answer === "" || question.answer === null) {
+      return <Clock className="h-4 w-4 text-muted-foreground" />
+    }
+    if (question.ragStatus === "red") {
+      return <AlertCircle className="h-4 w-4 text-red-500" />
+    }
+    if (question.ragStatus === "amber") {
+      return <AlertCircle className="h-4 w-4 text-amber-500" />
+    }
+    return <CheckCircle className="h-4 w-4 text-green-500" />
+  }
+
   return (
-    <div className="p-4 md:p-6 border rounded-lg shadow-sm bg-card">
-      <div className="flex justify-between items-start mb-1">
-        <Label htmlFor={question.id} className="text-lg font-semibold block flex-1 pr-2">
-          {question.text}
-        </Label>
-        <div className="flex items-center space-x-1">
-          {/* Popovers for Guidance and Discovery */}
-          <RAGIndicator status={question.ragStatus} size="md" />
-        </div>
-      </div>
-      <p className="text-xs text-muted-foreground mb-3">
-        Category: {question.category} | Weight: {question.weight}
-      </p>
-
-      <div className="mb-4">{renderQuestionInput()}</div>
-
-      {question.type !== "document-review" && (
-        <div className="mb-4">
-          <Label className="text-sm font-medium text-muted-foreground mb-2 block">
-            Observations / Evidence Summary
-          </Label>
-          <Dialog open={isEvidenceDialogOpen} onOpenChange={setIsEvidenceDialogOpen}>
-            <div className="flex items-start gap-2">
-              <div className="w-full p-3 border rounded-md bg-background min-h-[84px]">
-                {question.evidenceNotes ? (
-                  <p className="text-sm whitespace-pre-wrap">{question.evidenceNotes}</p>
-                ) : (
-                  <p className="text-sm text-muted-foreground">No observations recorded.</p>
-                )}
-              </div>
+    <Card className="mb-6">
+      <CardHeader>
+        <div className="flex items-start justify-between">
+          <div className="flex-1">
+            <CardTitle className="text-lg flex items-center gap-2">
+              {getStatusIcon()}
+              {question.text}
+              {question.ragStatus && question.ragStatus !== "grey" && (
+                <RAGIndicator status={question.ragStatus} size="sm" />
+              )}
+            </CardTitle>
+            {question.category && (
+              <Badge variant="secondary" className="mt-2">
+                {question.category}
+              </Badge>
+            )}
+          </div>
+          {question.discovery && question.discovery.length > 0 && (
+            <Dialog>
               <DialogTrigger asChild>
-                <Button variant="outline" size="icon">
-                  <Edit className="h-4 w-4" />
-                  <span className="sr-only">Edit Observations</span>
+                <Button variant="outline" size="sm">
+                  <Compass className="h-4 w-4 mr-2" />
+                  Discovery Guide
                 </Button>
               </DialogTrigger>
-            </div>
-            <DialogContent className="sm:max-w-[625px]">
-              <DialogHeader>
-                <DialogTitle>Edit Observations / Evidence Summary</DialogTitle>
-                <DialogDescription>
-                  Summarise your findings, link to documentation, or describe the evidence provided below.
-                </DialogDescription>
-              </DialogHeader>
-              <div className="py-4">
-                <Textarea
-                  value={evidenceNotes}
-                  onChange={(e) => setEvidenceNotes(e.target.value)}
-                  placeholder="Enter your detailed observations..."
-                  className="min-h-[250px]"
-                />
-              </div>
-              <DialogFooter>
-                <Button type="button" variant="secondary" onClick={() => setIsEvidenceDialogOpen(false)}>
-                  Cancel
-                </Button>
-                <Button type="button" onClick={handleEvidenceSave}>
-                  Save Observations
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
-        </div>
-      )}
-
-      {activeProjectName && (
-        <EvidenceManager
-          projectName={activeProjectName}
-          questionId={question.id}
-          standardSlug={standardSlug}
-          initialEvidence={question.evidence || []}
-        />
-      )}
-
-      {question.riskLevel && question.ragStatus !== "grey" && (
-        <div
-          className={`mt-6 text-sm p-3 rounded-md border ${
-            question.ragStatus === "red"
-              ? "bg-red-50 border-red-200 text-red-900 dark:bg-red-900/20 dark:border-red-800 dark:text-red-200"
-              : question.ragStatus === "amber"
-                ? "bg-yellow-50 border-yellow-200 text-yellow-900 dark:bg-yellow-900/20 dark:border-yellow-800 dark:text-yellow-200"
-                : "bg-green-50 border-green-200 text-green-900 dark:bg-green-900/20 dark:border-green-800 dark:text-green-200"
-          }`}
-        >
-          <p className="text-xs font-semibold uppercase tracking-wider mb-2">Assessment Feedback</p>
-          <p>
-            Calculated Risk: <span className="font-semibold">{question.riskLevel?.toUpperCase()}</span> (Score:{" "}
-            {question.score}/5)
-          </p>
-
-          {question.bestPractice?.suggestedActions && question.bestPractice.suggestedActions.length > 0 && (
-            <div className="mt-3">
-              <p className="font-semibold text-xs mb-1">Suggested Actions:</p>
-              <ul className="list-disc list-inside text-xs space-y-0.5">
-                {question.bestPractice.suggestedActions.map((action, idx) => (
-                  <li key={idx}>{action}</li>
-                ))}
-              </ul>
-            </div>
+              <DialogContent className="max-w-2xl">
+                <DialogHeader>
+                  <DialogTitle>How to Find This Information</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-3">
+                  {question.discovery.map((step, index) => (
+                    <div key={index} className="flex gap-3">
+                      <div className="flex-shrink-0 w-6 h-6 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-sm font-medium">
+                        {index + 1}
+                      </div>
+                      <p className="text-sm">{step}</p>
+                    </div>
+                  ))}
+                </div>
+              </DialogContent>
+            </Dialog>
           )}
+        </div>
+        {question.guidance && <CardDescription>{question.guidance}</CardDescription>}
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {renderQuestionInput()}
 
-          {(question.ragStatus === "red" || question.ragStatus === "amber") && (
-            <div className="mt-3">
-              <Label htmlFor={`${question.id}-risk-owner`} className="text-xs font-semibold block mb-1">
-                Risk Owner (e.g., C-Suite, Department Head):
-              </Label>
-              <Input
-                id={`${question.id}-risk-owner`}
-                type="text"
-                value={riskOwnerInput}
-                onChange={(e) => setRiskOwnerInput(e.target.value)}
-                onBlur={handleRiskOwnerBlur}
-                placeholder="Enter name or role"
-                className="text-xs h-8"
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor={`evidence-${question.id}`}>Observations / Evidence Summary</Label>
+            <div className="flex items-center gap-2">
+              <Textarea
+                id={`evidence-${question.id}`}
+                value={question.evidenceNotes || ""}
+                readOnly
+                placeholder="Click to add detailed observations and evidence..."
+                className="min-h-[80px] cursor-pointer"
+                onClick={() => setIsEvidenceDialogOpen(true)}
               />
+              <Dialog open={isEvidenceDialogOpen} onOpenChange={setIsEvidenceDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button variant="outline" size="sm">
+                    <Edit3 className="h-4 w-4" />
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-4xl max-h-[80vh]">
+                  <DialogHeader>
+                    <DialogTitle>Observations / Evidence Summary</DialogTitle>
+                  </DialogHeader>
+                  <div className="space-y-4">
+                    <Textarea
+                      value={tempEvidenceNotes}
+                      onChange={(e) => setTempEvidenceNotes(e.target.value)}
+                      placeholder="Provide detailed observations, evidence, and context for your assessment..."
+                      className="min-h-[400px] resize-none"
+                      autoFocus
+                    />
+                    <div className="flex justify-end gap-2">
+                      <Button variant="outline" onClick={handleCancelEvidence}>
+                        Cancel
+                      </Button>
+                      <Button onClick={handleSaveEvidence}>
+                        <Save className="h-4 w-4 mr-2" />
+                        Save
+                      </Button>
+                    </div>
+                  </div>
+                </DialogContent>
+              </Dialog>
             </div>
-          )}
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor={`risk-owner-${question.id}`}>Risk Owner</Label>
+            <Input
+              id={`risk-owner-${question.id}`}
+              value={question.riskOwner || ""}
+              onChange={(e) => onRiskOwnerChange(e.target.value)}
+              placeholder="e.g., IT Director, Security Team"
+            />
+          </div>
         </div>
-      )}
-    </div>
+
+        {question.bestPractice && (
+          <div className="mt-4 p-4 bg-muted rounded-lg">
+            <h4 className="font-semibold text-sm mb-2">Best Practice Guidance</h4>
+            <p className="text-sm text-muted-foreground mb-2">{question.bestPractice.description}</p>
+            {question.bestPractice.suggestedActions && (
+              <div>
+                <p className="font-medium text-sm mb-1">Suggested Actions:</p>
+                <ul className="list-disc list-inside text-sm text-muted-foreground space-y-1">
+                  {question.bestPractice.suggestedActions.map((action, index) => (
+                    <li key={index}>{action}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            {question.bestPractice.link && (
+              <a
+                href={question.bestPractice.link}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-primary hover:underline text-sm"
+              >
+                {question.bestPractice.linkText || "Learn more"}
+              </a>
+            )}
+          </div>
+        )}
+      </CardContent>
+    </Card>
   )
 }

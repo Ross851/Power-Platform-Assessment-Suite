@@ -10,7 +10,32 @@ const createInitialProjectStandards = (): AssessmentStandard[] => JSON.parse(JSO
 // --- DUMMY DATA CREATION ---
 const createDummyProject = (): Project => {
   const standards = createInitialProjectStandards()
-  // ... (dummy data modifications as before) ...
+
+  // Answer doc-q1 as 'Yes' (Green)
+  const docStandard = standards.find((s) => s.slug === "documentation-rulebooks")
+  if (docStandard) {
+    const docQ1 = docStandard.questions.find((q) => q.id === "doc-q1")
+    if (docQ1) docQ1.answer = true
+  }
+
+  // Answer dlp-q1 as 'No' (Red) and add risk owner
+  const dlpStandard = standards.find((s) => s.slug === "dlp-policy")
+  if (dlpStandard) {
+    const dlpQ1 = dlpStandard.questions.find((q) => q.id === "dlp-q1")
+    if (dlpQ1) {
+      dlpQ1.answer = false
+      dlpQ1.evidenceNotes = "DLP policies are only applied to the default environment, leaving production vulnerable."
+      dlpQ1.riskOwner = "CIO / Head of Security"
+    }
+  }
+
+  // Answer env-q2 as '3' (Amber)
+  const envStandard = standards.find((s) => s.slug === "environment-usage")
+  if (envStandard) {
+    const envQ2 = envStandard.questions.find((q) => q.id === "env-q2")
+    if (envQ2) envQ2.answer = 3
+  }
+
   return {
     name: "Telana_Contoso_Demo",
     clientReferenceNumber: "TEL-C0N-001",
@@ -59,8 +84,13 @@ const calculateStandardMetrics = (standard: AssessmentStandard): AssessmentStand
         else if (perc < 75) riskLevel = "medium"
         else riskLevel = "low"
         break
+      case "document-review":
+        const hasContent = q.answer || (q.document?.annotations && q.document.annotations.length > 0)
+        questionScore = hasContent ? 3 : 1
+        riskLevel = hasContent ? "medium" : "low"
+        break
       default:
-        questionScore = 3 // Default for text, numeric, doc-review if answered
+        questionScore = 3 // Default for text, numeric if answered
         riskLevel = "medium"
     }
 
@@ -105,6 +135,7 @@ interface AssessmentState {
   getHighPriorityAreas: () => (Question & { standardName: string; standardSlug: string })[]
   createVersion: (versionName: string) => void
   restoreVersion: (versionId: string) => void
+  deleteProject: (projectName: string) => void
 }
 
 export const useAssessmentStore = create<AssessmentState>()(
@@ -147,6 +178,13 @@ export const useAssessmentStore = create<AssessmentState>()(
         return get().projects.find((p) => p.name === activeName)
       },
 
+      deleteProject: (projectName) => {
+        set((state) => ({
+          projects: state.projects.filter((p) => p.name !== projectName),
+          activeProjectName: state.activeProjectName === projectName ? null : state.activeProjectName,
+        }))
+      },
+
       getStandardProgress: (slug) => {
         const std = get().getStandardBySlug(slug)
         return std?.completion ?? 0
@@ -162,7 +200,7 @@ export const useAssessmentStore = create<AssessmentState>()(
         return activeProject?.standards.find((s) => s.slug === slug)
       },
 
-      setAnswer: ({ standardSlug, questionId, answer, evidenceNotes, riskOwner }) => {
+      setAnswer: ({ standardSlug, questionId, answer, evidenceNotes, riskOwner, documentData, evidence }) => {
         set((state) => {
           const activeProject = get().getActiveProject()
           if (!activeProject) return state
@@ -177,6 +215,8 @@ export const useAssessmentStore = create<AssessmentState>()(
                   if (answer !== undefined) updatedQ.answer = answer
                   if (evidenceNotes !== undefined) updatedQ.evidenceNotes = evidenceNotes
                   if (riskOwner !== undefined) updatedQ.riskOwner = riskOwner
+                  if (documentData) updatedQ.document = { ...q.document, ...documentData }
+                  if (evidence !== undefined) updatedQ.evidence = evidence
                   return updatedQ
                 }
                 return q
