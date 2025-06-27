@@ -1,80 +1,59 @@
 "use client"
 
-import { useEffect, useState } from "react"
-import { useAssessmentStore } from "@/store/assessment-store"
-import { CreateProjectForm } from "@/components/create-project-form"
-import { ProjectList } from "@/components/project-list"
+import { ProtectedRoute } from "@/components/auth/protected-route"
+import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Skeleton } from "@/components/ui/skeleton"
+import Link from "next/link"
 
-export default function DashboardPage() {
-  const { projects, getOverallProgress } = useAssessmentStore()
-  const [isClient, setIsClient] = useState(false)
-
-  useEffect(() => {
-    setIsClient(true)
-  }, [])
-
-  if (!isClient) {
-    return (
-      <div className="container mx-auto p-4 md:p-8">
-        <header className="mb-8">
-          <Skeleton className="h-10 w-1/2" />
-          <Skeleton className="h-6 w-3/4 mt-2" />
-        </header>
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2">
-            <Card>
-              <CardHeader>
-                <Skeleton className="h-8 w-1/3" />
-                <Skeleton className="h-5 w-2/3 mt-1" />
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <Skeleton className="h-12 w-full" />
-                <Skeleton className="h-12 w-full" />
-                <Skeleton className="h-12 w-full" />
-              </CardContent>
-            </Card>
-          </div>
-          <div>
-            <Card>
-              <CardHeader>
-                <Skeleton className="h-8 w-1/2" />
-                <Skeleton className="h-5 w-3/4 mt-1" />
-              </CardHeader>
-              <CardContent>
-                <Skeleton className="h-32 w-full" />
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </div>
-    )
-  }
-
+export default function HomePage() {
   return (
-    <div className="container mx-auto p-4 md:p-8">
-      <header className="mb-8">
-        <h1 className="text-4xl font-bold tracking-tight">Assessment Suite Dashboard</h1>
-        <p className="text-muted-foreground mt-2">Manage all your Power Platform assessment projects from one place.</p>
-      </header>
+    <ProtectedRoute>
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-3xl font-bold">Welcome to Power Platform Assessment Suite</h1>
+          <p className="text-muted-foreground mt-2">
+            Comprehensive assessment tool for Microsoft Power Platform implementations
+          </p>
+        </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           <Card>
             <CardHeader>
-              <CardTitle>My Projects</CardTitle>
-              <CardDescription>Select a project to view its detailed assessment dashboard.</CardDescription>
+              <CardTitle>Start Assessment</CardTitle>
+              <CardDescription>Begin a new Power Platform assessment</CardDescription>
             </CardHeader>
             <CardContent>
-              <ProjectList projects={projects} getOverallProgress={getOverallProgress} />
+              <Button asChild className="w-full">
+                <Link href="/assessment">Start New Assessment</Link>
+              </Button>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>View Projects</CardTitle>
+              <CardDescription>Manage your existing assessment projects</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button asChild variant="outline" className="w-full bg-transparent">
+                <Link href="/projects">View Projects</Link>
+              </Button>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Test System</CardTitle>
+              <CardDescription>Test authentication and system features</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button asChild variant="secondary" className="w-full">
+                <Link href="/test">Run Tests</Link>
+              </Button>
             </CardContent>
           </Card>
         </div>
-        <div>
-          <CreateProjectForm />
-        </div>
       </div>
-    </div>
+    </ProtectedRoute>
   )
 }
