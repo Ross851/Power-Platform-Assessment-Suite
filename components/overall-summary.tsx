@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useAssessmentStore } from "@/store/assessment-store"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { RiskProfileChart } from "@/components/risk-profile-chart"
@@ -14,8 +14,29 @@ export function OverallSummary() {
   const [isClientExporting, setIsClientExporting] = useState(false)
   const [isTechExporting, setIsTechExporting] = useState(false)
   const { toast } = useToast()
+  const [isClient, setIsClient] = useState(false)
+
+  useEffect(() => {
+    setIsClient(true)
+  }, [])
 
   const activeProject = getActiveProject()
+
+  if (!isClient || !activeProject) {
+    return (
+      <Card className="sticky top-8">
+        <CardHeader>
+          <CardTitle>Overall Summary</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-center h-48">
+            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+          </div>
+        </CardContent>
+      </Card>
+    )
+  }
+
   const maturityScore = getOverallMaturityScore()
   const ragStatus = getOverallRAGStatus()
   const riskProfile = getRiskProfile()
