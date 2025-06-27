@@ -9,7 +9,7 @@ import type { AssessmentStandard as AssessmentStandardType } from "@/lib/types"
 import { OverallSummary } from "@/components/overall-summary"
 import { GeneralDocumentation } from "@/components/general-documentation"
 import { AssessmentGuidance } from "@/components/assessment-guidance"
-import { FileDown, ExternalLink, FolderPlus, Trash2, AlertCircle, Briefcase, Wrench, Upload, Download, FileText, GitCompare, Code } from "lucide-react"
+import { FileDown, ExternalLink, FolderPlus, Trash2, AlertCircle, Briefcase, Wrench, Upload, Download, FileText, GitCompare, Code, Cloud } from "lucide-react"
 import { RAGIndicator } from "@/components/rag-indicator"
 import { useAssessmentStore } from "@/store/assessment-store"
 import { useEffect, useState, useRef } from "react"
@@ -39,6 +39,7 @@ import { VersionControl } from "@/lib/version-control"
 import { Textarea } from "@/components/ui/textarea"
 import { CodeSnippetsViewer } from "@/components/code-snippets-viewer"
 import { AssessorInfoDialog, AssessorInfoDisplay } from "@/components/assessor-info-dialog"
+import { GoogleDriveSetup } from "@/components/google-drive-setup"
 import { UserCheck } from "lucide-react"
 
 export default function DashboardPage() {
@@ -217,6 +218,12 @@ export default function DashboardPage() {
                 </DialogFooter>
               </DialogContent>
             </Dialog>
+            <Link href="/google-drive-test">
+              <Button variant="ghost" size="sm" title="Test Google Drive Integration">
+                <Cloud className="mr-2 h-4 w-4" />
+                Cloud Test
+              </Button>
+            </Link>
           </div>
         </div>
         <p className="text-muted-foreground">
