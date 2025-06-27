@@ -24,19 +24,16 @@ export function ProjectList({
   className,
 }: ProjectListProps) {
   const store = useAssessmentStore()
-  const projects = incomingProjects ?? store.projects ?? []
-  const getOverallProgress = incomingGetOverallProgress ?? store.getOverallProgress ?? (() => 0)
+  const projects = incomingProjects || store.projects || []
+  const getOverallProgress = incomingGetOverallProgress || store.getOverallProgress || (() => 0)
 
   const [query, setQuery] = useState("")
 
-  // COMPLETELY AVOID REGEX - use simple string matching only
   const filteredProjects = projects.filter((project) => {
     if (!query.trim()) return true
-
     const searchTerm = query.toLowerCase().trim()
     const projectName = (project.name || "").toLowerCase()
     const clientRef = (project.clientReferenceNumber || "").toLowerCase()
-
     return projectName.includes(searchTerm) || clientRef.includes(searchTerm)
   })
 
