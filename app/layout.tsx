@@ -9,7 +9,6 @@ const inter = Inter({ subsets: ["latin"] })
 export const metadata: Metadata = {
   title: "Power Platform Assessment Suite",
   description: "Comprehensive assessment tool for Microsoft Power Platform implementations",
-  keywords: ["Power Platform", "Assessment", "Microsoft", "Security", "Compliance"],
     generator: 'v0.dev'
 }
 
@@ -19,7 +18,7 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en">
       <body className={inter.className}>
         <AuthProvider>{children}</AuthProvider>
       </body>

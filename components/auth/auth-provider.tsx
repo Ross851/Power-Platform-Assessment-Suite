@@ -2,17 +2,17 @@
 
 import type React from "react"
 import { createContext, useContext, useEffect, useState } from "react"
-import { supabase } from "@/lib/supabase/client"
 import type { User } from "@supabase/supabase-js"
+import { supabase } from "@/lib/supabase/client"
 
 interface AuthContextType {
   user: User | null
   loading: boolean
   error: string | null
-  signIn: (email: string, password: string) => Promise<{ success: boolean; error?: string }>
-  signUp: (email: string, password: string) => Promise<{ success: boolean; error?: string }>
+  signIn: (email: string, password: string) => Promise<void>
+  signUp: (email: string, password: string) => Promise<void>
   signOut: () => Promise<void>
-  clearError: () => void
+  resetPassword: (email: string) => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -23,54 +23,40 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    let mounted = true
-
-    const getSession = async () => {
+    // Get initial session
+    const getInitialSession = async () => {
       try {
         const {
           data: { session },
           error,
         } = await supabase.auth.getSession()
-
-        if (mounted) {
-          if (error) {
-            console.error("Session error:", error)
-            setError(error.message)
-          } else {
-            setUser(session?.user ?? null)
-          }
-          setLoading(false)
+        if (error) {
+          console.error("Error getting session:", error)
+          setError(error.message)
+        } else {
+          setUser(session?.user ?? null)
         }
       } catch (err) {
-        console.error("Auth initialization error:", err)
-        if (mounted) {
-          setError("Failed to initialize authentication")
-          setLoading(false)
-        }
+        console.error("Session error:", err)
+        setError("Failed to initialize authentication")
+      } finally {
+        setLoading(false)
       }
     }
 
-    getSession()
+    getInitialSession()
 
+    // Listen for auth changes
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log("Auth state change:", event, session?.user?.email)
-
-      if (mounted) {
-        setUser(session?.user ?? null)
-        setLoading(false)
-
-        if (event === "SIGNED_IN") {
-          setError(null)
-        }
-      }
+      console.log("Auth state changed:", event, session?.user?.email)
+      setUser(session?.user ?? null)
+      setError(null)
+      setLoading(false)
     })
 
-    return () => {
-      mounted = false
-      subscription.unsubscribe()
-    }
+    return () => subscription.unsubscribe()
   }, [])
 
   const signIn = async (email: string, password: string) => {
@@ -84,22 +70,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       })
 
       if (error) {
-        console.error("Sign in error:", error)
-        setError(error.message)
-        return { success: false, error: error.message }
+        throw error
       }
 
       if (data.user) {
-        console.log("Sign in successful:", data.user.email)
-        return { success: true }
+        setUser(data.user)
       }
-
-      return { success: false, error: "Unknown error occurred" }
-    } catch (err) {
-      console.error("Sign in exception:", err)
-      const errorMessage = err instanceof Error ? err.message : "Network error occurred"
-      setError(errorMessage)
-      return { success: false, error: errorMessage }
+    } catch (err: any) {
+      console.error("Sign in error:", err)
+      setError(err.message || "Failed to sign in")
+      throw err
     } finally {
       setLoading(false)
     }
@@ -113,25 +93,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const { data, error } = await supabase.auth.signUp({
         email: email.trim(),
         password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
+        },
       })
 
       if (error) {
-        console.error("Sign up error:", error)
-        setError(error.message)
-        return { success: false, error: error.message }
+        throw error
       }
 
-      if (data.user) {
-        console.log("Sign up successful:", data.user.email)
-        return { success: true }
+      if (data.user && !data.user.email_confirmed_at) {
+        setError("Please check your email and click the confirmation link to complete registration.")
       }
-
-      return { success: false, error: "Unknown error occurred" }
-    } catch (err) {
-      console.error("Sign up exception:", err)
-      const errorMessage = err instanceof Error ? err.message : "Network error occurred"
-      setError(errorMessage)
-      return { success: false, error: errorMessage }
+    } catch (err: any) {
+      console.error("Sign up error:", err)
+      setError(err.message || "Failed to create account")
+      throw err
     } finally {
       setLoading(false)
     }
@@ -142,18 +119,32 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setLoading(true)
       const { error } = await supabase.auth.signOut()
       if (error) {
-        console.error("Sign out error:", error)
-        setError(error.message)
+        throw error
       }
-    } catch (err) {
-      console.error("Sign out exception:", err)
+      setUser(null)
+    } catch (err: any) {
+      console.error("Sign out error:", err)
+      setError(err.message || "Failed to sign out")
+      throw err
     } finally {
       setLoading(false)
     }
   }
 
-  const clearError = () => {
-    setError(null)
+  const resetPassword = async (email: string) => {
+    try {
+      setError(null)
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/auth/reset-password`,
+      })
+      if (error) {
+        throw error
+      }
+    } catch (err: any) {
+      console.error("Reset password error:", err)
+      setError(err.message || "Failed to send reset email")
+      throw err
+    }
   }
 
   const value = {
@@ -163,7 +154,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     signIn,
     signUp,
     signOut,
-    clearError,
+    resetPassword,
   }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
