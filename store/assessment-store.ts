@@ -95,6 +95,7 @@ interface AssessmentState {
   getActiveProject: () => Project | undefined
   getStandardBySlug: (slug: string) => AssessmentStandard | undefined
   setAnswer: (payload: AnswerPayload) => void
+  calculateScoresAndRAG: (standardSlug: string) => void
   getOverallProgress: (projectName?: string) => number
   getOverallMaturityScore: () => number
   getOverallRAGStatus: () => RAGStatus
@@ -177,6 +178,28 @@ export const useAssessmentStore = create<AssessmentState>()(
           })
 
           const updatedProject = { ...activeProject, standards: updatedStandards, lastModifiedAt: new Date() }
+          return {
+            projects: state.projects.map((p) => (p.name === activeProject.name ? updatedProject : p)),
+          }
+        })
+      },
+
+      calculateScoresAndRAG: (standardSlug) => {
+        set((state) => {
+          const activeProject = get().getActiveProject()
+          if (!activeProject) return state
+
+          // Recalculate only the targeted standard
+          const updatedStandards = activeProject.standards.map((std) =>
+            std.slug === standardSlug ? calculateStandardMetrics(std) : std,
+          )
+
+          const updatedProject = {
+            ...activeProject,
+            standards: updatedStandards,
+            lastModifiedAt: new Date(),
+          }
+
           return {
             projects: state.projects.map((p) => (p.name === activeProject.name ? updatedProject : p)),
           }
