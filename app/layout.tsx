@@ -8,7 +8,7 @@ const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
   title: "Power Platform Assessment Suite",
-  description: "Comprehensive assessment tool for Power Platform implementations",
+  description: "Comprehensive assessment tool for Power Platform environments",
     generator: 'v0.dev'
 }
 

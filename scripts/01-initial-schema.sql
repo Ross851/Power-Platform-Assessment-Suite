@@ -7,7 +7,6 @@ CREATE TABLE IF NOT EXISTS public.profiles (
   email TEXT UNIQUE NOT NULL,
   full_name TEXT,
   avatar_url TEXT,
-  role TEXT DEFAULT 'user',
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -17,9 +16,11 @@ CREATE TABLE IF NOT EXISTS public.projects (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   name TEXT NOT NULL,
   description TEXT,
+  client_reference_number TEXT,
   owner_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE NOT NULL,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  UNIQUE(name, owner_id)
 );
 
 -- Create project_access table for role-based access
@@ -28,6 +29,7 @@ CREATE TABLE IF NOT EXISTS public.project_access (
   project_id UUID REFERENCES public.projects(id) ON DELETE CASCADE NOT NULL,
   user_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE NOT NULL,
   role TEXT NOT NULL CHECK (role IN ('owner', 'editor', 'viewer')),
+  granted_by UUID REFERENCES public.profiles(id) NOT NULL,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   UNIQUE(project_id, user_id)
 );
@@ -37,11 +39,10 @@ CREATE TABLE IF NOT EXISTS public.assessments (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   project_id UUID REFERENCES public.projects(id) ON DELETE CASCADE NOT NULL,
   standard_slug TEXT NOT NULL,
-  title TEXT NOT NULL,
-  status TEXT DEFAULT 'draft' CHECK (status IN ('draft', 'in_progress', 'completed')),
-  data JSONB DEFAULT '{}',
+  data JSONB NOT NULL DEFAULT '{}',
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  UNIQUE(project_id, standard_slug)
 );
 
 -- Create documents table for file storage
@@ -52,7 +53,7 @@ CREATE TABLE IF NOT EXISTS public.documents (
   file_path TEXT NOT NULL,
   file_size INTEGER,
   mime_type TEXT,
-  uploaded_by UUID REFERENCES public.profiles(id) ON DELETE SET NULL,
+  uploaded_by UUID REFERENCES public.profiles(id) NOT NULL,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
@@ -77,9 +78,9 @@ CREATE POLICY "Users can insert own profile" ON public.profiles
 CREATE POLICY "Users can view projects they have access to" ON public.projects
   FOR SELECT USING (
     owner_id = auth.uid() OR
-    EXISTS (
-      SELECT 1 FROM public.project_access
-      WHERE project_id = projects.id AND user_id = auth.uid()
+    id IN (
+      SELECT project_id FROM public.project_access 
+      WHERE user_id = auth.uid()
     )
   );
 
@@ -93,93 +94,65 @@ CREATE POLICY "Project owners can delete projects" ON public.projects
   FOR DELETE USING (owner_id = auth.uid());
 
 -- Project access policies
-CREATE POLICY "Users can view project access for their projects" ON public.project_access
+CREATE POLICY "Users can view project access they're involved in" ON public.project_access
   FOR SELECT USING (
     user_id = auth.uid() OR
-    EXISTS (
-      SELECT 1 FROM public.projects
-      WHERE id = project_access.project_id AND owner_id = auth.uid()
+    project_id IN (
+      SELECT id FROM public.projects WHERE owner_id = auth.uid()
     )
   );
 
 CREATE POLICY "Project owners can manage access" ON public.project_access
   FOR ALL USING (
-    EXISTS (
-      SELECT 1 FROM public.projects
-      WHERE id = project_access.project_id AND owner_id = auth.uid()
+    project_id IN (
+      SELECT id FROM public.projects WHERE owner_id = auth.uid()
     )
   );
 
 -- Assessments policies
 CREATE POLICY "Users can view assessments for accessible projects" ON public.assessments
   FOR SELECT USING (
-    EXISTS (
-      SELECT 1 FROM public.projects
-      WHERE id = assessments.project_id AND (
-        owner_id = auth.uid() OR
-        EXISTS (
-          SELECT 1 FROM public.project_access
-          WHERE project_id = projects.id AND user_id = auth.uid()
-        )
-      )
+    project_id IN (
+      SELECT id FROM public.projects 
+      WHERE owner_id = auth.uid()
+      UNION
+      SELECT project_id FROM public.project_access 
+      WHERE user_id = auth.uid()
     )
   );
 
-CREATE POLICY "Users can create assessments for accessible projects" ON public.assessments
-  FOR INSERT WITH CHECK (
-    EXISTS (
-      SELECT 1 FROM public.projects
-      WHERE id = assessments.project_id AND (
-        owner_id = auth.uid() OR
-        EXISTS (
-          SELECT 1 FROM public.project_access
-          WHERE project_id = projects.id AND user_id = auth.uid() AND role IN ('owner', 'editor')
-        )
-      )
-    )
-  );
-
-CREATE POLICY "Users can update assessments for accessible projects" ON public.assessments
-  FOR UPDATE USING (
-    EXISTS (
-      SELECT 1 FROM public.projects
-      WHERE id = assessments.project_id AND (
-        owner_id = auth.uid() OR
-        EXISTS (
-          SELECT 1 FROM public.project_access
-          WHERE project_id = projects.id AND user_id = auth.uid() AND role IN ('owner', 'editor')
-        )
-      )
+CREATE POLICY "Users can modify assessments for accessible projects" ON public.assessments
+  FOR ALL USING (
+    project_id IN (
+      SELECT id FROM public.projects 
+      WHERE owner_id = auth.uid()
+      UNION
+      SELECT project_id FROM public.project_access 
+      WHERE user_id = auth.uid() AND role IN ('owner', 'editor')
     )
   );
 
 -- Documents policies
 CREATE POLICY "Users can view documents for accessible projects" ON public.documents
   FOR SELECT USING (
-    EXISTS (
-      SELECT 1 FROM public.projects
-      WHERE id = documents.project_id AND (
-        owner_id = auth.uid() OR
-        EXISTS (
-          SELECT 1 FROM public.project_access
-          WHERE project_id = projects.id AND user_id = auth.uid()
-        )
-      )
+    project_id IN (
+      SELECT id FROM public.projects 
+      WHERE owner_id = auth.uid()
+      UNION
+      SELECT project_id FROM public.project_access 
+      WHERE user_id = auth.uid()
     )
   );
 
 CREATE POLICY "Users can upload documents to accessible projects" ON public.documents
   FOR INSERT WITH CHECK (
     uploaded_by = auth.uid() AND
-    EXISTS (
-      SELECT 1 FROM public.projects
-      WHERE id = documents.project_id AND (
-        owner_id = auth.uid() OR
-        EXISTS (
-          SELECT 1 FROM public.project_access
-          WHERE project_id = projects.id AND user_id = auth.uid() AND role IN ('owner', 'editor')
-        )
-      )
+    project_id IN (
+      SELECT id FROM public.projects 
+      WHERE owner_id = auth.uid()
+      UNION
+      SELECT project_id FROM public.project_access 
+      WHERE user_id = auth.uid() AND role IN ('owner', 'editor')
     )
   );
 
@@ -199,29 +172,32 @@ CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
 
--- Storage policies for file uploads
-INSERT INTO storage.buckets (id, name, public) VALUES ('documents', 'documents', false) ON CONFLICT DO NOTHING;
+-- Storage bucket for documents
+INSERT INTO storage.buckets (id, name, public) 
+VALUES ('documents', 'documents', false)
+ON CONFLICT (id) DO NOTHING;
 
-CREATE POLICY "Users can upload documents" ON storage.objects
-  FOR INSERT WITH CHECK (
-    bucket_id = 'documents' AND
-    auth.uid()::text = (storage.foldername(name))[1]
-  );
-
+-- Storage policies
 CREATE POLICY "Users can view documents they have access to" ON storage.objects
   FOR SELECT USING (
-    bucket_id = 'documents' AND (
-      auth.uid()::text = (storage.foldername(name))[1] OR
-      EXISTS (
-        SELECT 1 FROM public.documents d
-        JOIN public.projects p ON d.project_id = p.id
-        WHERE d.file_path = name AND (
-          p.owner_id = auth.uid() OR
-          EXISTS (
-            SELECT 1 FROM public.project_access pa
-            WHERE pa.project_id = p.id AND pa.user_id = auth.uid()
-          )
-        )
-      )
+    bucket_id = 'documents' AND
+    (storage.foldername(name))[1] IN (
+      SELECT id::text FROM public.projects 
+      WHERE owner_id = auth.uid()
+      UNION
+      SELECT project_id::text FROM public.project_access 
+      WHERE user_id = auth.uid()
+    )
+  );
+
+CREATE POLICY "Users can upload documents to accessible projects" ON storage.objects
+  FOR INSERT WITH CHECK (
+    bucket_id = 'documents' AND
+    (storage.foldername(name))[1] IN (
+      SELECT id::text FROM public.projects 
+      WHERE owner_id = auth.uid()
+      UNION
+      SELECT project_id::text FROM public.project_access 
+      WHERE user_id = auth.uid() AND role IN ('owner', 'editor')
     )
   );
