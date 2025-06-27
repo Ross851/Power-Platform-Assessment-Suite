@@ -2,7 +2,7 @@
 
 import { useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { useFormState } from "react-dom"
+import { useActionState } from "react"
 import { useAssessmentStore } from "@/store/assessment-store"
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -37,7 +37,8 @@ export function CreateProjectForm() {
     }
   }
 
-  const [state, formAction] = useFormState(handleCreateProject, { error: undefined, success: false })
+  const initialState: FormState = { error: undefined, success: false }
+  const [state, formAction, pending] = useActionState(handleCreateProject, initialState)
 
   useEffect(() => {
     if (state.success && state.projectName) {
@@ -71,8 +72,8 @@ export function CreateProjectForm() {
             </p>
           )}
 
-          <Button type="submit" className="w-full">
-            Create and Open Project
+          <Button type="submit" className="w-full" disabled={pending}>
+            {pending ? "Creating…" : "Create and Open Project"}
           </Button>
         </form>
       </CardContent>
