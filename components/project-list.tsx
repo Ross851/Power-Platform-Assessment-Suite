@@ -15,49 +15,49 @@ import { Input } from "@/components/ui/input"
 import { cn } from "@/lib/utils"
 
 interface ProjectListProps {
-  /** Allows caller to supply its own list; falls back to global store. */
+  /** Optional – list can be injected; otherwise pulled from global store */
   projects?: Project[]
-  /** Optional helper to calculate progress; falls back to store’s helper. */
+  /** Optional – helper to compute progress; otherwise pulled from store */
   getOverallProgress?: (projectName: string) => number
   className?: string
 }
 
 export function ProjectList({
   projects: incomingProjects,
-  getOverallProgress: incomingProgressFn,
+  getOverallProgress: incomingProgress,
   className,
 }: ProjectListProps) {
-  /* -----------------------------------------------------------------------
-   * Data source
-   * ---------------------------------------------------------------------*/
+  /* ------------------------------------------------------------------ */
+  /* Data source                                                         */
+  /* ------------------------------------------------------------------ */
   const store = useAssessmentStore()
   const projects = incomingProjects ?? store.projects ?? []
-  const getOverallProgress = incomingProgressFn ?? store.getOverallProgress
+  const getOverallProgress = incomingProgress ?? store.getOverallProgress
 
-  /* -----------------------------------------------------------------------
-   * Search
-   * ---------------------------------------------------------------------*/
+  /* ------------------------------------------------------------------ */
+  /* Search handling                                                     */
+  /* ------------------------------------------------------------------ */
   const [query, setQuery] = useState("")
 
-  const filtered = useMemo(() => {
+  const filteredProjects = useMemo(() => {
     if (!query.trim()) return projects
 
-    const safe = escapeRegExp(query.trim())
+    const safePattern = escapeRegExp(query.trim())
 
     try {
-      const rx = new RegExp(safe, "i")
-      return projects.filter((p) => rx.test(p.name))
+      const re = new RegExp(safePattern, "i")
+      return projects.filter((p) => re.test(p.name))
     } catch (err) {
-      // Shouldn’t happen after escaping, but stay resilient.
-      console.warn("[ProjectList] RegExp failure – falling back to includes()", err)
-      const q = query.toLowerCase()
-      return projects.filter((p) => p.name.toLowerCase().includes(q))
+      /* Extremely rare after escaping, but remain resilient. */
+      console.warn("[ProjectList] RegExp construction failed – falling back to includes().", err)
+      const lower = query.toLowerCase()
+      return projects.filter((p) => p.name.toLowerCase().includes(lower))
     }
   }, [projects, query])
 
-  /* -----------------------------------------------------------------------
-   * Empty state
-   * ---------------------------------------------------------------------*/
+  /* ------------------------------------------------------------------ */
+  /* Empty state                                                         */
+  /* ------------------------------------------------------------------ */
   if (projects.length === 0) {
     return (
       <div className={cn("text-center py-12 border-2 border-dashed rounded-lg", className)}>
@@ -67,9 +67,9 @@ export function ProjectList({
     )
   }
 
-  /* -----------------------------------------------------------------------
-   * Render
-   * ---------------------------------------------------------------------*/
+  /* ------------------------------------------------------------------ */
+  /* Render                                                              */
+  /* ------------------------------------------------------------------ */
   return (
     <div className={cn("space-y-4", className)}>
       {/* Search bar */}
@@ -84,15 +84,15 @@ export function ProjectList({
         />
       </div>
 
-      {/* Grid */}
+      {/* Project grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {filtered.map((project) => {
+        {filteredProjects.map((project) => {
           const progress = getOverallProgress(project.name)
           return (
             <Card key={project.name}>
               <CardHeader>
                 <CardTitle>{project.name}</CardTitle>
-                <CardDescription>Ref: {project.clientReferenceNumber}</CardDescription>
+                <CardDescription>Ref:&nbsp;{project.clientReferenceNumber}</CardDescription>
               </CardHeader>
 
               <CardContent>
@@ -102,7 +102,10 @@ export function ProjectList({
                 </div>
                 <Progress value={progress} className="h-2" />
                 <p className="text-xs text-muted-foreground mt-2">
-                  Last modified {formatDistanceToNow(new Date(project.lastModifiedAt), { addSuffix: true })}
+                  Last modified{" "}
+                  {formatDistanceToNow(new Date(project.lastModifiedAt), {
+                    addSuffix: true,
+                  })}
                 </p>
               </CardContent>
 
@@ -118,7 +121,7 @@ export function ProjectList({
           )
         })}
 
-        {filtered.length === 0 && (
+        {filteredProjects.length === 0 && (
           <p className="col-span-full text-center text-sm text-muted-foreground">
             No projects match <span className="font-medium">&ldquo;{query}&rdquo;</span>
           </p>
