@@ -1,119 +1,114 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import type React from "react"
+
+import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { useActionState } from "react"
 import { useAssessmentStore } from "@/store/assessment-store"
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
+import { useAuth } from "@/components/auth/auth-provider"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { CheckCircle, AlertCircle } from "lucide-react"
-
-interface FormState {
-  error?: string
-  success?: boolean
-  projectName?: string
-}
+import { Loader2, Plus } from "lucide-react"
 
 export function CreateProjectForm() {
+  const [projectName, setProjectName] = useState("")
+  const [clientName, setClientName] = useState("")
+  const [clientRef, setClientRef] = useState("")
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState("")
+
+  const { addProject } = useAssessmentStore()
+  const { user } = useAuth()
   const router = useRouter()
-  const addProject = useAssessmentStore((state) => state.addProject)
-  const [isSubmitting, setIsSubmitting] = useState(false)
 
-  const handleCreateProject = async (prevState: FormState, formData: FormData): Promise<FormState> => {
-    const name = (formData.get("name") as string)?.trim()
-    const clientRef = (formData.get("client_name") as string)?.trim()
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
 
-    if (!name) {
-      return { error: "Project name is required." }
+    if (!projectName.trim()) {
+      setError("Project name is required")
+      return
     }
+
+    if (!user) {
+      setError("You must be signed in to create a project")
+      return
+    }
+
+    setLoading(true)
+    setError("")
 
     try {
-      setIsSubmitting(true)
-
-      // Add the project to the store (this simulates creating it)
-      addProject({
-        name,
-        client_name: clientRef || null,
-        clientReferenceNumber: clientRef || "",
-        id: Date.now().toString(), // Simple ID generation
+      const newProject = {
+        id: Date.now().toString(),
+        name: projectName.trim(),
+        client_name: clientName.trim() || null,
+        clientReferenceNumber: clientRef.trim() || `REF-${Date.now()}`,
         created_at: new Date().toISOString(),
-        owner_id: "current-user", // This would be the actual user ID in production
-      })
+        owner_id: user.id,
+      }
 
-      // Small delay to show the success state
-      await new Promise((resolve) => setTimeout(resolve, 500))
+      addProject(newProject)
 
-      return { success: true, projectName: name }
-    } catch (error) {
-      console.error("Error creating project:", error)
-      return { error: "Failed to create project. Please try again." }
-    } finally {
-      setIsSubmitting(false)
+      // Clear form
+      setProjectName("")
+      setClientName("")
+      setClientRef("")
+
+      // Navigate to the new project
+      router.push(`/project/${encodeURIComponent(newProject.name)}`)
+    } catch (err) {
+      setError("Failed to create project. Please try again.")
     }
+
+    setLoading(false)
   }
 
-  const initialState: FormState = { error: undefined, success: false }
-  const [state, formAction, pending] = useActionState(handleCreateProject, initialState)
-
-  useEffect(() => {
-    if (state.success && state.projectName) {
-      // Use a timeout to ensure the success message is visible
-      const timer = setTimeout(() => {
-        router.push(`/project/${encodeURIComponent(state.projectName)}`)
-      }, 1000)
-
-      return () => clearTimeout(timer)
-    }
-  }, [state, router])
-
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Create New Project</CardTitle>
-        <CardDescription>Start a new assessment for a client or a new period.</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <form action={formAction} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="name">
-              Project name<span className="text-destructive">*</span>
-            </Label>
-            <Input
-              id="name"
-              name="name"
-              placeholder="e.g. FY25 Governance Review"
-              required
-              disabled={pending || isSubmitting}
-            />
-          </div>
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="space-y-2">
+        <Label htmlFor="projectName">Project Name *</Label>
+        <Input
+          id="projectName"
+          value={projectName}
+          onChange={(e) => setProjectName(e.target.value)}
+          placeholder="Enter project name"
+          required
+        />
+      </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="client_name">Client / Reference</Label>
-            <Input id="client_name" name="client_name" placeholder="Client Ltd." disabled={pending || isSubmitting} />
-          </div>
+      <div className="space-y-2">
+        <Label htmlFor="clientName">Client Name</Label>
+        <Input
+          id="clientName"
+          value={clientName}
+          onChange={(e) => setClientName(e.target.value)}
+          placeholder="Enter client name (optional)"
+        />
+      </div>
 
-          {state.error && (
-            <Alert variant="destructive">
-              <AlertCircle className="h-4 w-4" />
-              <AlertDescription>{state.error}</AlertDescription>
-            </Alert>
-          )}
+      <div className="space-y-2">
+        <Label htmlFor="clientRef">Client Reference</Label>
+        <Input
+          id="clientRef"
+          value={clientRef}
+          onChange={(e) => setClientRef(e.target.value)}
+          placeholder="Enter reference number (optional)"
+        />
+      </div>
 
-          {state.success && (
-            <Alert>
-              <CheckCircle className="h-4 w-4" />
-              <AlertDescription>Project created successfully! Redirecting to project page...</AlertDescription>
-            </Alert>
-          )}
+      {error && (
+        <Alert variant="destructive">
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
 
-          <Button type="submit" className="w-full" disabled={pending || isSubmitting}>
-            {pending || isSubmitting ? "Creating…" : "Create and Open Project"}
-          </Button>
-        </form>
-      </CardContent>
-    </Card>
+      <Button type="submit" className="w-full" disabled={loading}>
+        {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+        <Plus className="mr-2 h-4 w-4" />
+        Create Project
+      </Button>
+    </form>
   )
 }

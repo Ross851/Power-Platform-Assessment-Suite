@@ -2,15 +2,16 @@
 
 import { useAuth } from "@/components/auth/auth-provider"
 import { useAssessmentStore } from "@/store/assessment-store"
+import { AssessmentStandardsList } from "@/components/assessment-standards-list"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { ArrowLeft, AlertTriangle } from "lucide-react"
+import { ArrowLeft, AlertTriangle, CheckCircle, Play } from "lucide-react"
 import Link from "next/link"
 
 export default function AssessmentPage() {
   const { user, loading } = useAuth()
-  const { getActiveProject } = useAssessmentStore()
+  const { getActiveProject, projects, setActiveProject } = useAssessmentStore()
 
   if (loading) {
     return (
@@ -86,6 +87,26 @@ export default function AssessmentPage() {
                     your assessments and allow you to track progress over time.
                   </AlertDescription>
                 </Alert>
+
+                {projects.length > 0 && (
+                  <div className="mb-4">
+                    <h4 className="font-medium mb-2">Available Projects:</h4>
+                    <div className="space-y-2">
+                      {projects.map((project) => (
+                        <Button
+                          key={project.name}
+                          variant="outline"
+                          className="w-full justify-start bg-transparent"
+                          onClick={() => setActiveProject(project.name)}
+                        >
+                          <Play className="h-4 w-4 mr-2" />
+                          {project.name}
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
                 <Link href="/">
                   <Button className="w-full">Go to Dashboard</Button>
                 </Link>
@@ -97,13 +118,49 @@ export default function AssessmentPage() {
     )
   }
 
-  // If there is an active project, redirect to the project page
   return (
-    <div className="min-h-screen flex items-center justify-center">
-      <div className="text-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-        <p className="mt-2 text-gray-600">Redirecting to project...</p>
-      </div>
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <header className="bg-white shadow-sm border-b">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            <div className="flex items-center space-x-4">
+              <Link href="/">
+                <Button variant="ghost" size="sm" className="flex items-center space-x-2">
+                  <ArrowLeft className="h-4 w-4" />
+                  <span>Back to Dashboard</span>
+                </Button>
+              </Link>
+              <div className="h-6 w-px bg-gray-300" />
+              <div>
+                <h1 className="text-xl font-semibold text-gray-900">Assessment Standards</h1>
+                <p className="text-sm text-gray-500">Project: {activeProject.name}</p>
+              </div>
+            </div>
+            <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-2">
+                <CheckCircle className="h-4 w-4 text-green-500" />
+                <span className="text-sm text-gray-600">Project Active</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="mb-8">
+          <Alert>
+            <CheckCircle className="h-4 w-4" />
+            <AlertDescription>
+              Select an assessment standard below to begin your evaluation. Each standard contains specific questions
+              designed to assess your Power Platform implementation.
+            </AlertDescription>
+          </Alert>
+        </div>
+
+        <AssessmentStandardsList />
+      </main>
     </div>
   )
 }
