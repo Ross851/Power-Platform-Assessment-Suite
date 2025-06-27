@@ -4,7 +4,7 @@ import { useAuth } from "@/components/auth/auth-provider"
 import { LoginForm } from "@/components/auth/login-form"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Loader2, TestTube, FolderOpen, Settings, LogOut } from "lucide-react"
+import { LogOut, TestTube, FolderOpen, Settings } from "lucide-react"
 import Link from "next/link"
 
 export default function HomePage() {
@@ -13,7 +13,7 @@ export default function HomePage() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin" />
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
       </div>
     )
   }
@@ -51,9 +51,9 @@ export default function HomePage() {
                 <CardDescription>Begin a new Power Platform assessment</CardDescription>
               </CardHeader>
               <CardContent>
-                <Link href="/assessment">
-                  <Button className="w-full">Start New Assessment</Button>
-                </Link>
+                <Button className="w-full" asChild>
+                  <Link href="/assessment">Start New Assessment</Link>
+                </Button>
               </CardContent>
             </Card>
 
@@ -66,11 +66,9 @@ export default function HomePage() {
                 <CardDescription>Manage your existing assessment projects</CardDescription>
               </CardHeader>
               <CardContent>
-                <Link href="/projects">
-                  <Button className="w-full bg-transparent" variant="outline">
-                    View Projects
-                  </Button>
-                </Link>
+                <Button variant="outline" className="w-full bg-transparent" asChild>
+                  <Link href="/projects">View Projects</Link>
+                </Button>
               </CardContent>
             </Card>
 
@@ -83,53 +81,9 @@ export default function HomePage() {
                 <CardDescription>Run system tests and check configuration</CardDescription>
               </CardHeader>
               <CardContent>
-                <Link href="/test">
-                  <Button className="w-full bg-transparent" variant="outline">
-                    Run Tests
-                  </Button>
-                </Link>
-              </CardContent>
-            </Card>
-          </div>
-
-          <div className="mt-8">
-            <Card>
-              <CardHeader>
-                <CardTitle>Getting Started</CardTitle>
-                <CardDescription>Quick guide to using the Power Platform Assessment Suite</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-start space-x-3">
-                  <div className="flex-shrink-0 w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center">
-                    <span className="text-sm font-medium text-blue-600">1</span>
-                  </div>
-                  <div>
-                    <h4 className="font-medium">Create a Project</h4>
-                    <p className="text-sm text-gray-600">
-                      Start by creating a new assessment project for your organization.
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-start space-x-3">
-                  <div className="flex-shrink-0 w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center">
-                    <span className="text-sm font-medium text-blue-600">2</span>
-                  </div>
-                  <div>
-                    <h4 className="font-medium">Complete Assessment</h4>
-                    <p className="text-sm text-gray-600">
-                      Answer questions across different assessment standards and frameworks.
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-start space-x-3">
-                  <div className="flex-shrink-0 w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center">
-                    <span className="text-sm font-medium text-blue-600">3</span>
-                  </div>
-                  <div>
-                    <h4 className="font-medium">Generate Reports</h4>
-                    <p className="text-sm text-gray-600">Export comprehensive reports and share with stakeholders.</p>
-                  </div>
-                </div>
+                <Button variant="outline" className="w-full bg-transparent" asChild>
+                  <Link href="/test">Run Tests</Link>
+                </Button>
               </CardContent>
             </Card>
           </div>
