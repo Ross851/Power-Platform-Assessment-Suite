@@ -1,5 +1,6 @@
 "use client"
 
+import { useAuth } from "@/components/auth/auth-provider"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -10,28 +11,34 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { LogOut, User, Settings } from "lucide-react"
-import { useAuth } from "./auth/auth-provider"
+import { User, LogOut, Settings } from "lucide-react"
 
 export function UserMenu() {
-  const { user, signOut } = useAuth()
+  const { user, signOut, loading } = useAuth()
 
-  if (!user) return null
+  if (loading) {
+    return <div className="w-8 h-8 rounded-full bg-gray-200 animate-pulse" />
+  }
 
-  const initials =
-    user.user_metadata?.full_name
-      ?.split(" ")
-      .map((n: string) => n[0])
-      .join("")
-      .toUpperCase() || user.email?.substring(0, 2).toUpperCase()
+  if (!user) {
+    return null
+  }
+
+  const userInitials = user.user_metadata?.full_name
+    ? user.user_metadata.full_name
+        .split(" ")
+        .map((n: string) => n[0])
+        .join("")
+        .toUpperCase()
+    : user.email?.charAt(0).toUpperCase() || "U"
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative h-8 w-8 rounded-full">
           <Avatar className="h-8 w-8">
-            <AvatarImage src={user.user_metadata?.avatar_url || "/placeholder.svg"} alt={user.email} />
-            <AvatarFallback>{initials}</AvatarFallback>
+            <AvatarImage src={user.user_metadata?.avatar_url || "/placeholder.svg"} alt={user.email || ""} />
+            <AvatarFallback>{userInitials}</AvatarFallback>
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
