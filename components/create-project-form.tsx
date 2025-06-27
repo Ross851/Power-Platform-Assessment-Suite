@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { useActionState } from "react"
 import { useAssessmentStore } from "@/store/assessment-store"
@@ -8,6 +8,8 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/com
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import { CheckCircle, AlertCircle } from "lucide-react"
 
 interface FormState {
   error?: string
@@ -18,6 +20,7 @@ interface FormState {
 export function CreateProjectForm() {
   const router = useRouter()
   const addProject = useAssessmentStore((state) => state.addProject)
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const handleCreateProject = async (prevState: FormState, formData: FormData): Promise<FormState> => {
     const name = (formData.get("name") as string)?.trim()
@@ -27,10 +30,29 @@ export function CreateProjectForm() {
       return { error: "Project name is required." }
     }
 
-    // Add the project to the store
-    addProject({ name, client_name: clientRef || null, clientReferenceNumber: clientRef || "" })
+    try {
+      setIsSubmitting(true)
 
-    return { success: true, projectName: name }
+      // Add the project to the store (this simulates creating it)
+      addProject({
+        name,
+        client_name: clientRef || null,
+        clientReferenceNumber: clientRef || "",
+        id: Date.now().toString(), // Simple ID generation
+        created_at: new Date().toISOString(),
+        owner_id: "current-user", // This would be the actual user ID in production
+      })
+
+      // Small delay to show the success state
+      await new Promise((resolve) => setTimeout(resolve, 500))
+
+      return { success: true, projectName: name }
+    } catch (error) {
+      console.error("Error creating project:", error)
+      return { error: "Failed to create project. Please try again." }
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   const initialState: FormState = { error: undefined, success: false }
@@ -38,7 +60,12 @@ export function CreateProjectForm() {
 
   useEffect(() => {
     if (state.success && state.projectName) {
-      router.push(`/project/${encodeURIComponent(state.projectName)}`)
+      // Use a timeout to ensure the success message is visible
+      const timer = setTimeout(() => {
+        router.push(`/project/${encodeURIComponent(state.projectName)}`)
+      }, 1000)
+
+      return () => clearTimeout(timer)
     }
   }, [state, router])
 
@@ -54,22 +81,36 @@ export function CreateProjectForm() {
             <Label htmlFor="name">
               Project name<span className="text-destructive">*</span>
             </Label>
-            <Input id="name" name="name" placeholder="e.g. FY25 Governance Review" required />
+            <Input
+              id="name"
+              name="name"
+              placeholder="e.g. FY25 Governance Review"
+              required
+              disabled={pending || isSubmitting}
+            />
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="client_name">Client / Reference</Label>
-            <Input id="client_name" name="client_name" placeholder="Client Ltd." />
+            <Input id="client_name" name="client_name" placeholder="Client Ltd." disabled={pending || isSubmitting} />
           </div>
 
           {state.error && (
-            <p className="text-sm text-destructive" role="alert">
-              {state.error}
-            </p>
+            <Alert variant="destructive">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>{state.error}</AlertDescription>
+            </Alert>
           )}
 
-          <Button type="submit" className="w-full" disabled={pending}>
-            {pending ? "Creating…" : "Create and Open Project"}
+          {state.success && (
+            <Alert>
+              <CheckCircle className="h-4 w-4" />
+              <AlertDescription>Project created successfully! Redirecting to project page...</AlertDescription>
+            </Alert>
+          )}
+
+          <Button type="submit" className="w-full" disabled={pending || isSubmitting}>
+            {pending || isSubmitting ? "Creating…" : "Create and Open Project"}
           </Button>
         </form>
       </CardContent>

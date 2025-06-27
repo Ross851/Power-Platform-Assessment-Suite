@@ -10,131 +10,116 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Eye, EyeOff, Loader2, Shield, AlertCircle, CheckCircle } from "lucide-react"
+import { Eye, EyeOff, Shield, AlertCircle, CheckCircle } from "lucide-react"
 
 export function LoginForm() {
-  const { signIn, signUp, resetPassword, loading, error } = useAuth()
+  const { signIn, signUp, error, loading } = useAuth()
   const [showPassword, setShowPassword] = useState(false)
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
-  const [localError, setLocalError] = useState<string | null>(null)
-  const [success, setSuccess] = useState<string | null>(null)
-  const [activeTab, setActiveTab] = useState("signin")
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+    confirmPassword: "",
+  })
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({})
+  const [successMessage, setSuccessMessage] = useState("")
 
-  // Form states
-  const [signInData, setSignInData] = useState({ email: "", password: "" })
-  const [signUpData, setSignUpData] = useState({ email: "", password: "", confirmPassword: "" })
-  const [resetEmail, setResetEmail] = useState("")
+  const validateForm = (isSignUp = false) => {
+    const errors: Record<string, string> = {}
+
+    if (!formData.email) {
+      errors.email = "Email is required"
+    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      errors.email = "Please enter a valid email address"
+    }
+
+    if (!formData.password) {
+      errors.password = "Password is required"
+    } else if (formData.password.length < 6) {
+      errors.password = "Password must be at least 6 characters"
+    }
+
+    if (isSignUp && formData.password !== formData.confirmPassword) {
+      errors.confirmPassword = "Passwords do not match"
+    }
+
+    setFormErrors(errors)
+    return Object.keys(errors).length === 0
+  }
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault()
-    setLocalError(null)
-    setSuccess(null)
-
-    if (!signInData.email || !signInData.password) {
-      setLocalError("Please fill in all fields")
-      return
-    }
+    if (!validateForm()) return
 
     try {
-      await signIn(signInData.email, signInData.password)
-      setSuccess("Successfully signed in!")
-    } catch (err: any) {
-      setLocalError(err.message || "Failed to sign in")
+      await signIn(formData.email, formData.password)
+    } catch (err) {
+      console.error("Sign in error:", err)
     }
   }
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault()
-    setLocalError(null)
-    setSuccess(null)
-
-    if (!signUpData.email || !signUpData.password || !signUpData.confirmPassword) {
-      setLocalError("Please fill in all fields")
-      return
-    }
-
-    if (signUpData.password.length < 6) {
-      setLocalError("Password must be at least 6 characters long")
-      return
-    }
-
-    if (signUpData.password !== signUpData.confirmPassword) {
-      setLocalError("Passwords do not match")
-      return
-    }
+    if (!validateForm(true)) return
 
     try {
-      await signUp(signUpData.email, signUpData.password)
-      setSuccess("Account created! Please check your email for a confirmation link.")
-      setSignUpData({ email: "", password: "", confirmPassword: "" })
-    } catch (err: any) {
-      setLocalError(err.message || "Failed to create account")
+      await signUp(formData.email, formData.password)
+      setSuccessMessage("Account created! Please check your email for a confirmation link.")
+    } catch (err) {
+      console.error("Sign up error:", err)
     }
   }
 
-  const handleResetPassword = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setLocalError(null)
-    setSuccess(null)
-
-    if (!resetEmail) {
-      setLocalError("Please enter your email address")
-      return
-    }
-
-    try {
-      await resetPassword(resetEmail)
-      setSuccess("Password reset email sent! Check your inbox.")
-      setResetEmail("")
-    } catch (err: any) {
-      setLocalError(err.message || "Failed to send reset email")
+  const handleInputChange = (field: string, value: string) => {
+    setFormData((prev) => ({ ...prev, [field]: value }))
+    if (formErrors[field]) {
+      setFormErrors((prev) => ({ ...prev, [field]: "" }))
     }
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
-      <Card className="w-full max-w-md shadow-xl">
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+      <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-blue-100">
-            <Shield className="h-6 w-6 text-blue-600" />
+          <div className="flex justify-center mb-4">
+            <Shield className="h-12 w-12 text-blue-600" />
           </div>
           <CardTitle className="text-2xl font-bold">Power Platform Assessment Suite</CardTitle>
-          <CardDescription>Sign in to access your assessment dashboard</CardDescription>
+          <CardDescription>Sign in to your account or create a new one</CardDescription>
         </CardHeader>
         <CardContent>
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-3">
+          <Tabs defaultValue="signin" className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="signin">Sign In</TabsTrigger>
               <TabsTrigger value="signup">Sign Up</TabsTrigger>
-              <TabsTrigger value="reset">Reset</TabsTrigger>
             </TabsList>
 
-            {/* Sign In Tab */}
-            <TabsContent value="signin" className="space-y-4">
+            <TabsContent value="signin">
               <form onSubmit={handleSignIn} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="signin-email">Email</Label>
                   <Input
                     id="signin-email"
                     type="email"
+                    value={formData.email}
+                    onChange={(e) => handleInputChange("email", e.target.value)}
                     placeholder="Enter your email"
-                    value={signInData.email}
-                    onChange={(e) => setSignInData({ ...signInData, email: e.target.value })}
-                    required
-                    autoComplete="email"
+                    disabled={loading}
+                    className={formErrors.email ? "border-red-500" : ""}
                   />
+                  {formErrors.email && <p className="text-sm text-red-600">{formErrors.email}</p>}
                 </div>
+
                 <div className="space-y-2">
                   <Label htmlFor="signin-password">Password</Label>
                   <div className="relative">
                     <Input
                       id="signin-password"
                       type={showPassword ? "text" : "password"}
+                      value={formData.password}
+                      onChange={(e) => handleInputChange("password", e.target.value)}
                       placeholder="Enter your password"
-                      value={signInData.password}
-                      onChange={(e) => setSignInData({ ...signInData, password: e.target.value })}
-                      required
-                      autoComplete="current-password"
+                      disabled={loading}
+                      className={formErrors.password ? "border-red-500" : ""}
                     />
                     <Button
                       type="button"
@@ -142,51 +127,54 @@ export function LoginForm() {
                       size="sm"
                       className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
                       onClick={() => setShowPassword(!showPassword)}
+                      disabled={loading}
                     >
                       {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                     </Button>
                   </div>
+                  {formErrors.password && <p className="text-sm text-red-600">{formErrors.password}</p>}
                 </div>
+
+                {error && (
+                  <Alert variant="destructive">
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertDescription>{error}</AlertDescription>
+                  </Alert>
+                )}
+
                 <Button type="submit" className="w-full" disabled={loading}>
-                  {loading ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Signing In...
-                    </>
-                  ) : (
-                    "Sign In"
-                  )}
+                  {loading ? "Signing in..." : "Sign In"}
                 </Button>
               </form>
             </TabsContent>
 
-            {/* Sign Up Tab */}
-            <TabsContent value="signup" className="space-y-4">
+            <TabsContent value="signup">
               <form onSubmit={handleSignUp} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="signup-email">Email</Label>
                   <Input
                     id="signup-email"
                     type="email"
+                    value={formData.email}
+                    onChange={(e) => handleInputChange("email", e.target.value)}
                     placeholder="Enter your email"
-                    value={signUpData.email}
-                    onChange={(e) => setSignUpData({ ...signUpData, email: e.target.value })}
-                    required
-                    autoComplete="email"
+                    disabled={loading}
+                    className={formErrors.email ? "border-red-500" : ""}
                   />
+                  {formErrors.email && <p className="text-sm text-red-600">{formErrors.email}</p>}
                 </div>
+
                 <div className="space-y-2">
                   <Label htmlFor="signup-password">Password</Label>
                   <div className="relative">
                     <Input
                       id="signup-password"
                       type={showPassword ? "text" : "password"}
-                      placeholder="Create a password (min 6 characters)"
-                      value={signUpData.password}
-                      onChange={(e) => setSignUpData({ ...signUpData, password: e.target.value })}
-                      required
-                      minLength={6}
-                      autoComplete="new-password"
+                      value={formData.password}
+                      onChange={(e) => handleInputChange("password", e.target.value)}
+                      placeholder="Create a password (min. 6 characters)"
+                      disabled={loading}
+                      className={formErrors.password ? "border-red-500" : ""}
                     />
                     <Button
                       type="button"
@@ -194,91 +182,48 @@ export function LoginForm() {
                       size="sm"
                       className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
                       onClick={() => setShowPassword(!showPassword)}
+                      disabled={loading}
                     >
                       {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                     </Button>
                   </div>
+                  {formErrors.password && <p className="text-sm text-red-600">{formErrors.password}</p>}
                 </div>
+
                 <div className="space-y-2">
                   <Label htmlFor="confirm-password">Confirm Password</Label>
-                  <div className="relative">
-                    <Input
-                      id="confirm-password"
-                      type={showConfirmPassword ? "text" : "password"}
-                      placeholder="Confirm your password"
-                      value={signUpData.confirmPassword}
-                      onChange={(e) => setSignUpData({ ...signUpData, confirmPassword: e.target.value })}
-                      required
-                      autoComplete="new-password"
-                    />
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    >
-                      {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                    </Button>
-                  </div>
-                </div>
-                <Button type="submit" className="w-full" disabled={loading}>
-                  {loading ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Creating Account...
-                    </>
-                  ) : (
-                    "Create Account"
-                  )}
-                </Button>
-              </form>
-            </TabsContent>
-
-            {/* Reset Password Tab */}
-            <TabsContent value="reset" className="space-y-4">
-              <form onSubmit={handleResetPassword} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="reset-email">Email</Label>
                   <Input
-                    id="reset-email"
-                    type="email"
-                    placeholder="Enter your email"
-                    value={resetEmail}
-                    onChange={(e) => setResetEmail(e.target.value)}
-                    required
-                    autoComplete="email"
+                    id="confirm-password"
+                    type="password"
+                    value={formData.confirmPassword}
+                    onChange={(e) => handleInputChange("confirmPassword", e.target.value)}
+                    placeholder="Confirm your password"
+                    disabled={loading}
+                    className={formErrors.confirmPassword ? "border-red-500" : ""}
                   />
+                  {formErrors.confirmPassword && <p className="text-sm text-red-600">{formErrors.confirmPassword}</p>}
                 </div>
+
+                {error && (
+                  <Alert variant="destructive">
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertDescription>{error}</AlertDescription>
+                  </Alert>
+                )}
+
+                {successMessage && (
+                  <Alert>
+                    <CheckCircle className="h-4 w-4" />
+                    <AlertDescription>{successMessage}</AlertDescription>
+                  </Alert>
+                )}
+
                 <Button type="submit" className="w-full" disabled={loading}>
-                  {loading ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Sending Reset Email...
-                    </>
-                  ) : (
-                    "Send Reset Email"
-                  )}
+                  {loading ? "Creating account..." : "Create Account"}
                 </Button>
               </form>
             </TabsContent>
           </Tabs>
-
-          {/* Error Display */}
-          {(error || localError) && (
-            <Alert variant="destructive" className="mt-4">
-              <AlertCircle className="h-4 w-4" />
-              <AlertDescription>{error || localError}</AlertDescription>
-            </Alert>
-          )}
-
-          {/* Success Display */}
-          {success && (
-            <Alert className="mt-4 border-green-200 bg-green-50">
-              <CheckCircle className="h-4 w-4 text-green-600" />
-              <AlertDescription className="text-green-800">{success}</AlertDescription>
-            </Alert>
-          )}
         </CardContent>
       </Card>
     </div>
