@@ -22,13 +22,6 @@ interface Project {
   updated_at: string
 }
 
-interface ProjectAccess {
-  id: string
-  role: "owner" | "editor" | "viewer"
-  user_email: string
-  user_name: string | null
-}
-
 interface Assessment {
   id: string
   standard_slug: string
@@ -62,64 +55,68 @@ export default function ProjectPage() {
       setError(null)
 
       const supabase = createClient()
+      const decodedName = decodeURIComponent(projectName)
 
-      // First, try to get the project by name and check if user has access
-      const { data: projects, error: projectError } = await supabase
+      /* ── 1️⃣  Fetch the project by name ───────────────────────────── */
+      const { data: projectData, error: projectErr } = await supabase
         .from("projects")
-        .select(`
-          *,
-          project_access (
-            role,
-            user_id,
-            profiles (
-              email,
-              full_name
-            )
-          )
-        `)
-        .eq("name", projectName)
+        .select("*")
+        .eq("name", decodedName)
+        .order("created_at", { ascending: false })
         .limit(1)
+        .maybeSingle()
 
-      if (projectError) {
-        console.error("Project query error:", projectError)
-        setError(`Database error: ${projectError.message}`)
+      if (projectErr) {
+        console.error("Project query error:", projectErr)
+        setError(`Database error: ${projectErr.message}`)
         return
       }
 
-      if (!projects || projects.length === 0) {
-        setError("Project not found or you do not have access to this project.")
+      if (!projectData) {
+        setError(`No project named “${decodedName}” found or you lack access.`)
         return
       }
 
-      const projectData = projects[0]
-      setProject(projectData)
+      setProject(projectData as Project)
 
-      // Determine user's role
-      if (projectData.owner_id === user.id) {
+      /* ── 2️⃣  Determine the user’s role ───────────────────────────── */
+      if (projectData.owner_id === user!.id) {
         setUserRole("owner")
       } else {
-        const userAccess = projectData.project_access?.find((access: any) => access.user_id === user.id)
-        if (userAccess) {
-          setUserRole(userAccess.role)
-        } else {
+        const { data: accessRow, error: accessErr } = await supabase
+          .from("project_access")
+          .select("role")
+          .eq("project_id", projectData.id)
+          .eq("user_id", user!.id)
+          .maybeSingle()
+
+        if (accessErr) {
+          console.error("Access query error:", accessErr)
+          setError(`Database error: ${accessErr.message}`)
+          return
+        }
+
+        if (!accessRow) {
           setError("You do not have access to this project.")
           return
         }
+
+        setUserRole(accessRow.role as "owner" | "editor" | "viewer")
       }
 
-      // Fetch assessments for this project
-      const { data: assessmentData, error: assessmentError } = await supabase
+      /* ── 3️⃣  Fetch assessments ───────────────────────────────────── */
+      const { data: assessmentData, error: assessErr } = await supabase
         .from("assessments")
         .select("*")
         .eq("project_id", projectData.id)
 
-      if (assessmentError) {
-        console.error("Assessment query error:", assessmentError)
+      if (assessErr) {
+        console.error("Assessment query error:", assessErr)
       } else {
         setAssessments(assessmentData || [])
       }
     } catch (err) {
-      console.error("Error fetching project:", err)
+      console.error("Unexpected fetch error:", err)
       setError("An unexpected error occurred while loading the project.")
     } finally {
       setLoading(false)
