@@ -1,33 +1,55 @@
 "use client"
 
-import { Button } from "@/components/ui/button"
-import type { Question } from "@/lib/types"
-import { ThumbsUp, ThumbsDown } from "lucide-react"
+import { useState } from "react"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { Label } from "@/components/ui/label"
+import { Check, X } from "lucide-react"
 
 interface BooleanInputProps {
-  question: Question
-  onAnswerChange: (answer: boolean) => void
+  question: {
+    id: string
+    text: string
+    description?: string
+    answer?: boolean
+  }
+  onAnswerChange: (questionId: string, answer: boolean) => void
 }
 
 export function BooleanInput({ question, onAnswerChange }: BooleanInputProps) {
-  const currentAnswer = question.answer as boolean | undefined
+  const [selectedValue, setSelectedValue] = useState<string>(
+    question.answer !== undefined ? question.answer.toString() : "",
+  )
+
+  const handleValueChange = (value: string) => {
+    setSelectedValue(value)
+    onAnswerChange(question.id, value === "true")
+  }
 
   return (
-    <div className="flex space-x-4">
-      <Button
-        variant={currentAnswer === true ? "default" : "outline"}
-        onClick={() => onAnswerChange(true)}
-        className={`flex-1 ${currentAnswer === true ? "ring-2 ring-primary ring-offset-2" : "bg-card text-card-foreground"}`}
-      >
-        <ThumbsUp className="mr-2 h-5 w-5 text-green-500" /> Yes
-      </Button>
-      <Button
-        variant={currentAnswer === false ? "default" : "outline"}
-        onClick={() => onAnswerChange(false)}
-        className={`flex-1 ${currentAnswer === false ? "ring-2 ring-destructive ring-offset-2" : "bg-card text-card-foreground"}`}
-      >
-        <ThumbsDown className="mr-2 h-5 w-5 text-red-500" /> No
-      </Button>
-    </div>
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-lg">{question.text}</CardTitle>
+        {question.description && <CardDescription>{question.description}</CardDescription>}
+      </CardHeader>
+      <CardContent>
+        <RadioGroup value={selectedValue} onValueChange={handleValueChange} className="space-y-3">
+          <div className="flex items-center space-x-2">
+            <RadioGroupItem value="true" id={`${question.id}-true`} />
+            <Label htmlFor={`${question.id}-true`} className="flex items-center space-x-2 cursor-pointer">
+              <Check className="h-4 w-4 text-green-600" />
+              <span>Yes</span>
+            </Label>
+          </div>
+          <div className="flex items-center space-x-2">
+            <RadioGroupItem value="false" id={`${question.id}-false`} />
+            <Label htmlFor={`${question.id}-false`} className="flex items-center space-x-2 cursor-pointer">
+              <X className="h-4 w-4 text-red-600" />
+              <span>No</span>
+            </Label>
+          </div>
+        </RadioGroup>
+      </CardContent>
+    </Card>
   )
 }

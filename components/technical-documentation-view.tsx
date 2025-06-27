@@ -242,7 +242,7 @@ export function TechnicalDocumentationView() {
                         </CardTitle>
                       </CardHeader>
                       <CardContent>
-                        {gap.evidence.length > 0 ? (
+                        {gap.evidence && gap.evidence.length > 0 ? (
                           <div className="space-y-2">
                             {gap.evidence.map((evidence, evidenceIndex) => (
                               <div key={evidenceIndex} className="border-l-2 border-l-blue-200 pl-3 py-1">

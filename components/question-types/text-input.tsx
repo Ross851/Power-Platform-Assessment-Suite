@@ -1,85 +1,58 @@
 "use client"
 
+import type React from "react"
+
 import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
-import type { Question } from "@/lib/types"
-import { Edit, Save } from "lucide-react"
 
 interface TextInputProps {
-  question: Question
-  onAnswerChange: (answer: string) => void
+  question: {
+    id: string
+    text: string
+    description?: string
+    answer?: string
+    placeholder?: string
+    maxLength?: number
+  }
+  onAnswerChange: (questionId: string, answer: string) => void
 }
 
 export function TextInput({ question, onAnswerChange }: TextInputProps) {
-  const [isOpen, setIsOpen] = useState(false)
-  const [currentValue, setCurrentValue] = useState((question.answer as string) || "")
+  const [value, setValue] = useState<string>(question.answer || "")
 
-  const handleSave = () => {
-    onAnswerChange(currentValue)
-    setIsOpen(false)
-  }
-
-  const handleCancel = () => {
-    setCurrentValue((question.answer as string) || "")
-    setIsOpen(false)
+  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const inputValue = e.target.value
+    setValue(inputValue)
+    onAnswerChange(question.id, inputValue)
   }
 
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <div className="flex items-start gap-2">
-        <Textarea
-          value={(question.answer as string) || ""}
-          readOnly
-          placeholder="Click to enter your detailed response..."
-          className="min-h-[120px] cursor-pointer resize-none"
-          onClick={() => setIsOpen(true)}
-        />
-        <DialogTrigger asChild>
-          <Button variant="outline" size="icon">
-            <Edit className="h-4 w-4" />
-            <span className="sr-only">Edit Response</span>
-          </Button>
-        </DialogTrigger>
-      </div>
-      <DialogContent className="max-w-4xl max-h-[80vh]">
-        <DialogHeader>
-          <DialogTitle>Detailed Response</DialogTitle>
-          <DialogDescription>{question.text}</DialogDescription>
-        </DialogHeader>
-        <div className="py-4">
-          <Label htmlFor="response-text" className="sr-only">
-            Detailed Response
-          </Label>
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-lg">{question.text}</CardTitle>
+        {question.description && <CardDescription>{question.description}</CardDescription>}
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-2">
+          <Label htmlFor={`${question.id}-textarea`}>Your response</Label>
           <Textarea
-            id="response-text"
-            value={currentValue}
-            onChange={(e) => setCurrentValue(e.target.value)}
-            placeholder="Enter your detailed response..."
-            className="min-h-[400px] resize-none"
-            autoFocus
+            id={`${question.id}-textarea`}
+            value={value}
+            onChange={handleChange}
+            placeholder={question.placeholder || "Enter your response..."}
+            maxLength={question.maxLength}
+            rows={4}
+            className="w-full"
           />
+          {question.maxLength && (
+            <p className="text-sm text-muted-foreground">
+              {value.length}/{question.maxLength} characters
+            </p>
+          )}
         </div>
-        <DialogFooter>
-          <Button type="button" variant="outline" onClick={handleCancel}>
-            Cancel
-          </Button>
-          <Button type="button" onClick={handleSave}>
-            <Save className="h-4 w-4 mr-2" />
-            Save Response
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+      </CardContent>
+    </Card>
   )
 }

@@ -1,330 +1,142 @@
 "use client"
 
 import type React from "react"
-import { useState, useCallback, useEffect } from "react"
-import { useDropzone } from "react-dropzone"
-import { Document, Page, pdfjs } from "react-pdf"
 
-import type { Question } from "@/lib/types"
+import { useState } from "react"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
-import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Badge } from "@/components/ui/badge"
-import { UploadCloud, FileText, X, ChevronLeft, ChevronRight, PlusCircle, Trash2 } from "lucide-react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-
-// Configure PDF.js worker
-// In a Next.js app, you'd typically copy this to the public folder
-// For Next.js, this might be tricky. Let's assume it can be fetched from a CDN.
-// If running locally after npm install, it might resolve from node_modules.
-pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`
+import { Upload, FileText, X } from "lucide-react"
 
 interface DocumentReviewInputProps {
-  question: Question
-  onAnswerChange: (
-    questionId: string,
-    // The 'answer' could be a summary or overall assessment.
-    // Annotations are handled via documentData.
-    answer: string,
-    documentData: {
-      file?: File | null
-      fileName?: string
-      numPages?: number
-      annotations: Array<{ page: number; text: string; tags?: string[] }>
-    },
-  ) => void
-}
-
-interface Annotation {
-  page: number
-  text: string
-  tags: string[]
+  question: {
+    id: string
+    text: string
+    description?: string
+    answer?: {
+      documents: Array<{ name: string; type: string; size: number }>
+      notes: string
+    }
+  }
+  onAnswerChange: (questionId: string, answer: any) => void
 }
 
 export function DocumentReviewInput({ question, onAnswerChange }: DocumentReviewInputProps) {
-  const [file, setFile] = useState<File | null>(question.document?.file || null)
-  const [fileName, setFileName] = useState<string>(question.document?.fileName || "")
-  const [numPages, setNumPages] = useState<number | null>(question.document?.numPages || null)
-  const [currentPage, setCurrentPage] = useState<number>(1)
-  const [annotations, setAnnotations] = useState<Annotation[]>(question.document?.annotations || [])
-  const [currentAnnotationText, setCurrentAnnotationText] = useState("")
-  const [currentAnnotationTags, setCurrentAnnotationTags] = useState<string[]>([])
-  const [tagInput, setTagInput] = useState("")
-  const [overallAssessment, setOverallAssessment] = useState<string>((question.answer as string) || "")
-
-  const onDrop = useCallback(
-    (acceptedFiles: File[]) => {
-      if (acceptedFiles && acceptedFiles.length > 0) {
-        const selectedFile = acceptedFiles[0]
-        if (selectedFile.type === "application/pdf") {
-          setFile(selectedFile)
-          setFileName(selectedFile.name)
-          setCurrentPage(1) // Reset to first page on new file
-          // Annotations should be reset or handled if associated with the specific file
-          setAnnotations([])
-          onAnswerChange(question.id, overallAssessment, {
-            file: selectedFile,
-            fileName: selectedFile.name,
-            numPages,
-            annotations: [],
-          })
-        } else {
-          alert("Please upload a PDF file.")
-        }
-      }
-    },
-    [question.id, onAnswerChange, overallAssessment, numPages],
+  const [documents, setDocuments] = useState<Array<{ name: string; type: string; size: number }>>(
+    question.answer?.documents || [],
   )
+  const [notes, setNotes] = useState<string>(question.answer?.notes || "")
 
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    onDrop,
-    accept: { "application/pdf": [".pdf"] },
-    multiple: false,
-  })
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || [])
+    const newDocuments = files.map((file) => ({
+      name: file.name,
+      type: file.type,
+      size: file.size,
+    }))
 
-  function onDocumentLoadSuccess({ numPages: nextNumPages }: { numPages: number }) {
-    setNumPages(nextNumPages)
-    onAnswerChange(question.id, overallAssessment, { file, fileName, numPages: nextNumPages, annotations })
+    const updatedDocuments = [...documents, ...newDocuments]
+    setDocuments(updatedDocuments)
+    updateAnswer(updatedDocuments, notes)
   }
 
-  const addAnnotation = () => {
-    if (currentAnnotationText.trim() === "") return
-    const newAnnotation: Annotation = {
-      page: currentPage,
-      text: currentAnnotationText,
-      tags: currentAnnotationTags,
-    }
-    const updatedAnnotations = [...annotations, newAnnotation]
-    setAnnotations(updatedAnnotations)
-    onAnswerChange(question.id, overallAssessment, { file, fileName, numPages, annotations: updatedAnnotations })
-    setCurrentAnnotationText("")
-    setCurrentAnnotationTags([])
-    setTagInput("")
+  const removeDocument = (index: number) => {
+    const updatedDocuments = documents.filter((_, i) => i !== index)
+    setDocuments(updatedDocuments)
+    updateAnswer(updatedDocuments, notes)
   }
 
-  const removeAnnotation = (index: number) => {
-    const updatedAnnotations = annotations.filter((_, i) => i !== index)
-    setAnnotations(updatedAnnotations)
-    onAnswerChange(question.id, overallAssessment, { file, fileName, numPages, annotations: updatedAnnotations })
+  const handleNotesChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const newNotes = e.target.value
+    setNotes(newNotes)
+    updateAnswer(documents, newNotes)
   }
 
-  const addTag = () => {
-    if (tagInput.trim() && !currentAnnotationTags.includes(tagInput.trim())) {
-      setCurrentAnnotationTags([...currentAnnotationTags, tagInput.trim()])
-      setTagInput("")
-    }
+  const updateAnswer = (docs: typeof documents, notesText: string) => {
+    onAnswerChange(question.id, {
+      documents: docs,
+      notes: notesText,
+    })
   }
 
-  const removeTag = (tagToRemove: string) => {
-    setCurrentAnnotationTags(currentAnnotationTags.filter((tag) => tag !== tagToRemove))
+  const formatFileSize = (bytes: number) => {
+    if (bytes === 0) return "0 Bytes"
+    const k = 1024
+    const sizes = ["Bytes", "KB", "MB", "GB"]
+    const i = Math.floor(Math.log(bytes) / Math.log(k))
+    return Number.parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i]
   }
-
-  const handleOverallAssessmentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setOverallAssessment(e.target.value)
-    onAnswerChange(question.id, e.target.value, { file, fileName, numPages, annotations })
-  }
-
-  useEffect(() => {
-    // If initial question data exists, populate state
-    if (question.document) {
-      setFile(question.document.file || null)
-      setFileName(question.document.fileName || "")
-      setNumPages(question.document.numPages || null)
-      setAnnotations(question.document.annotations || [])
-    }
-    if (question.answer) {
-      setOverallAssessment(question.answer as string)
-    }
-  }, [question])
 
   return (
-    <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>Overall Document Assessment</CardTitle>
-          <CardDescription>Provide a summary of your findings for this document.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Textarea
-            value={overallAssessment}
-            onChange={handleOverallAssessmentChange}
-            placeholder="e.g., Rulebook is comprehensive but lacks clear version control. Several DLP policies are outdated..."
-            className="min-h-[100px]"
-          />
-        </CardContent>
-      </Card>
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-lg">{question.text}</CardTitle>
+        {question.description && <CardDescription>{question.description}</CardDescription>}
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="space-y-2">
+          <Label>Upload Documents</Label>
+          <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-6 text-center">
+            <Upload className="mx-auto h-12 w-12 text-muted-foreground/50 mb-4" />
+            <div className="space-y-2">
+              <p className="text-sm text-muted-foreground">Drag and drop files here, or click to browse</p>
+              <Button variant="outline" size="sm" asChild>
+                <label htmlFor={`${question.id}-file-upload`} className="cursor-pointer">
+                  Choose Files
+                  <input
+                    id={`${question.id}-file-upload`}
+                    type="file"
+                    multiple
+                    onChange={handleFileUpload}
+                    className="sr-only"
+                    accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png"
+                  />
+                </label>
+              </Button>
+            </div>
+          </div>
+        </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>Document Upload & View</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {!file ? (
-              <div
-                {...getRootProps()}
-                className={`p-8 border-2 border-dashed rounded-lg text-center cursor-pointer
-                  ${isDragActive ? "border-primary bg-primary/10" : "border-muted-foreground/50 hover:border-primary/80"}`}
-              >
-                <input {...getInputProps()} />
-                <UploadCloud className="mx-auto h-12 w-12 text-muted-foreground mb-2" />
-                {isDragActive ? (
-                  <p>Drop the PDF here ...</p>
-                ) : (
-                  <p>Drag 'n' drop a PDF file here, or click to select file</p>
-                )}
-                <p className="text-xs text-muted-foreground mt-1">PDF files only</p>
-              </div>
-            ) : (
-              <div>
-                <div className="flex justify-between items-center mb-2 p-2 border rounded-md bg-muted/50">
-                  <div className="flex items-center space-x-2">
-                    <FileText className="h-5 w-5 text-primary" />
-                    <span className="text-sm font-medium">{fileName}</span>
+        {documents.length > 0 && (
+          <div className="space-y-2">
+            <Label>Uploaded Documents</Label>
+            <div className="space-y-2">
+              {documents.map((doc, index) => (
+                <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
+                  <div className="flex items-center space-x-3">
+                    <FileText className="h-5 w-5 text-muted-foreground" />
+                    <div>
+                      <p className="text-sm font-medium">{doc.name}</p>
+                      <p className="text-xs text-muted-foreground">{formatFileSize(doc.size)}</p>
+                    </div>
                   </div>
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => {
-                      setFile(null)
-                      setFileName("")
-                      setNumPages(null)
-                      setAnnotations([])
-                      onAnswerChange(question.id, overallAssessment, {
-                        file: null,
-                        fileName: "",
-                        numPages: null,
-                        annotations: [],
-                      })
-                    }}
+                    onClick={() => removeDocument(index)}
+                    className="text-red-500 hover:text-red-700"
                   >
                     <X className="h-4 w-4" />
                   </Button>
                 </div>
-
-                <div className="border rounded-md overflow-hidden">
-                  <Document
-                    file={file}
-                    onLoadSuccess={onDocumentLoadSuccess}
-                    onLoadError={(error) => console.error("Error loading PDF:", error)}
-                  >
-                    <Page
-                      pageNumber={currentPage}
-                      width={window.innerWidth > 768 ? window.innerWidth / 2 - 80 : window.innerWidth - 80}
-                    />
-                  </Document>
-                </div>
-
-                {numPages && (
-                  <div className="flex items-center justify-center space-x-2 mt-2">
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-                      disabled={currentPage <= 1}
-                    >
-                      <ChevronLeft className="h-4 w-4" />
-                    </Button>
-                    <span className="text-sm">
-                      Page {currentPage} of {numPages}
-                    </span>
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      onClick={() => setCurrentPage(Math.min(numPages, currentPage + 1))}
-                      disabled={currentPage >= numPages}
-                    >
-                      <ChevronRight className="h-4 w-4" />
-                    </Button>
-                  </div>
-                )}
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Annotations & Issues</CardTitle>
-            <CardDescription>Log specific findings for page {currentPage} (or general document notes).</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <Label htmlFor="annotation-text">Note for Page {currentPage}:</Label>
-              <Textarea
-                id="annotation-text"
-                value={currentAnnotationText}
-                onChange={(e) => setCurrentAnnotationText(e.target.value)}
-                placeholder="Describe the issue, observation, or gap..."
-                className="min-h-[80px]"
-              />
-            </div>
-            <div>
-              <Label htmlFor="annotation-tags">Tags (optional):</Label>
-              <div className="flex items-center space-x-2">
-                <Input
-                  id="annotation-tags"
-                  type="text"
-                  value={tagInput}
-                  onChange={(e) => setTagInput(e.target.value)}
-                  onKeyPress={(e) => {
-                    if (e.key === "Enter") {
-                      e.preventDefault()
-                      addTag()
-                    }
-                  }}
-                  placeholder="e.g., Security, Compliance"
-                  className="flex-grow"
-                />
-                <Button type="button" variant="outline" size="sm" onClick={addTag}>
-                  <PlusCircle className="h-4 w-4 mr-1" /> Add Tag
-                </Button>
-              </div>
-              <div className="mt-2 space-x-1 space-y-1">
-                {currentAnnotationTags.map((tag) => (
-                  <Badge key={tag} variant="secondary" className="group">
-                    {tag}
-                    <X
-                      className="ml-1 h-3 w-3 cursor-pointer group-hover:text-destructive"
-                      onClick={() => removeTag(tag)}
-                    />
-                  </Badge>
-                ))}
-              </div>
-            </div>
-            <Button onClick={addAnnotation} className="w-full" disabled={!file}>
-              <PlusCircle className="mr-2 h-4 w-4" /> Add Annotation for Page {currentPage}
-            </Button>
-
-            <div className="mt-4 space-y-3 max-h-60 overflow-y-auto">
-              <h4 className="text-sm font-semibold">Logged Annotations:</h4>
-              {annotations.length === 0 && <p className="text-xs text-muted-foreground">No annotations added yet.</p>}
-              {annotations.map((ann, index) => (
-                <div key={index} className="p-2 border rounded-md bg-muted/30 text-xs">
-                  <div className="flex justify-between items-start">
-                    <p className="font-semibold">
-                      Page {ann.page}: <span className="font-normal">{ann.text}</span>
-                    </p>
-                    <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => removeAnnotation(index)}>
-                      <Trash2 className="h-3 w-3 text-destructive" />
-                    </Button>
-                  </div>
-                  {ann.tags.length > 0 && (
-                    <div className="mt-1 space-x-1">
-                      {ann.tags.map((tag) => (
-                        <Badge key={tag} variant="outline" className="text-xs">
-                          {tag}
-                        </Badge>
-                      ))}
-                    </div>
-                  )}
-                </div>
               ))}
             </div>
-          </CardContent>
-        </Card>
-      </div>
-    </div>
+          </div>
+        )}
+
+        <div className="space-y-2">
+          <Label htmlFor={`${question.id}-notes`}>Review Notes</Label>
+          <Textarea
+            id={`${question.id}-notes`}
+            value={notes}
+            onChange={handleNotesChange}
+            placeholder="Add your review notes and observations..."
+            rows={4}
+            className="w-full"
+          />
+        </div>
+      </CardContent>
+    </Card>
   )
 }
