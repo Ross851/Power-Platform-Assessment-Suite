@@ -2,6 +2,7 @@ import { create } from "zustand"
 import { persist, type StateStorage } from "zustand/middleware"
 import type { AssessmentStandard, AnswerPayload, RAGStatus, GeneralDocument, Project, AssessmentMetadata } from "@/lib/types" // Added Project
 import { ASSESSMENT_STANDARDS } from "@/lib/constants"
+import { safeLocalStorage, safeJsonParse, safeJsonStringify } from "@/lib/safe-storage"
 
 // Helper function to create a fresh set of standards for a new project
 const createInitialProjectStandards = (): AssessmentStandard[] =>
@@ -58,9 +59,11 @@ interface AssessmentState {
 
 const customStorage: StateStorage = {
   getItem: (name) => {
-    const str = localStorage.getItem(name)
+    const str = safeLocalStorage.getItem(name)
     if (!str) return null
-    const parsed = JSON.parse(str)
+    
+    const parsed = safeJsonParse(str, null)
+    if (!parsed) return null
     
     // Handle both old format (direct state) and new format (with version)
     const state = parsed.state || parsed
@@ -87,11 +90,12 @@ const customStorage: StateStorage = {
     }
     
     // Return the data in the format expected by zustand persist
-    return JSON.stringify({ state: revivedState, version })
+    return safeJsonStringify({ state: revivedState, version })
   },
   setItem: (name, value) => {
     // Parse the stringified value from zustand
-    const parsed = JSON.parse(value)
+    const parsed = safeJsonParse(value, null)
+    if (!parsed) return
     
     const modifiedState = {
       ...parsed.state,
@@ -102,9 +106,9 @@ const customStorage: StateStorage = {
         ),
       })),
     }
-    localStorage.setItem(name, JSON.stringify({ state: modifiedState, version: parsed.version }))
+    safeLocalStorage.setItem(name, safeJsonStringify({ state: modifiedState, version: parsed.version }))
   },
-  removeItem: (name) => localStorage.removeItem(name),
+  removeItem: (name) => safeLocalStorage.removeItem(name),
 }
 
 export const useAssessmentStore = create<AssessmentState>()(

@@ -18,6 +18,7 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { format } from "date-fns"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { ClientOnly } from "@/components/client-only"
 import {
   Dialog,
   DialogContent,
@@ -183,7 +184,15 @@ export default function DashboardPage() {
     : []
 
   return (
-    <div className="container mx-auto p-4 md:p-8 bg-background text-foreground min-h-screen">
+    <ClientOnly fallback={
+      <div className="container mx-auto p-4 md:p-8 bg-background text-foreground min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading assessment suite...</p>
+        </div>
+      </div>
+    }>
+      <div className="container mx-auto p-4 md:p-8 bg-background text-foreground min-h-screen">
       <header className="mb-8">
         <div className="flex items-center justify-between mb-2">
           <h1 className="text-3xl font-bold text-primary">Power Platform Assessment Suite</h1>
@@ -511,5 +520,6 @@ export default function DashboardPage() {
         </>
       )}
     </div>
+    </ClientOnly>
   )
 }
