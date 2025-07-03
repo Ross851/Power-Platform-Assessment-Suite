@@ -1068,3 +1068,4 @@ export const QUESTION_TYPES: QuestionType[] = [
   "file-upload",
   "document-review",
 ]
+export const assessmentStandards = ASSESSMENT_STANDARDS

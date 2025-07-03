@@ -10,12 +10,12 @@ import {
   WidthType,
   BorderStyle,
 } from "docx"
-import saveAs from "file-saver"
+import { saveAs } from "file-saver"
 import type { Project, Question } from "./types"
 import { format } from "date-fns"
 
 // --- Helper Functions for Styling ---
-const createHeading = (text: string, level: HeadingLevel = HeadingLevel.HEADING_1) =>
+const createHeading = (text: string, level = HeadingLevel.HEADING_1) =>
   new Paragraph({ heading: level, children: [new TextRun({ text, bold: true })] })
 
 const createSubHeading = (text: string) =>
@@ -24,7 +24,7 @@ const createSubHeading = (text: string) =>
     children: [new TextRun({ text, bold: true })],
   })
 
-const createParagraph = (text: string) => new Paragraph(text)
+const createParagraph = (text: string) => new Paragraph({ text })
 
 const createBullet = (text: string) => new Paragraph({ text, bullet: { level: 0 } })
 
@@ -43,8 +43,8 @@ const createStyledTable = (rows: TableRow[]) =>
       bottom: { style: BorderStyle.SINGLE, size: 1, color: "D3D3D3" },
       left: { style: BorderStyle.SINGLE, size: 1, color: "D3D3D3" },
       right: { style: BorderStyle.SINGLE, size: 1, color: "D3D3D3" },
-      insideH: { style: BorderStyle.SINGLE, size: 1, color: "D3D3D3" },
-      insideV: { style: BorderStyle.SINGLE, size: 1, color: "D3D3D3" },
+      insideHorizontal: { style: BorderStyle.SINGLE, size: 1, color: "D3D3D3" },
+      insideVertical: { style: BorderStyle.SINGLE, size: 1, color: "D3D3D3" },
     },
   })
 
@@ -73,14 +73,14 @@ export const exportToClientWord = async (project: Project) => {
             new Paragraph({
               children: [
                 new TextRun({ text: `Recommendation for ${area.standardName}: `, bold: true }),
-                new TextRun(`Address critical gaps identified in '${area.questionText || "overall standard"}'.`),
+                new TextRun(`Address critical gaps identified in '${area.text || "overall standard"}'.`),
               ],
             }),
             createBullet(
               `Impact: Mitigates ${area.ragStatus === "red" ? "high" : "medium"} risk related to ${area.category}.`,
             ),
             createBullet(`Assigned Owner (Recommended): ${area.riskOwner || "To be assigned"}`),
-            new Paragraph(""),
+            new Paragraph({ text: "" }),
           ]),
 
           createSubHeading("2. High-Priority Risk Register"),
@@ -102,8 +102,8 @@ export const exportToClientWord = async (project: Project) => {
                 new TableRow({
                   children: [
                     createCell(area.standardName),
-                    createCell(area.questionText || "Overall standard weakness"),
-                    createCell(area.ragStatus.toUpperCase()),
+                    createCell(area.text || "Overall standard weakness"),
+                    createCell((area.ragStatus || "grey").toUpperCase()),
                     createCell(area.riskOwner || "TBA"),
                   ],
                 }),
@@ -183,7 +183,7 @@ export const exportToTechnicalWord = async (project: Project) => {
           new Paragraph({ text: "" }),
 
           ...allGaps.flatMap((gap) => [
-            createSubHeading(`Gap: ${gap.questionId} - ${gap.questionText}`),
+            createSubHeading(`Gap: ${gap.id} - ${gap.text}`),
             createStyledTable([
               new TableRow({
                 children: [createCell("Standard", true), createCell(gap.standardName)],
@@ -192,7 +192,7 @@ export const exportToTechnicalWord = async (project: Project) => {
                 children: [createCell("Category", true), createCell(gap.category)],
               }),
               new TableRow({
-                children: [createCell("Status", true), createCell(gap.ragStatus.toUpperCase())],
+                children: [createCell("Status", true), createCell((gap.ragStatus || "grey").toUpperCase())],
               }),
               new TableRow({
                 children: [createCell("Current Answer", true), createCell(JSON.stringify(gap.answer) || "N/A")],

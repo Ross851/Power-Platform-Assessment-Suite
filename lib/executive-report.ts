@@ -145,7 +145,7 @@ export async function generateExecutiveReport(project: Project) {
           
           // Detailed Findings
           ...createDetailedFindings(project),
-        ],
+        ] as any,
       },
     ],
   })
@@ -310,7 +310,7 @@ function createTitlePage(project: Project, summary: ExecutiveSummaryData): Parag
   ]
 }
 
-function createExecutiveSummary(project: Project, summary: ExecutiveSummaryData): Paragraph[] {
+function createExecutiveSummary(project: Project, summary: ExecutiveSummaryData): (Paragraph | Table)[] {
   return [
     new Paragraph({
       text: "Executive Summary",
@@ -376,15 +376,15 @@ function createKeyMetricsTable(summary: ExecutiveSummaryData): Table {
       new TableRow({
         children: [
           new TableCell({
-            children: [new Paragraph({ text: "Metric", bold: true })],
+            children: [new Paragraph({ children: [new TextRun({ text: "Metric", bold: true })] })],
             shading: { fill: "E6E6E6", type: ShadingType.SOLID },
           }),
           new TableCell({
-            children: [new Paragraph({ text: "Value", bold: true })],
+            children: [new Paragraph({ children: [new TextRun({ text: "Value", bold: true })] })],
             shading: { fill: "E6E6E6", type: ShadingType.SOLID },
           }),
           new TableCell({
-            children: [new Paragraph({ text: "Status", bold: true })],
+            children: [new Paragraph({ children: [new TextRun({ text: "Status", bold: true })] })],
             shading: { fill: "E6E6E6", type: ShadingType.SOLID },
           }),
         ],
@@ -526,7 +526,7 @@ function createRiskAssessment(project: Project, summary: ExecutiveSummaryData): 
   return paragraphs
 }
 
-function createMaturityAnalysis(project: Project, summary: ExecutiveSummaryData): Paragraph[] {
+function createMaturityAnalysis(project: Project, summary: ExecutiveSummaryData): (Paragraph | Table)[] {
   return [
     new Paragraph({
       text: "Maturity Analysis by Domain",
@@ -585,19 +585,19 @@ function createMaturityTable(maturityData: ExecutiveSummaryData['maturityByArea'
       new TableRow({
         children: [
           new TableCell({
-            children: [new Paragraph({ text: "Domain", bold: true })],
+            children: [new Paragraph({ children: [new TextRun({ text: "Domain", bold: true })] })],
             shading: { fill: "E6E6E6", type: ShadingType.SOLID },
           }),
           new TableCell({
-            children: [new Paragraph({ text: "Score", bold: true })],
+            children: [new Paragraph({ children: [new TextRun({ text: "Score", bold: true })] })],
             shading: { fill: "E6E6E6", type: ShadingType.SOLID },
           }),
           new TableCell({
-            children: [new Paragraph({ text: "Status", bold: true })],
+            children: [new Paragraph({ children: [new TextRun({ text: "Status", bold: true })] })],
             shading: { fill: "E6E6E6", type: ShadingType.SOLID },
           }),
           new TableCell({
-            children: [new Paragraph({ text: "Trend", bold: true })],
+            children: [new Paragraph({ children: [new TextRun({ text: "Trend", bold: true })] })],
             shading: { fill: "E6E6E6", type: ShadingType.SOLID },
           }),
         ],
@@ -670,7 +670,7 @@ function createStrategicRecommendations(project: Project, summary: ExecutiveSumm
   ]
 }
 
-function createInvestmentPriorities(project: Project, summary: ExecutiveSummaryData): Paragraph[] {
+function createInvestmentPriorities(project: Project, summary: ExecutiveSummaryData): (Paragraph | Table)[] {
   return [
     new Paragraph({
       text: "Investment Priorities & Business Case",
@@ -785,8 +785,7 @@ function createDetailedFindings(project: Project): Paragraph[] {
     if (criticalFindings.length > 0) {
       paragraphs.push(
         new Paragraph({
-          text: "Critical Findings:",
-          bold: true,
+          children: [new TextRun({ text: "Critical Findings:", bold: true })],
           spacing: { before: 200, after: 100 },
         })
       )
@@ -817,8 +816,7 @@ function createDetailedFindings(project: Project): Paragraph[] {
         if (finding.codeSnippets || finding.developerFeedback || finding.developerRecommendations) {
           paragraphs.push(
             new Paragraph({
-              text: "Developer Documentation:",
-              bold: true,
+              children: [new TextRun({ text: "Developer Documentation:", bold: true })],
               spacing: { before: 100, after: 50 },
             })
           )
@@ -909,8 +907,7 @@ function createDetailedFindings(project: Project): Paragraph[] {
     if (amberFindings.length > 0) {
       paragraphs.push(
         new Paragraph({
-          text: "Important Findings with Developer Insights:",
-          bold: true,
+          children: [new TextRun({ text: "Important Findings with Developer Insights:", bold: true })],
           spacing: { before: 200, after: 100 },
         })
       )
@@ -927,8 +924,7 @@ function createDetailedFindings(project: Project): Paragraph[] {
         if (finding.codeSnippets || finding.developerFeedback || finding.developerRecommendations) {
           paragraphs.push(
             new Paragraph({
-              text: "Developer Documentation:",
-              bold: true,
+              children: [new TextRun({ text: "Developer Documentation:", bold: true })],
               spacing: { before: 100, after: 50 },
             })
           )
@@ -1083,19 +1079,19 @@ function createInvestmentTable(summary: ExecutiveSummaryData): Table {
       new TableRow({
         children: [
           new TableCell({
-            children: [new Paragraph({ text: "Investment Area", bold: true })],
+            children: [new Paragraph({ children: [new TextRun({ text: "Investment Area", bold: true })] })],
             shading: { fill: "E6E6E6", type: ShadingType.SOLID },
           }),
           new TableCell({
-            children: [new Paragraph({ text: "Priority", bold: true })],
+            children: [new Paragraph({ children: [new TextRun({ text: "Priority", bold: true })] })],
             shading: { fill: "E6E6E6", type: ShadingType.SOLID },
           }),
           new TableCell({
-            children: [new Paragraph({ text: "Estimated Cost", bold: true })],
+            children: [new Paragraph({ children: [new TextRun({ text: "Estimated Cost", bold: true })] })],
             shading: { fill: "E6E6E6", type: ShadingType.SOLID },
           }),
           new TableCell({
-            children: [new Paragraph({ text: "ROI Timeline", bold: true })],
+            children: [new Paragraph({ children: [new TextRun({ text: "ROI Timeline", bold: true })] })],
             shading: { fill: "E6E6E6", type: ShadingType.SOLID },
           }),
         ],
@@ -1119,6 +1115,7 @@ function createInvestmentTable(summary: ExecutiveSummaryData): Table {
       new TableRow({
         children: [
           new TableCell({ children: [new Paragraph("Training & Certification")] }),
+          new TableCell({ children: [new Paragraph("Medium")] }),
           new TableCell({ children: [new Paragraph("$30,000 - $50,000")] }),
           new TableCell({ children: [new Paragraph("6-12 months")] }),
         ],
@@ -1126,6 +1123,7 @@ function createInvestmentTable(summary: ExecutiveSummaryData): Table {
       new TableRow({
         children: [
           new TableCell({ children: [new Paragraph("Monitoring & Analytics")] }),
+          new TableCell({ children: [new Paragraph("Medium")] }),
           new TableCell({ children: [new Paragraph("$25,000 - $40,000")] }),
           new TableCell({ children: [new Paragraph("3-6 months")] }),
         ],

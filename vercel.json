@@ -1,0 +1,98 @@
+{
+  "buildCommand": "npm run build",
+  "outputDirectory": ".next",
+  "devCommand": "npm run dev",
+  "installCommand": "npm install --legacy-peer-deps",
+  "framework": "nextjs",
+  
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/"
+    }
+  ],
+  
+  "headers": [
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-store, must-revalidate"
+        },
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        },
+        {
+          "key": "X-XSS-Protection",
+          "value": "1; mode=block"
+        }
+      ]
+    },
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "SAMEORIGIN"
+        },
+        {
+          "key": "X-XSS-Protection",
+          "value": "1; mode=block"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
+        },
+        {
+          "key": "Permissions-Policy",
+          "value": "camera=(), microphone=(), geolocation=()"
+        }
+      ]
+    },
+    {
+      "source": "/:path*.(js|css|woff|woff2|ttf|eot|ico|jpg|jpeg|png|gif|svg|webp)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    }
+  ],
+  
+  "functions": {
+    "app/api/auth/[...nextauth]/route.ts": {
+      "maxDuration": 10
+    },
+    "app/api/export/[type]/route.ts": {
+      "maxDuration": 30,
+      "memory": 1024
+    }
+  },
+  
+  "env": {
+    "NEXT_PUBLIC_APP_URL": "@vercel-url",
+    "NODE_ENV": "production"
+  },
+  
+  "github": {
+    "silent": true
+  },
+  
+  "regions": ["iad1"],
+  
+  "crons": [{
+    "path": "/api/cron/cleanup",
+    "schedule": "0 2 * * *"
+  }]
+}

@@ -47,11 +47,12 @@ export function OverallSummary() {
     return "5 - Optimizing"
   }
 
-  const ragColorClasses = {
+  const ragColorClasses: Record<string, string> = {
     red: "text-red-600 dark:text-red-400",
     amber: "text-yellow-600 dark:text-yellow-400",
     green: "text-green-600 dark:text-green-400",
     grey: "text-gray-600 dark:text-gray-400",
+    "not-applicable": "text-blue-600 dark:text-blue-400",
   }
 
   return (
@@ -60,7 +61,7 @@ export function OverallSummary() {
         <CardHeader>
           <div className="flex justify-between items-center">
             <CardTitle>Overall Progress & Maturity</CardTitle>
-            <RAGIndicator status={overallRAG} size="lg" showText />
+            <RAGIndicator status={overallRAG} size="lg" showLabel />
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -116,11 +117,6 @@ export function OverallSummary() {
                           {area.questionText.length > 100
                             ? area.questionText.substring(0, 97) + "..."
                             : area.questionText}
-                        </p>
-                      )}
-                      {area.riskOwner && ( // Display Risk Owner if present
-                        <p className="text-xs text-muted-foreground mt-0.5">
-                          <span className="font-medium">Owner:</span> {area.riskOwner}
                         </p>
                       )}
                       <Link

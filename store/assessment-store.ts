@@ -60,7 +60,12 @@ const customStorage: StateStorage = {
   getItem: (name) => {
     const str = localStorage.getItem(name)
     if (!str) return null
-    const { state, version } = JSON.parse(str)
+    const parsed = JSON.parse(str)
+    
+    // Handle both old format (direct state) and new format (with version)
+    const state = parsed.state || parsed
+    const version = parsed.version || 0
+    
     // Revive Date objects and handle generalDocuments within each project
     const revivedState = {
       ...state,
@@ -80,19 +85,24 @@ const customStorage: StateStorage = {
         // Potentially revive dates within standards/questions if any were added
       })),
     }
-    return { state: revivedState, version }
+    
+    // Return the data in the format expected by zustand persist
+    return JSON.stringify({ state: revivedState, version })
   },
-  setItem: (name, newValue) => {
+  setItem: (name, value) => {
+    // Parse the stringified value from zustand
+    const parsed = JSON.parse(value)
+    
     const modifiedState = {
-      ...newValue.state,
-      projects: newValue.state.projects.map((project: Project) => ({
+      ...parsed.state,
+      projects: parsed.state.projects.map((project: Project) => ({
         ...project,
         generalDocuments: project.generalDocuments.map(
           ({ file, ...restOfDoc }: GeneralDocument) => restOfDoc, // eslint-disable-line @typescript-eslint/no-unused-vars
         ),
       })),
     }
-    localStorage.setItem(name, JSON.stringify({ state: modifiedState, version: newValue.version }))
+    localStorage.setItem(name, JSON.stringify({ state: modifiedState, version: parsed.version }))
   },
   removeItem: (name) => localStorage.removeItem(name),
 }
