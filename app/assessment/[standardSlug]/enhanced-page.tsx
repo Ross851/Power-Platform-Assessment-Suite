@@ -31,12 +31,12 @@ import { useMediaQuery } from "@/hooks/use-media-query"
 import { Question } from "@/lib/types"
 
 // Import question type components
-import { BooleanQuestion } from "@/components/question-types/boolean-question"
-import { ScaleQuestion } from "@/components/question-types/scale-question"
-import { PercentageQuestion } from "@/components/question-types/percentage-question"
-import { TextQuestion } from "@/components/question-types/text-question"
-import { NumericQuestion } from "@/components/question-types/numeric-question"
-import { DocumentReviewQuestion } from "@/components/question-types/document-review-question"
+import { BooleanInput } from "@/components/question-types/boolean-input"
+import { ScaleInput } from "@/components/question-types/scale-input"
+import { PercentageInput } from "@/components/question-types/percentage-input"
+import { TextInput } from "@/components/question-types/text-input"
+import { NumericInput } from "@/components/question-types/numeric-input"
+import { DocumentReview } from "@/components/question-types/document-review"
 
 export default function EnhancedAssessmentPage() {
   const params = useParams()
@@ -181,17 +181,17 @@ export default function EnhancedAssessmentPage() {
 
     switch (question.type) {
       case "boolean":
-        return <BooleanQuestion {...props} />
+        return <BooleanInput {...props} />
       case "scale":
-        return <ScaleQuestion {...props} />
+        return <ScaleInput {...props} />
       case "percentage":
-        return <PercentageQuestion {...props} />
+        return <PercentageInput {...props} />
       case "text":
-        return <TextQuestion {...props} />
+        return <TextInput {...props} />
       case "numeric":
-        return <NumericQuestion {...props} />
+        return <NumericInput {...props} />
       case "document-review":
-        return <DocumentReviewQuestion {...props} />
+        return <DocumentReview {...props} />
       default:
         return <div>Unknown question type</div>
     }
