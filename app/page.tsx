@@ -19,6 +19,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { format } from "date-fns"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { ClientOnly } from "@/components/client-only"
+import { StorageResetButton } from "@/components/storage-reset-button"
 import {
   Dialog,
   DialogContent,
@@ -200,6 +201,7 @@ export default function DashboardPage() {
             <Button variant="outline" size="sm" onClick={handleBackupExport}>
               <Download className="mr-2 h-4 w-4" /> Backup All
             </Button>
+            <StorageResetButton />
             <Dialog>
               <DialogTrigger asChild>
                 <Button variant="outline" size="sm">

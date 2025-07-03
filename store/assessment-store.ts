@@ -59,38 +59,55 @@ interface AssessmentState {
 
 const customStorage: StateStorage = {
   getItem: (name) => {
-    const str = safeLocalStorage.getItem(name)
-    if (!str) return null
-    
-    const parsed = safeJsonParse(str, null)
-    if (!parsed) return null
-    
-    // Handle both old format (direct state) and new format (with version)
-    const state = parsed.state || parsed
-    const version = parsed.version || 0
-    
-    // Revive Date objects and handle generalDocuments within each project
-    const revivedState = {
-      ...state,
-      projects: (state.projects || []).map((project: any) => ({
-        ...project,
-        createdAt: new Date(project.createdAt),
-        lastModifiedAt: new Date(project.lastModifiedAt),
-        generalDocuments: (project.generalDocuments || []).map((doc: any) => ({
-          ...doc,
-          uploadedAt: new Date(doc.uploadedAt),
-          file: null, // File object is not persisted
-        })),
-        assessmentMetadata: project.assessmentMetadata ? {
-          ...project.assessmentMetadata,
-          assessmentDate: new Date(project.assessmentMetadata.assessmentDate)
-        } : undefined,
-        // Potentially revive dates within standards/questions if any were added
-      })),
+    try {
+      const str = safeLocalStorage.getItem(name)
+      if (!str) return null
+      
+      const parsed = safeJsonParse(str, null)
+      if (!parsed) return null
+      
+      // Handle both old format (direct state) and new format (with version)
+      const state = parsed.state || parsed
+      const version = parsed.version || 0
+      
+      // Validate state structure
+      if (!state || typeof state !== 'object') {
+        console.warn('Invalid state structure, resetting...')
+        return null
+      }
+      
+      // Revive Date objects and handle generalDocuments within each project
+      const revivedState = {
+        ...state,
+        projects: (state.projects || []).map((project: any) => {
+          try {
+            return {
+              ...project,
+              createdAt: new Date(project.createdAt || Date.now()),
+              lastModifiedAt: new Date(project.lastModifiedAt || Date.now()),
+              generalDocuments: (project.generalDocuments || []).map((doc: any) => ({
+                ...doc,
+                uploadedAt: new Date(doc.uploadedAt || Date.now()),
+                file: null, // File object is not persisted
+              })),
+              assessmentMetadata: project.assessmentMetadata ? {
+                ...project.assessmentMetadata,
+                assessmentDate: new Date(project.assessmentMetadata.assessmentDate || Date.now())
+              } : undefined,
+            }
+          } catch (e) {
+            console.error('Error reviving project:', e)
+            return null
+          }
+        }).filter(Boolean),
+      }
+      
+      // Return the data in the format expected by zustand persist
+      return safeJsonStringify({ state: revivedState, version })
+    } catch (error) {
+      console.error('Storage getItem error:', error)
+      return null
     }
-    
-    // Return the data in the format expected by zustand persist
-    return safeJsonStringify({ state: revivedState, version })
   },
   setItem: (name, value) => {
     // Parse the stringified value from zustand
