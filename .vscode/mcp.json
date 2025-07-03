@@ -10,31 +10,20 @@
   "servers": {
     "microsoft-docs": {
       "type": "http",
-      "url": "https://learn.microsoft.com/api/mcp"
+      "url": "https://learn.microsoft.com/api/mcp",
+      "description": "Official Microsoft documentation including Power Platform guides"
     },
     "fetch": {
       "type": "stdio",
       "command": "uvx",
-      "args": ["mcp-server-fetch"]
+      "args": ["mcp-server-fetch"],
+      "description": "Web content fetching for external resources"
     },
     "filesystem": {
       "type": "stdio",
       "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-filesystem", "."]
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "."],
+      "description": "File system operations for project management"
     }
   }
 }
-{
-  "servers": {
-    "microsoft-docs": {
-      "type": "http",
-      "url": "https://learn.microsoft.com/api/mcp"
-    },
-    "fetch": {
-      "type": "stdio",
-      "command": "uvx",
-      "args": ["mcp-server-fetch"]
-    }
-  }
-}
-
