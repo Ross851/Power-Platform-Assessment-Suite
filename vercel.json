@@ -81,7 +81,6 @@
   },
   
   "env": {
-    "NEXT_PUBLIC_APP_URL": "@vercel-url",
     "NODE_ENV": "production"
   },
   
