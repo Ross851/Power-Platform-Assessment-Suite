@@ -184,6 +184,7 @@ export default function Microsoft2025BeautifulPage() {
   const [showReport, setShowReport] = useState(false)
   const [taskTracking, setTaskTracking] = useState<Record<string, TaskTracking>>({})
   const [taskBasedScoreAdjustments, setTaskBasedScoreAdjustments] = useState<Record<string, number>>({})
+  const [hoveredPillar, setHoveredPillar] = useState<string | null>(null)
   const [organizationFactors, setOrganizationFactors] = useState<TimeEstimationFactors>({
     organizationSize: 'medium',
     teamExperience: 'intermediate',
@@ -262,6 +263,8 @@ export default function Microsoft2025BeautifulPage() {
             const current = prev[key] || 0
             if (current < targetValue) {
               return { ...prev, [key]: Math.min(current + 2, targetValue) }
+            } else if (current > targetValue) {
+              return { ...prev, [key]: Math.max(current - 2, targetValue) }
             }
             clearInterval(interval)
             return prev
@@ -271,7 +274,127 @@ export default function Microsoft2025BeautifulPage() {
       timers.push(timer)
     })
     return () => timers.forEach(clearTimeout)
-  }, [responses])
+  }, [responses, taskBasedScoreAdjustments])
+
+  // Pillar color scheme to match gap analysis
+  const pillarColors: Record<string, { bg: string; text: string; border: string; badge: string }> = {
+    governance: {
+      bg: 'bg-blue-50 dark:bg-blue-900/20',
+      text: 'text-blue-600 dark:text-blue-400',
+      border: 'border-blue-200 dark:border-blue-800',
+      badge: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'
+    },
+    security: {
+      bg: 'bg-teal-50 dark:bg-teal-900/20',
+      text: 'text-teal-600 dark:text-teal-400',
+      border: 'border-teal-200 dark:border-teal-800',
+      badge: 'bg-teal-100 text-teal-800 dark:bg-teal-900 dark:text-teal-200'
+    },
+    reliability: {
+      bg: 'bg-green-50 dark:bg-green-900/20',
+      text: 'text-green-600 dark:text-green-400',
+      border: 'border-green-200 dark:border-green-800',
+      badge: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+    },
+    performance: {
+      bg: 'bg-orange-50 dark:bg-orange-900/20',
+      text: 'text-orange-600 dark:text-orange-400',
+      border: 'border-orange-200 dark:border-orange-800',
+      badge: 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200'
+    },
+    operations: {
+      bg: 'bg-purple-50 dark:bg-purple-900/20',
+      text: 'text-purple-600 dark:text-purple-400',
+      border: 'border-purple-200 dark:border-purple-800',
+      badge: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200'
+    },
+    experience: {
+      bg: 'bg-pink-50 dark:bg-pink-900/20',
+      text: 'text-pink-600 dark:text-pink-400',
+      border: 'border-pink-200 dark:border-pink-800',
+      badge: 'bg-pink-100 text-pink-800 dark:bg-pink-900 dark:text-pink-200'
+    }
+  }
+
+  // Calculate question impact on pillar score
+  const calculateQuestionImpact = (pillarId: string, questionWeight: number): string => {
+    const pillar = assessmentPillars.find(p => p.id === pillarId)
+    if (!pillar) return 'Low'
+    
+    const totalWeight = pillar.questions.reduce((sum, q) => sum + (q.weight || 1), 0)
+    const impactPercentage = (questionWeight / totalWeight) * 100
+    
+    if (impactPercentage >= 25) return 'High Impact'
+    if (impactPercentage >= 15) return 'Medium Impact'
+    return 'Low Impact'
+  }
+
+  // Calculate gap closure contribution
+  const calculateGapContribution = (pillarId: string, questionId: string): number => {
+    const currentValue = responses[questionId] || 0
+    const maxValue = 5
+    const currentScore = pillarScores[pillarId] || 0
+    const targetScore = microsoftExpectedScores[pillarId] || 80
+    const gap = Math.max(0, targetScore - currentScore)
+    
+    if (gap === 0) return 100 // Gap already closed
+    
+    const maxContribution = ((maxValue - currentValue) / maxValue) * 100
+    return Math.min(100, (maxContribution / gap) * 100)
+  }
+
+  // Map recommendation categories to pillar IDs
+  const mapCategoryToPillar = (category: string): string => {
+    const categoryLower = category.toLowerCase()
+    
+    // Security-related categories
+    if (categoryLower.includes('data protection') || 
+        categoryLower.includes('identity') || 
+        categoryLower.includes('access') || 
+        categoryLower.includes('encryption') || 
+        categoryLower.includes('information protection') || 
+        categoryLower.includes('security') ||
+        categoryLower.includes('compliance')) {
+      return 'security'
+    }
+    
+    // Governance-related categories
+    if (categoryLower.includes('governance') || 
+        categoryLower.includes('environment management') || 
+        categoryLower.includes('administration')) {
+      return 'governance'
+    }
+    
+    // Performance-related categories
+    if (categoryLower.includes('performance') || 
+        categoryLower.includes('optimization') || 
+        categoryLower.includes('efficiency')) {
+      return 'performance'
+    }
+    
+    // Reliability-related categories
+    if (categoryLower.includes('reliability') || 
+        categoryLower.includes('monitoring') || 
+        categoryLower.includes('backup') || 
+        categoryLower.includes('disaster recovery')) {
+      return 'reliability'
+    }
+    
+    // Operations-related categories
+    if (categoryLower.includes('operations') || 
+        categoryLower.includes('automation') || 
+        categoryLower.includes('deployment')) {
+      return 'operations'
+    }
+    
+    // Default fallback - try to match exact pillar names
+    const pillarMatch = assessmentPillars.find(p => 
+      p.id === categoryLower || 
+      p.name.toLowerCase().includes(categoryLower)
+    )
+    
+    return pillarMatch?.id || 'governance' // Default to governance if no match
+  }
 
   const toggleQuestionExpanded = (questionId: string) => {
     const newExpanded = new Set(expandedQuestions)
@@ -641,9 +764,19 @@ export default function Microsoft2025BeautifulPage() {
                     const Icon = getPillarIcon(pillar.id)
                     
                     return (
-                      <div key={pillar.id} className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-800 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors" onClick={() => setActiveTab('assessment')}>
+                      <div 
+                        key={pillar.id} 
+                        className={`flex items-center justify-between p-4 rounded-lg cursor-pointer transition-all duration-200 ${
+                          hoveredPillar === pillar.id 
+                            ? `${pillarColors[pillar.id].bg} ${pillarColors[pillar.id].border} border-2 shadow-lg`
+                            : 'bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700'
+                        }`}
+                        onClick={() => setActiveTab('assessment')}
+                        onMouseEnter={() => setHoveredPillar(pillar.id)}
+                        onMouseLeave={() => setHoveredPillar(null)}
+                      >
                         <div className="flex items-center gap-4">
-                          <Icon className="w-8 h-8 text-gray-600" />
+                          <Icon className={`w-8 h-8 ${hoveredPillar === pillar.id ? pillarColors[pillar.id].text : 'text-gray-600'} transition-colors`} />
                           <div>
                             <h4 className="font-semibold">{pillar.name}</h4>
                             <div className="flex items-center gap-2 mt-1">
@@ -690,6 +823,7 @@ export default function Microsoft2025BeautifulPage() {
               <CardContent>
                 <div className="flex justify-center">
                   <EnhancedSpiderChart 
+                    key={`radar-${Object.values(pillarScores).join('-')}`}
                     labels={assessmentPillars.map(p => p.name)}
                     series={[
                       {
@@ -875,11 +1009,11 @@ export default function Microsoft2025BeautifulPage() {
               <CardContent>
                 <div className="space-y-6">
                   {/* KPI Grid */}
-                  <div className="grid grid-cols-3 gap-6">
+                  <div key={`kpi-${Object.values(pillarScores).join('-')}`} className="grid grid-cols-3 gap-6">
                     {[
                       { 
                         label: 'Security',
-                        current: securityScore?.percentage || 0,
+                        current: pillarScores.security || 0,
                         baseline: auditTrail?.baseline?.pillarScores?.security || 0,
                         color: '#3b82f6',
                         icon: Shield
@@ -899,10 +1033,10 @@ export default function Microsoft2025BeautifulPage() {
                         icon: Award
                       }
                     ].map((kpi, index) => {
-                      const improvement = kpi.current - kpi.baseline
+                      const improvement = Math.max(0, kpi.current - kpi.baseline)
                       const target = 100
-                      const gapToTarget = target - kpi.baseline
-                      const gapClosed = gapToTarget > 0 ? (improvement / gapToTarget) * 100 : 0
+                      const gapToTarget = Math.max(1, target - kpi.baseline)
+                      const gapClosed = Math.min(100, Math.max(0, (improvement / gapToTarget) * 100))
                       
                       return (
                         <div key={index} className="text-center">
@@ -1086,18 +1220,50 @@ export default function Microsoft2025BeautifulPage() {
                       const isExpanded = expandedQuestions.has(question.id)
                       
                       return (
-                        <div key={question.id} className="border rounded-lg p-4 space-y-3">
+                        <div 
+                          key={question.id} 
+                          className={`border rounded-lg p-4 space-y-3 transition-all duration-200 ${
+                            hoveredPillar === pillar.id ? `${pillarColors[pillar.id].border} shadow-md` : ''
+                          }`}
+                          onMouseEnter={() => setHoveredPillar(pillar.id)}
+                          onMouseLeave={() => setHoveredPillar(null)}
+                        >
                           <div className="flex items-start justify-between">
                             <div className="flex-1">
-                              <h4 className="font-medium flex items-center gap-2">
-                                {question.text}
+                              <div className="flex items-center gap-2 mb-2">
+                                {/* Pillar Color Badge */}
+                                <Badge className={`text-xs ${pillarColors[pillar.id].badge} border-0`}>
+                                  {pillar.name}
+                                </Badge>
+                                {/* Impact Indicator */}
+                                <Badge variant="outline" className="text-xs">
+                                  {calculateQuestionImpact(pillar.id, question.weight || 1)}
+                                </Badge>
                                 {question.required && (
                                   <Badge variant="destructive" className="text-xs">Required</Badge>
                                 )}
+                              </div>
+                              <h4 className="font-medium flex items-center gap-2">
+                                {question.text}
                               </h4>
                               <p className="text-sm text-muted-foreground mt-1">
                                 {question.description}
                               </p>
+                              {/* Gap Closure Progress Bar */}
+                              <div className="mt-2">
+                                <div className="flex items-center justify-between text-xs text-muted-foreground mb-1">
+                                  <span>Gap Closure Potential</span>
+                                  <span>{calculateGapContribution(pillar.id, question.id).toFixed(0)}%</span>
+                                </div>
+                                <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
+                                  <div 
+                                    className={`h-1.5 rounded-full transition-all duration-300 ${pillarColors[pillar.id].text.replace('text-', 'bg-')}`}
+                                    style={{ 
+                                      width: `${calculateGapContribution(pillar.id, question.id)}%` 
+                                    }}
+                                  />
+                                </div>
+                              </div>
                             </div>
                             {value > 0 && getStatusIcon(value)}
                           </div>
@@ -1286,18 +1452,50 @@ export default function Microsoft2025BeautifulPage() {
                       const isExpanded = expandedQuestions.has(question.id)
                       
                       return (
-                        <div key={question.id} className="border rounded-lg p-4 space-y-3">
+                        <div 
+                          key={question.id} 
+                          className={`border rounded-lg p-4 space-y-3 transition-all duration-200 ${
+                            hoveredPillar === pillar.id ? `${pillarColors[pillar.id].border} shadow-md` : ''
+                          }`}
+                          onMouseEnter={() => setHoveredPillar(pillar.id)}
+                          onMouseLeave={() => setHoveredPillar(null)}
+                        >
                           <div className="flex items-start justify-between">
                             <div className="flex-1">
-                              <h4 className="font-medium flex items-center gap-2">
-                                {question.text}
+                              <div className="flex items-center gap-2 mb-2">
+                                {/* Pillar Color Badge */}
+                                <Badge className={`text-xs ${pillarColors[pillar.id].badge} border-0`}>
+                                  {pillar.name}
+                                </Badge>
+                                {/* Impact Indicator */}
+                                <Badge variant="outline" className="text-xs">
+                                  {calculateQuestionImpact(pillar.id, question.weight || 1)}
+                                </Badge>
                                 {question.required && (
                                   <Badge variant="destructive" className="text-xs">Required</Badge>
                                 )}
+                              </div>
+                              <h4 className="font-medium flex items-center gap-2">
+                                {question.text}
                               </h4>
                               <p className="text-sm text-muted-foreground mt-1">
                                 {question.description}
                               </p>
+                              {/* Gap Closure Progress Bar */}
+                              <div className="mt-2">
+                                <div className="flex items-center justify-between text-xs text-muted-foreground mb-1">
+                                  <span>Gap Closure Potential</span>
+                                  <span>{calculateGapContribution(pillar.id, question.id).toFixed(0)}%</span>
+                                </div>
+                                <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
+                                  <div 
+                                    className={`h-1.5 rounded-full transition-all duration-300 ${pillarColors[pillar.id].text.replace('text-', 'bg-')}`}
+                                    style={{ 
+                                      width: `${calculateGapContribution(pillar.id, question.id)}%` 
+                                    }}
+                                  />
+                                </div>
+                              </div>
                             </div>
                             {value > 0 && getStatusIcon(value)}
                           </div>
@@ -2079,8 +2277,18 @@ export default function Microsoft2025BeautifulPage() {
                                                             )
                                                             
                                                             // Update task-based score adjustments
-                                                            const pillarId = rec.category.toLowerCase()
+                                                            const pillarId = mapCategoryToPillar(rec.category)
                                                             const improvement = scoreImpact.projectedScore - currentPillarScore
+                                                            
+                                                            // Debug logging
+                                                            console.log(`Task "${task.name}" completed:`, {
+                                                              category: rec.category,
+                                                              mappedPillar: pillarId,
+                                                              improvement: improvement,
+                                                              currentScore: currentPillarScore,
+                                                              projectedScore: scoreImpact.projectedScore
+                                                            })
+                                                            
                                                             setTaskBasedScoreAdjustments(prev => ({
                                                               ...prev,
                                                               [pillarId]: (prev[pillarId] || 0) + improvement
@@ -2111,7 +2319,7 @@ export default function Microsoft2025BeautifulPage() {
                                                             }
                                                           } else if (tracking.currentStatus === 'Completed' && value !== 'Completed') {
                                                             // Handle task being uncompleted
-                                                            const pillarId = rec.category.toLowerCase()
+                                                            const pillarId = mapCategoryToPillar(rec.category)
                                                             const completedTasks = phase.tasks.filter(t => 
                                                               taskTracking[t.id]?.currentStatus === 'Completed' && t.id !== task.id
                                                             ).map(t => t.id)
