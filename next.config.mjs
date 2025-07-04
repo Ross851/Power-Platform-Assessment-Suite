@@ -23,6 +23,12 @@ const nextConfig = {
       encoding: false,
     }
     
+    // Fix for flowbite-react tailwindcss version issue
+    config.resolve.fallback = {
+      ...config.resolve.fallback,
+      'tailwindcss/version.js': false,
+    }
+    
     // Exclude react-pdf from server-side rendering
     if (isServer) {
       config.externals = [...(config.externals || []), 'canvas', 'encoding']

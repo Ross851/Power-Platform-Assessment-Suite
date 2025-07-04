@@ -33,6 +33,12 @@ export const safeLocalStorage = {
 export const safeJsonParse = <T>(str: string | null, fallback: T): T => {
   if (!str) return fallback
   
+  // Ensure str is actually a string
+  if (typeof str !== 'string') {
+    console.warn('safeJsonParse received non-string value:', typeof str)
+    return fallback
+  }
+  
   // Check if string is actually valid JSON-like
   const trimmed = str.trim()
   if (!trimmed || trimmed === 'undefined' || trimmed === 'null') {

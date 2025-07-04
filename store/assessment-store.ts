@@ -2,7 +2,9 @@ import { create } from "zustand"
 import { persist, type StateStorage } from "zustand/middleware"
 import type { AssessmentStandard, AnswerPayload, RAGStatus, GeneralDocument, Project, AssessmentMetadata } from "@/lib/types" // Added Project
 import { ASSESSMENT_STANDARDS } from "@/lib/constants"
-import { safeLocalStorage, safeJsonParse, safeJsonStringify } from "@/lib/safe-storage"
+import { safeLocalStorage } from "@/lib/safe-storage"
+import { safeJsonParse, safeJsonStringify } from "@/lib/safe-json"
+import type { AuditTrail, AuditEntry } from "@/lib/audit-trail"
 
 // Helper function to create a fresh set of standards for a new project
 const createInitialProjectStandards = (): AssessmentStandard[] =>
@@ -25,6 +27,7 @@ const createInitialProjectStandards = (): AssessmentStandard[] =>
 interface AssessmentState {
   projects: Project[] // Store multiple projects
   activeProjectName: string | null // Name of the currently active project
+  auditTrail: AuditTrail // Audit trail for compliance tracking
 
   // Project Management Actions
   createProject: (projectName: string) => void
@@ -55,6 +58,11 @@ interface AssessmentState {
   }>
   addGeneralDocument: (file: File, description?: string) => void
   removeGeneralDocument: (documentId: string) => void
+
+  // Audit Trail Actions
+  addAuditEntry: (entry: AuditEntry) => void
+  getAuditTrail: () => AuditTrail
+  clearAuditTrail: () => void
 }
 
 const customStorage: StateStorage = {
@@ -100,6 +108,20 @@ const customStorage: StateStorage = {
             return null
           }
         }).filter(Boolean),
+        // Revive audit trail dates
+        auditTrail: state.auditTrail ? {
+          ...state.auditTrail,
+          lastUpdated: new Date(state.auditTrail.lastUpdated || Date.now()),
+          entries: (state.auditTrail.entries || []).map((entry: any) => ({
+            ...entry,
+            timestamp: new Date(entry.timestamp || Date.now())
+          }))
+        } : {
+          entries: [],
+          lastUpdated: new Date(),
+          totalImprovements: 0,
+          verifiedImprovements: 0
+        }
       }
       
       // Return the data in the format expected by zustand persist
@@ -110,20 +132,61 @@ const customStorage: StateStorage = {
     }
   },
   setItem: (name, value) => {
-    // Parse the stringified value from zustand
-    const parsed = safeJsonParse(value, null)
-    if (!parsed) return
-    
-    const modifiedState = {
-      ...parsed.state,
-      projects: parsed.state.projects.map((project: Project) => ({
-        ...project,
-        generalDocuments: project.generalDocuments.map(
-          ({ file, ...restOfDoc }: GeneralDocument) => restOfDoc, // eslint-disable-line @typescript-eslint/no-unused-vars
-        ),
-      })),
+    try {
+      // Add comprehensive type checking
+      if (value === null || value === undefined) {
+        console.warn('setItem received null/undefined value')
+        return
+      }
+      
+      // Ensure value is a string
+      const stringValue = typeof value === 'string' ? value : String(value)
+      
+      // Extra validation
+      if (!stringValue || stringValue === 'undefined' || stringValue === 'null') {
+        console.warn('setItem received invalid string value:', stringValue)
+        return
+      }
+      
+      // Parse the stringified value from zustand
+      const parsed = safeJsonParse(stringValue, null)
+      if (!parsed || !parsed.state) {
+        console.warn('setItem failed to parse state')
+        return
+      }
+      
+      // Ensure projects array exists
+      if (!Array.isArray(parsed.state.projects)) {
+        console.warn('setItem: projects is not an array')
+        parsed.state.projects = []
+      }
+      
+      const modifiedState = {
+        ...parsed.state,
+        projects: parsed.state.projects.map((project: Project) => ({
+          ...project,
+          generalDocuments: (project.generalDocuments || []).map(
+            ({ file, ...restOfDoc }: GeneralDocument) => restOfDoc, // eslint-disable-line @typescript-eslint/no-unused-vars
+          ),
+        })),
+        // Ensure audit trail is properly serialized (dates to strings)
+        auditTrail: parsed.state.auditTrail ? {
+          ...parsed.state.auditTrail,
+          lastUpdated: parsed.state.auditTrail.lastUpdated?.toISOString ? 
+            parsed.state.auditTrail.lastUpdated.toISOString() : 
+            parsed.state.auditTrail.lastUpdated,
+          entries: (parsed.state.auditTrail.entries || []).map((entry: any) => ({
+            ...entry,
+            timestamp: entry.timestamp?.toISOString ? 
+              entry.timestamp.toISOString() : 
+              entry.timestamp
+          }))
+        } : undefined
+      }
+      safeLocalStorage.setItem(name, safeJsonStringify({ state: modifiedState, version: parsed.version || 0 }))
+    } catch (error) {
+      console.error('setItem error:', error)
     }
-    safeLocalStorage.setItem(name, safeJsonStringify({ state: modifiedState, version: parsed.version }))
   },
   removeItem: (name) => safeLocalStorage.removeItem(name),
 }
@@ -133,6 +196,12 @@ export const useAssessmentStore = create<AssessmentState>()(
     (set, get) => ({
       projects: [],
       activeProjectName: null,
+      auditTrail: {
+        entries: [],
+        lastUpdated: new Date(),
+        totalImprovements: 0,
+        verifiedImprovements: 0
+      },
 
       createProject: (projectName) => {
         if (get().projects.find((p) => p.name === projectName)) {
@@ -220,8 +289,10 @@ export const useAssessmentStore = create<AssessmentState>()(
                   : q,
               )
               const answeredQuestions = newQuestions.filter(
-                (q) =>
-                  (q.answer !== undefined && q.answer !== "") || (q.type === "document-review" && q.document?.file),
+                (q) => {
+                  const answer = q.answer !== null && q.answer !== undefined ? String(q.answer) : ""
+                  return answer !== "" || (q.type === "document-review" && q.document?.file)
+                }
               ).length
               const completion = newQuestions.length > 0 ? (answeredQuestions / newQuestions.length) * 100 : 0
               return { ...standard, questions: newQuestions, completion }
@@ -244,7 +315,10 @@ export const useAssessmentStore = create<AssessmentState>()(
         const standard = get().getStandardBySlug(slug)
         if (!standard) return 0
         const answeredQuestions = standard.questions.filter(
-          (q) => (q.answer !== undefined && q.answer !== "") || (q.type === "document-review" && q.document?.file),
+          (q) => {
+            const answer = q.answer !== null && q.answer !== undefined ? String(q.answer) : ""
+            return answer !== "" || (q.type === "document-review" && q.document?.file)
+          }
         ).length
         if (standard.questions.length === 0) return 0
         return (answeredQuestions / standard.questions.length) * 100
@@ -281,7 +355,11 @@ export const useAssessmentStore = create<AssessmentState>()(
                 let riskLevel: "low" | "medium" | "high" | undefined = undefined
                 let ragStatus: RAGStatus = "grey"
 
-                if ((q.answer !== undefined && q.answer !== "") || (q.type === "document-review" && q.document?.file)) {
+                // Ensure answer is properly typed
+                const answer = q.answer !== null && q.answer !== undefined ? String(q.answer) : ""
+                const hasAnswer = answer !== "" || (q.type === "document-review" && q.document?.file)
+                
+                if (hasAnswer) {
                   answeredQuestionsInStandard++
                   projectAnsweredQuestions++
                   switch (q.type) {
@@ -290,13 +368,13 @@ export const useAssessmentStore = create<AssessmentState>()(
                       riskLevel = q.answer ? "low" : "high"
                       break
                     case "scale":
-                      questionScore = Number(q.answer)
+                      questionScore = Number(q.answer || 0)
                       if (questionScore <= 2) riskLevel = "high"
                       else if (questionScore <= 3) riskLevel = "medium"
                       else riskLevel = "low"
                       break
                     case "percentage":
-                      const perc = Number(q.answer)
+                      const perc = Number(q.answer || 0)
                       if (perc >= 75) questionScore = 5
                       else if (perc >= 50) questionScore = 3
                       else if (perc >= 25) questionScore = 2
@@ -350,8 +428,10 @@ export const useAssessmentStore = create<AssessmentState>()(
             if (std.ragStatus === "green" && !projectHasRed && !projectHasAmber) projectHasGreen = true
             if (
               std.questions.some(
-                (q) =>
-                  (q.answer !== undefined && q.answer !== "") || (q.type === "document-review" && q.document?.file),
+                (q) => {
+                  const answer = q.answer !== null && q.answer !== undefined ? String(q.answer) : ""
+                  return answer !== "" || (q.type === "document-review" && q.document?.file)
+                }
               )
             )
               projectAnsweredQuestions++
@@ -408,7 +488,7 @@ export const useAssessmentStore = create<AssessmentState>()(
           std.questions.forEach((q) => {
             if (q.riskLevel === "high") high++
             else if (q.riskLevel === "medium") medium++
-            else if (q.riskLevel === "low" && q.answer !== undefined && q.answer !== "") low++
+            else if (q.riskLevel === "low" && q.answer !== undefined && q.answer !== null && String(q.answer) !== "") low++
           })
         })
         return { high, medium, low }
@@ -509,6 +589,34 @@ export const useAssessmentStore = create<AssessmentState>()(
             projects: state.projects.map((p) => (p.name === state.activeProjectName ? updatedProject : p)),
           }
         }),
+
+      // Audit Trail Actions
+      addAuditEntry: (entry) =>
+        set((state) => ({
+          auditTrail: {
+            ...state.auditTrail,
+            entries: [...state.auditTrail.entries, entry],
+            lastUpdated: new Date(),
+            totalImprovements: entry.type === 'score_updated' 
+              ? state.auditTrail.totalImprovements + 1 
+              : state.auditTrail.totalImprovements,
+            verifiedImprovements: entry.type === 'score_updated' && entry.details.verificationStatus === 'verified'
+              ? state.auditTrail.verifiedImprovements + 1
+              : state.auditTrail.verifiedImprovements
+          }
+        })),
+
+      getAuditTrail: () => get().auditTrail,
+
+      clearAuditTrail: () =>
+        set(() => ({
+          auditTrail: {
+            entries: [],
+            lastUpdated: new Date(),
+            totalImprovements: 0,
+            verifiedImprovements: 0
+          }
+        })),
     }),
     {
       name: "power-platform-assessment-storage-v2", // Changed name to avoid conflicts with old structure

@@ -75,11 +75,17 @@ export function sanitizeAssessmentData(project: Project): Project {
       ...standard,
       questions: standard.questions.map(question => ({
         ...question,
-        evidenceNotes: question.evidenceNotes?.trim() || "",
-        riskOwner: question.riskOwner?.trim() || "",
-        codeSnippetsList: question.codeSnippetsList?.filter((s: TimestampedCodeSnippet) => s.code.trim()) || [],
-        developerFeedbackList: question.developerFeedbackList?.filter((f: TimestampedFeedback) => f.feedback.trim()) || [],
-        developerRecommendationsList: question.developerRecommendationsList?.filter((r: TimestampedFeedback) => r.feedback.trim()) || [],
+        evidenceNotes: typeof question.evidenceNotes === 'string' ? question.evidenceNotes.trim() : "",
+        riskOwner: typeof question.riskOwner === 'string' ? question.riskOwner.trim() : "",
+        codeSnippetsList: question.codeSnippetsList?.filter((s: TimestampedCodeSnippet) => 
+          s.code && typeof s.code === 'string' && s.code.trim()
+        ) || [],
+        developerFeedbackList: question.developerFeedbackList?.filter((f: TimestampedFeedback) => 
+          f.feedback && typeof f.feedback === 'string' && f.feedback.trim()
+        ) || [],
+        developerRecommendationsList: question.developerRecommendationsList?.filter((r: TimestampedFeedback) => 
+          r.feedback && typeof r.feedback === 'string' && r.feedback.trim()
+        ) || [],
       }))
     }))
   }

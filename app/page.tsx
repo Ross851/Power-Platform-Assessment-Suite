@@ -1,527 +1,325 @@
 "use client"
 
-import Link from "next/link"
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card"
+import { useState, useEffect } from "react"
+import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Progress } from "@/components/ui/progress"
-import { ASSESSMENT_STANDARDS } from "@/lib/constants"
-import type { AssessmentStandard as AssessmentStandardType } from "@/lib/types"
-import { OverallSummary } from "@/components/overall-summary"
-import { GeneralDocumentation } from "@/components/general-documentation"
-import { AssessmentGuidance } from "@/components/assessment-guidance"
-import { FileDown, ExternalLink, FolderPlus, Trash2, AlertCircle, Briefcase, Wrench, Upload, Download, FileText, GitCompare, Code, Cloud, Settings } from "lucide-react"
-import { RAGIndicator } from "@/components/rag-indicator"
-import { useAssessmentStore } from "@/store/assessment-store"
-import { useEffect, useState, useRef } from "react"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { format } from "date-fns"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { ClientOnly } from "@/components/client-only"
-import { StorageResetButton } from "@/components/storage-reset-button"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog"
-import { exportToExcel, exportToJson } from "@/lib/export"
-import { exportToClientWord, exportToTechnicalWord } from "@/lib/word-export"
-import { generateExecutiveReport } from "@/lib/executive-report"
-import { AssessmentStorage } from "@/lib/storage"
-import { Separator } from "@/components/ui/separator"
 import { Badge } from "@/components/ui/badge"
-import { DeveloperSuccessGuide } from "@/components/developer-success-guide"
-import { VersionComparison } from "@/components/version-comparison"
-import { VersionControl } from "@/lib/version-control"
-import { Textarea } from "@/components/ui/textarea"
-import { CodeSnippetsViewer } from "@/components/code-snippets-viewer"
-import { AssessorInfoDialog, AssessorInfoDisplay } from "@/components/assessor-info-dialog"
-import { GoogleDriveSetup } from "@/components/google-drive-setup"
-import { UserCheck } from "lucide-react"
+import { Input } from "@/components/ui/input"
+import { useAssessmentStore } from "@/store/assessment-store"
+import { ClientOnly } from "@/components/client-only"
+import { AssessorInfoDialog } from "@/components/assessor-info-dialog"
+import { ErrorBoundary } from "@/components/error-boundary"
+import { 
+  ArrowRight,
+  Sparkles,
+  CheckCircle2,
+  Circle,
+  Search,
+  FolderOpen,
+  Plus,
+  FileText,
+  Calendar,
+  ChevronDown
+} from "lucide-react"
+import Link from "next/link"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
-export default function DashboardPage() {
+export default function SimplifiedHomepage() {
   const {
     projects,
     activeProjectName,
     createProject,
     setActiveProject,
-    deleteProject,
     getActiveProject,
-    getStandardProgress,
-    calculateScoresAndRAG,
+    getOverallProgress,
+    getAssessmentMetadata
   } = useAssessmentStore()
 
-  const [newProjectName, setNewProjectName] = useState("")
-  const [isClient, setIsClient] = useState(false)
-  const [confirmDeleteProject, setConfirmDeleteProject] = useState<string | null>(null)
-  const [isExporting, setIsExporting] = useState(false)
-  const [importFile, setImportFile] = useState<File | null>(null)
-  const [isImporting, setIsImporting] = useState(false)
-  const [versionNotes, setVersionNotes] = useState("")
-  const [versionAuthor, setVersionAuthor] = useState("")
-  const [showVersionDialog, setShowVersionDialog] = useState(false)
-  const [showCodeSnippets, setShowCodeSnippets] = useState(false)
+  const [showProjectInput, setShowProjectInput] = useState(false)
+  const [projectName, setProjectName] = useState("")
   const [showAssessorDialog, setShowAssessorDialog] = useState(false)
 
   const activeProject = getActiveProject()
-  const hasCalculatedOnMountRef = useRef<{ [key: string]: boolean }>({})
+  const metadata = getAssessmentMetadata()
+  const progress = getOverallProgress()
 
-  useEffect(() => {
-    setIsClient(true)
-  }, [])
+  // Determine current state
+  const hasProject = !!activeProject
+  const hasAssessor = !!metadata
+  const hasStarted = progress > 0
+  const isComplete = progress === 100
 
-  useEffect(() => {
-    if (isClient && activeProject && !hasCalculatedOnMountRef.current[activeProject.name]) {
-      activeProject.standards.forEach((s) => calculateScoresAndRAG(s.slug))
-      hasCalculatedOnMountRef.current[activeProject.name] = true
-    }
-  }, [isClient, activeProject, calculateScoresAndRAG])
-
-  const handleCreateProject = () => {
-    if (newProjectName.trim()) {
-      createProject(newProjectName.trim())
-      setNewProjectName("")
-    }
-  }
-
-  const handleSetActiveProject = (projectName: string) => {
-    setActiveProject(projectName)
-  }
-
-  const handleDeleteProject = (projectName: string) => {
-    deleteProject(projectName)
-    setConfirmDeleteProject(null)
-  }
-
-  const handleExport = async (format: "json" | "excel" | "client-word" | "tech-word" | "executive-word") => {
-    if (!activeProject) return
-    setIsExporting(true)
-    try {
-      switch (format) {
-        case "excel":
-          await exportToExcel(activeProject)
-          break
-        case "json":
-          exportToJson(activeProject)
-          break
-        case "client-word":
-          await exportToClientWord(activeProject)
-          break
-        case "tech-word":
-          await exportToTechnicalWord(activeProject)
-          break
-        case "executive-word":
-          await generateExecutiveReport(activeProject)
-          break
+  // Single action button logic
+  const getMainAction = () => {
+    if (!hasProject) {
+      return {
+        label: "Start New Assessment",
+        onClick: () => setShowProjectInput(true),
+        icon: <Sparkles className="mr-2 h-4 w-4" />
       }
-    } catch (error) {
-      console.error("Export failed:", error)
-      alert("An error occurred during the export.")
-    } finally {
-      setIsExporting(false)
+    }
+    if (!hasAssessor) {
+      return {
+        label: "Add Your Details",
+        onClick: () => setShowAssessorDialog(true),
+        icon: <ArrowRight className="mr-2 h-4 w-4" />
+      }
+    }
+    if (!hasStarted) {
+      return {
+        label: "Choose Assessment Type",
+        href: "#assessment-choice",
+        icon: <ArrowRight className="mr-2 h-4 w-4" />
+      }
+    }
+    if (isComplete) {
+      return {
+        label: "View Results",
+        href: "#export",
+        icon: <CheckCircle2 className="mr-2 h-4 w-4" />
+      }
+    }
+    return {
+      label: "Continue Assessment",
+      href: "/microsoft-2025-demo",
+      icon: <ArrowRight className="mr-2 h-4 w-4" />
     }
   }
 
-  const handleBackupExport = () => {
-    AssessmentStorage.exportToFile(projects)
-  }
-
-  const handleImport = async () => {
-    if (!importFile) return
-    setIsImporting(true)
-    try {
-      const importedProjects = await AssessmentStorage.importFromFile(importFile)
-      // This would need to be implemented in the store
-      alert(`Successfully imported ${importedProjects.length} projects. Please refresh the page.`)
-      window.location.reload()
-    } catch (error) {
-      alert(error instanceof Error ? error.message : "Import failed")
-    } finally {
-      setIsImporting(false)
-      setImportFile(null)
-    }
-  }
-
-  const handleCreateVersion = () => {
-    if (!activeProject) return
-    
-    VersionControl.createVersion(
-      activeProject,
-      versionAuthor || "Unknown",
-      versionNotes
-    )
-    
-    setShowVersionDialog(false)
-    setVersionNotes("")
-    setVersionAuthor("")
-    alert("Version created successfully!")
-  }
-
-  if (!isClient) {
-    return (
-      <div className="container mx-auto p-4 md:p-8 bg-background text-foreground min-h-screen">
-        <header className="mb-8">
-          <h1 className="text-3xl font-bold text-primary">Power Platform Assessment Suite</h1>
-          <p className="text-muted-foreground">Loading assessment data...</p>
-        </header>
-      </div>
-    )
-  }
-
-  const displayStandards = activeProject
-    ? activeProject.standards.map((projStd) => {
-        const constStd = ASSESSMENT_STANDARDS.find((cs) => cs.slug === projStd.slug)
-        return {
-          ...constStd,
-          ...projStd,
-          completion: getStandardProgress(projStd.slug),
-        }
-      })
-    : []
+  const mainAction = getMainAction()
 
   return (
-    <ClientOnly fallback={
-      <div className="container mx-auto p-4 md:p-8 bg-background text-foreground min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Loading assessment suite...</p>
-        </div>
-      </div>
-    }>
-      <div className="container mx-auto p-4 md:p-8 bg-background text-foreground min-h-screen">
-      <header className="mb-8">
-        <div className="flex items-center justify-between mb-2">
-          <h1 className="text-3xl font-bold text-primary">Power Platform Assessment Suite</h1>
-          <div className="flex gap-2">
-            <Button variant="outline" size="sm" onClick={handleBackupExport}>
-              <Download className="mr-2 h-4 w-4" /> Backup All
-            </Button>
-            <StorageResetButton />
-            <Dialog>
-              <DialogTrigger asChild>
-                <Button variant="outline" size="sm">
-                  <Upload className="mr-2 h-4 w-4" /> Import
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Import Assessment Data</DialogTitle>
-                  <DialogDescription>
-                    Select a previously exported assessment backup file to import.
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="grid gap-4 py-4">
-                  <Input
-                    type="file"
-                    accept=".json"
-                    onChange={(e) => setImportFile(e.target.files?.[0] || null)}
-                  />
-                </div>
-                <DialogFooter>
-                  <Button onClick={handleImport} disabled={!importFile || isImporting}>
-                    {isImporting ? "Importing..." : "Import"}
-                  </Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
-            <Link href="/google-drive-test">
-              <Button variant="ghost" size="sm" title="Test Google Drive Integration">
-                <Cloud className="mr-2 h-4 w-4" />
-                Cloud Test
-              </Button>
-            </Link>
-            <Link href="/setup-guide">
-              <Button variant="ghost" size="sm" title="Setup Guide for Other Computers">
-                <Settings className="mr-2 h-4 w-4" />
-                Setup Guide
-              </Button>
-            </Link>
-          </div>
-        </div>
-        <p className="text-muted-foreground">
-          Evaluate your organisation&apos;s Power Platform maturity against Microsoft best practices.
-        </p>
-      </header>
-
-      <AssessmentGuidance standardSlug="home" />
-
-      <Card className="mb-8">
-        <CardHeader>
-          <CardTitle>Project Management</CardTitle>
-          <CardDescription>Create a new assessment project or select an existing one.</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex flex-col sm:flex-row gap-2 items-end">
-            <div className="flex-grow">
-              <Label htmlFor="new-project-name">New Project Name</Label>
-              <Input
-                id="new-project-name"
-                value={newProjectName}
-                onChange={(e) => setNewProjectName(e.target.value)}
-                placeholder="e.g., Contoso Q3 Assessment"
-              />
-            </div>
-            <Button onClick={handleCreateProject} disabled={!newProjectName.trim()}>
-              <FolderPlus className="mr-2 h-4 w-4" /> Create Project
-            </Button>
-          </div>
-          {projects.length > 0 && (
-            <div className="flex flex-col sm:flex-row gap-2 items-end">
-              <div className="flex-grow">
-                <Label htmlFor="active-project-select">Active Project</Label>
-                <Select value={activeProjectName || ""} onValueChange={handleSetActiveProject}>
-                  <SelectTrigger id="active-project-select">
-                    <SelectValue placeholder="Select a project" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {projects.map((p) => (
-                      <SelectItem key={p.name} value={p.name}>
-                        {p.name} (Last modified: {format(new Date(p.lastModifiedAt), "dd MMM yyyy, HH:mm")})
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+    <ErrorBoundary>
+      <ClientOnly>
+        <AssessorInfoDialog open={showAssessorDialog} onOpenChange={setShowAssessorDialog} />
+        
+        <div className="min-h-screen flex flex-col items-center justify-center p-4">
+        <div className="max-w-2xl w-full space-y-8">
+          {/* Main Header */}
+          <div className="text-center space-y-4">
+            <h1 className="text-5xl font-bold">
+              Power Platform Assessment
+            </h1>
+            <p className="text-xl text-muted-foreground">
+              Evaluate your Microsoft Power Platform maturity in minutes
+            </p>
+            
+            {/* Project Switcher */}
+            {projects.length > 1 && (
+              <div className="flex justify-center mt-4">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" className="min-w-[200px]">
+                      <FolderOpen className="mr-2 h-4 w-4" />
+                      {activeProjectName || 'Select Project'}
+                      <ChevronDown className="ml-auto h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="w-[300px]">
+                    <DropdownMenuLabel>Your Projects</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    {projects.map((project) => {
+                      const projectProgress = Math.round(
+                        project.assessmentStandards.reduce((sum, std) => sum + std.completion, 0) / 
+                        project.assessmentStandards.length
+                      )
+                      return (
+                        <DropdownMenuItem
+                          key={project.name}
+                          onClick={() => setActiveProject(project.name)}
+                          className={activeProjectName === project.name ? 'bg-accent' : ''}
+                        >
+                          <div className="flex items-center justify-between w-full">
+                            <div className="flex items-center gap-2">
+                              <FolderOpen className="h-4 w-4" />
+                              <span>{project.name}</span>
+                            </div>
+                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                              <Badge variant="outline" className="text-xs">
+                                {projectProgress}%
+                              </Badge>
+                              <span className="text-xs">
+                                {new Date(project.lastModifiedAt).toLocaleDateString()}
+                              </span>
+                            </div>
+                          </div>
+                        </DropdownMenuItem>
+                      )
+                    })}
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => setShowProjectInput(true)}>
+                      <Plus className="mr-2 h-4 w-4" />
+                      New Project
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
-              {activeProjectName && (
-                <>
-                  <Button 
-                    variant="outline" 
-                    size="icon" 
-                    title="Set assessor information"
-                    onClick={() => setShowAssessorDialog(true)}
-                  >
-                    <UserCheck className="h-4 w-4" />
-                  </Button>
-                  <Dialog open={showVersionDialog} onOpenChange={setShowVersionDialog}>
-                    <DialogTrigger asChild>
-                      <Button variant="outline" size="icon" title="Create version snapshot">
-                        <GitCompare className="h-4 w-4" />
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent>
-                      <DialogHeader>
-                        <DialogTitle>Create Version Snapshot</DialogTitle>
-                        <DialogDescription>
-                          Save the current state of your assessment for future comparison.
-                        </DialogDescription>
-                      </DialogHeader>
-                      <div className="grid gap-4 py-4">
-                        <div>
-                          <Label htmlFor="version-author">Your Name</Label>
-                          <Input
-                            id="version-author"
-                            value={versionAuthor}
-                            onChange={(e) => setVersionAuthor(e.target.value)}
-                            placeholder="e.g., John Smith"
-                          />
-                        </div>
-                        <div>
-                          <Label htmlFor="version-notes">Version Notes</Label>
-                          <Textarea
-                            id="version-notes"
-                            value={versionNotes}
-                            onChange={(e) => setVersionNotes(e.target.value)}
-                            placeholder="What changes were made in this version?"
-                            rows={3}
-                          />
-                        </div>
-                      </div>
-                      <DialogFooter>
-                        <Button onClick={handleCreateVersion}>
-                          Create Version
-                        </Button>
-                      </DialogFooter>
-                    </DialogContent>
-                  </Dialog>
-                  <Dialog
-                    open={confirmDeleteProject === activeProjectName}
-                    onOpenChange={(isOpen) => !isOpen && setConfirmDeleteProject(null)}
-                  >
-                    <DialogTrigger asChild>
-                      <Button
-                        variant="destructive"
-                        size="icon"
-                        title={`Delete project ${activeProjectName}`}
-                        onClick={() => setConfirmDeleteProject(activeProjectName)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent>
-                      <DialogHeader>
-                        <DialogTitle>Confirm Deletion</DialogTitle>
-                        <DialogDescription>
-                          Are you sure you want to delete the project &quot;{activeProjectName}&quot;? This action cannot be undone.
-                        </DialogDescription>
-                      </DialogHeader>
-                      <DialogFooter>
-                        <Button variant="outline" onClick={() => setConfirmDeleteProject(null)}>
-                          Cancel
-                        </Button>
-                        <Button variant="destructive" onClick={() => handleDeleteProject(activeProjectName!)}>
-                          Delete Project
-                        </Button>
-                      </DialogFooter>
-                    </DialogContent>
-                  </Dialog>
-                </>
-              )}
+            )}
+          </div>
+
+          {/* Progress Indicator - Only show if started */}
+          {hasProject && (
+            <div className="flex justify-center">
+              <div className="flex items-center gap-2">
+                <Circle className={`h-3 w-3 ${hasProject ? 'fill-primary text-primary' : 'text-muted-foreground'}`} />
+                <div className="w-8 h-0.5 bg-muted" />
+                <Circle className={`h-3 w-3 ${hasAssessor ? 'fill-primary text-primary' : 'text-muted-foreground'}`} />
+                <div className="w-8 h-0.5 bg-muted" />
+                <Circle className={`h-3 w-3 ${hasStarted ? 'fill-primary text-primary' : 'text-muted-foreground'}`} />
+                <div className="w-8 h-0.5 bg-muted" />
+                <Circle className={`h-3 w-3 ${isComplete ? 'fill-primary text-primary' : 'text-muted-foreground'}`} />
+              </div>
             </div>
           )}
-        </CardContent>
-      </Card>
 
-      {!activeProject ? (
-        <Alert className="mb-8">
-          <AlertCircle className="h-4 w-4" />
-          <AlertTitle>No Active Project</AlertTitle>
-          <AlertDescription>Please create or select a project to begin your assessment.</AlertDescription>
-        </Alert>
-      ) : (
-        <>
-          <AssessorInfoDialog open={showAssessorDialog} onOpenChange={setShowAssessorDialog} />
-          
-          <AssessorInfoDisplay />
-
-          <OverallSummary />
-
-          <DeveloperSuccessGuide />
-
-          <Card className="mb-8">
-            <CardHeader className="cursor-pointer" onClick={() => setShowCodeSnippets(!showCodeSnippets)}>
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle className="flex items-center gap-2">
-                    <Code className="h-5 w-5" />
-                    Code Snippets Timeline
-                  </CardTitle>
-                  <CardDescription>View all code snippets across your assessment in chronological order</CardDescription>
-                </div>
-                <Button variant="ghost" size="sm">
-                  {showCodeSnippets ? "Hide" : "Show"}
-                </Button>
-              </div>
-            </CardHeader>
-            {showCodeSnippets && (
-              <CardContent>
-                <CodeSnippetsViewer />
-              </CardContent>
-            )}
-          </Card>
-
-          <Card className="mb-8">
-            <CardHeader className="flex flex-row items-center justify-between">
+          {/* Main Action Card */}
+          <Card className="shadow-lg">
+            <CardContent className="p-8 text-center space-y-6">
+              {/* Status Message */}
               <div>
-                <CardTitle>Export Assessment</CardTitle>
-                <CardDescription>Generate reports in various formats for different audiences.</CardDescription>
+                {!hasProject && (
+                  <p className="text-lg">Ready to assess your Power Platform implementation?</p>
+                )}
+                {hasProject && !hasAssessor && (
+                  <p className="text-lg">Welcome! Let's add your details to get started.</p>
+                )}
+                {hasAssessor && !hasStarted && (
+                  <p className="text-lg">Perfect! Choose your assessment type to begin.</p>
+                )}
+                {hasStarted && !isComplete && (
+                  <div>
+                    <p className="text-lg mb-2">Great progress!</p>
+                    <div className="text-3xl font-bold text-primary">{Math.round(progress)}% Complete</div>
+                  </div>
+                )}
+                {isComplete && (
+                  <div>
+                    <p className="text-lg mb-2">Assessment Complete! 🎉</p>
+                    <p className="text-muted-foreground">Download your executive report</p>
+                  </div>
+                )}
               </div>
-              <Badge variant="outline">Auto-saved locally</Badge>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                <Button
-                  onClick={() => handleExport("executive-word")}
-                  disabled={isExporting}
-                  variant="default"
-                  className="justify-start"
-                >
-                  <Briefcase className="mr-2 h-4 w-4" />
-                  Executive Report (Word)
-                  <Badge className="ml-auto" variant="secondary">C-Suite</Badge>
-                </Button>
-                <Button
-                  onClick={() => handleExport("client-word")}
-                  disabled={isExporting}
-                  variant="outline"
-                  className="justify-start"
-                >
-                  <FileText className="mr-2 h-4 w-4" />
-                  Client Report (Word)
-                </Button>
-                <Button
-                  onClick={() => handleExport("tech-word")}
-                  disabled={isExporting}
-                  variant="outline"
-                  className="justify-start"
-                >
-                  <Wrench className="mr-2 h-4 w-4" />
-                  Technical Report (Word)
-                </Button>
-                <Button
-                  onClick={() => handleExport("excel")}
-                  disabled={isExporting}
-                  variant="outline"
-                  className="justify-start"
-                >
-                  <FileDown className="mr-2 h-4 w-4" />
-                  Detailed Data (Excel)
-                </Button>
-                <Button
-                  onClick={() => handleExport("json")}
-                  disabled={isExporting}
-                  variant="outline"
-                  className="justify-start"
-                >
-                  <FileDown className="mr-2 h-4 w-4" />
-                  Raw Data (JSON)
-                </Button>
-              </div>
+
+              {/* Main Action Button */}
+              {!showProjectInput ? (
+                mainAction.href ? (
+                  <Button size="lg" className="text-lg px-8" asChild>
+                    <Link href={mainAction.href}>
+                      {mainAction.icon}
+                      {mainAction.label}
+                    </Link>
+                  </Button>
+                ) : (
+                  <Button size="lg" className="text-lg px-8" onClick={mainAction.onClick}>
+                    {mainAction.icon}
+                    {mainAction.label}
+                  </Button>
+                )
+              ) : (
+                <div className="space-y-4 max-w-sm mx-auto">
+                  <Input
+                    type="text"
+                    placeholder="Project name (e.g., Q1 2024)"
+                    className="w-full text-center bg-background text-foreground"
+                    value={projectName}
+                    onChange={(e) => setProjectName(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && projectName.trim()) {
+                        createProject(projectName.trim())
+                        setShowProjectInput(false)
+                        setProjectName("")
+                      }
+                    }}
+                    autoFocus
+                  />
+                  <div className="flex gap-2">
+                    <Button 
+                      className="flex-1"
+                      onClick={() => {
+                        if (projectName.trim()) {
+                          createProject(projectName.trim())
+                          setShowProjectInput(false)
+                          setProjectName("")
+                        }
+                      }}
+                    >
+                      Create Project
+                    </Button>
+                    <Button 
+                      variant="outline"
+                      onClick={() => {
+                        setShowProjectInput(false)
+                        setProjectName("")
+                      }}
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                </div>
+              )}
+
+              {/* Context Info */}
+              {activeProject && (
+                <div className="pt-4 border-t">
+                  <p className="text-sm text-muted-foreground">
+                    Project: <span className="font-medium">{activeProjectName}</span>
+                    {metadata && <span> • Assessor: {metadata.assessorName}</span>}
+                  </p>
+                </div>
+              )}
             </CardContent>
           </Card>
 
-          <VersionComparison 
-            projectName={activeProjectName!} 
-            onVersionCreate={() => setShowVersionDialog(true)}
-          />
+          {/* Assessment Type Choice - Only show when needed */}
+          {hasAssessor && !hasStarted && (
+            <div id="assessment-choice" className="grid md:grid-cols-2 gap-4">
+              <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => window.location.href = '/microsoft-2025-demo'}>
+                <CardContent className="p-6 text-center">
+                  <Sparkles className="h-8 w-8 mx-auto mb-3 text-purple-600" />
+                  <h3 className="font-semibold mb-1">Strategic Assessment</h3>
+                  <p className="text-sm text-muted-foreground">For executives • 30 mins</p>
+                </CardContent>
+              </Card>
+              <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => window.location.href = '/assessment/documentation-rulebooks'}>
+                <CardContent className="p-6 text-center">
+                  <CheckCircle2 className="h-8 w-8 mx-auto mb-3 text-blue-600" />
+                  <h3 className="font-semibold mb-1">Operational Assessment</h3>
+                  <p className="text-sm text-muted-foreground">For IT teams • 60+ mins</p>
+                </CardContent>
+              </Card>
+            </div>
+          )}
 
-          <GeneralDocumentation />
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Assessment Standards</CardTitle>
-              <CardDescription>Click on any standard to begin or continue your assessment.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid gap-4 md:grid-cols-2">
-                {displayStandards.map((standard: any) => (
-                  <Link key={standard.slug} href={`/assessment/${standard.slug}`} className="block">
-                    <Card className="hover:shadow-lg transition-shadow cursor-pointer h-full">
-                      <CardHeader>
-                        <div className="flex justify-between items-start">
-                          <div className="flex-1">
-                            <CardTitle className="text-lg">{standard.name}</CardTitle>
-                            <CardDescription className="mt-2">{standard.description}</CardDescription>
-                          </div>
-                          <RAGIndicator status={standard.ragStatus} size="lg" />
-                        </div>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="space-y-2">
-                          <div className="flex justify-between text-sm">
-                            <span>Progress</span>
-                            <span>{Math.round(standard.completion || 0)}%</span>
-                          </div>
-                          <Progress value={standard.completion || 0} className="h-2" />
-                          <div className="flex justify-between text-sm text-muted-foreground">
-                            <span>{standard.questions?.length || 0} questions</span>
-                            <span>Weight: {standard.weight}</span>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </Link>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </>
-      )}
-    </div>
-    </ClientOnly>
+          {/* Minimal Footer Links */}
+          <div className="flex justify-center gap-6 text-sm">
+            <Link 
+              href="/resources"
+              className="text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
+            >
+              <Search className="h-3 w-3" />
+              Search
+            </Link>
+            <Link href="/evidence" className="text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1">
+              <FileText className="h-3 w-3" />
+              Evidence
+            </Link>
+            <Link href="/resources" className="text-muted-foreground hover:text-foreground transition-colors">
+              Resources
+            </Link>
+            <Link href="/assessment-guide" className="text-muted-foreground hover:text-foreground transition-colors">
+              Help
+            </Link>
+          </div>
+        </div>
+      </div>
+      </ClientOnly>
+    </ErrorBoundary>
   )
 }

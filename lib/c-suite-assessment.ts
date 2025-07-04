@@ -1,0 +1,383 @@
+import type { Question, AssessmentStandard } from "./types"
+
+// C-Suite Strategic Governance Assessment Questions
+export const cSuiteStrategicGovernanceQuestions: Question[] = [
+  // Strategic Alignment & Vision
+  {
+    id: "csuite-q1",
+    text: "Is Power Platform adoption aligned with your organization's digital transformation strategy?",
+    type: "scale",
+    weight: 5,
+    importance: 5,
+    category: "Strategic Alignment",
+    guidance: "Assess whether Power Platform initiatives directly support board-approved digital transformation objectives, competitive positioning, and long-term business strategy.",
+    references: [
+      {
+        title: "Digital Transformation Strategy",
+        url: "https://learn.microsoft.com/en-us/power-platform/guidance/adoption/strategy",
+      },
+    ],
+  },
+  {
+    id: "csuite-q2",
+    text: "What percentage of strategic business initiatives leverage Power Platform capabilities?",
+    type: "percentage",
+    weight: 4,
+    importance: 4,
+    category: "Strategic Alignment",
+    guidance: "Measure the penetration of Power Platform in critical business transformation projects. Higher percentages indicate platform maturity and strategic importance.",
+  },
+  {
+    id: "csuite-q3",
+    text: "Is there an executive sponsor at C-Suite or Board level for Power Platform initiatives?",
+    type: "boolean",
+    weight: 5,
+    importance: 5,
+    category: "Executive Leadership",
+    guidance: "Executive sponsorship is crucial for strategic success, resource allocation, and organizational alignment. Document sponsor role, commitment level, and engagement frequency.",
+  },
+
+  // Business Value & ROI
+  {
+    id: "csuite-q4",
+    text: "Are business value metrics and KPIs defined and tracked for Power Platform investments?",
+    type: "boolean",
+    weight: 5,
+    importance: 5,
+    category: "Value Realization",
+    guidance: "Document specific metrics like process efficiency gains, cost savings, revenue impact, employee productivity, and customer satisfaction improvements.",
+  },
+  {
+    id: "csuite-q5",
+    text: "What is the documented ROI for Power Platform investments over the last 12 months?",
+    type: "percentage",
+    weight: 5,
+    importance: 5,
+    category: "Value Realization",
+    guidance: "Calculate total return including hard savings (cost reduction) and soft benefits (productivity, agility, innovation speed). Industry benchmarks typically show 200-500% ROI.",
+  },
+  {
+    id: "csuite-q6",
+    text: "How mature is your business value tracking methodology (1=Ad-hoc, 5=Optimized)?",
+    type: "scale",
+    weight: 4,
+    importance: 4,
+    category: "Value Realization",
+    guidance: "Evaluate the sophistication of value measurement: from basic cost tracking to advanced analytics including opportunity costs, strategic options value, and innovation metrics.",
+  },
+
+  // Risk Management
+  {
+    id: "csuite-q7",
+    text: "Is Power Platform included in enterprise risk management frameworks and board risk reporting?",
+    type: "boolean",
+    weight: 5,
+    importance: 5,
+    category: "Risk Management",
+    guidance: "Assess integration with ERM processes, risk registers, board risk committees, and regular executive risk reviews. Document risk appetite statements specific to citizen development.",
+  },
+  {
+    id: "csuite-q8",
+    text: "How comprehensive is your Power Platform risk assessment across operational, financial, strategic, and compliance dimensions?",
+    type: "scale",
+    weight: 5,
+    importance: 5,
+    category: "Risk Management",
+    guidance: "Evaluate coverage of shadow IT risks, data governance, regulatory compliance, vendor lock-in, skills dependencies, and business continuity impacts.",
+  },
+  {
+    id: "csuite-q9",
+    text: "Are cyber security and data privacy risks from Power Platform actively managed at executive level?",
+    type: "boolean",
+    weight: 5,
+    importance: 5,
+    category: "Risk Management",
+    guidance: "Verify CISO/DPO involvement, regular security assessments, incident response planning, and alignment with corporate cyber insurance requirements.",
+  },
+
+  // Investment Strategy
+  {
+    id: "csuite-q10",
+    text: "Is there a multi-year investment roadmap for Power Platform approved by executive leadership?",
+    type: "boolean",
+    weight: 4,
+    importance: 5,
+    category: "Investment Strategy",
+    guidance: "Document 3-5 year investment plans including licensing, training, CoE development, and innovation funding. Link to strategic business outcomes and capability building.",
+  },
+  {
+    id: "csuite-q11",
+    text: "What percentage of IT budget is allocated to Power Platform and citizen development initiatives?",
+    type: "percentage",
+    weight: 3,
+    importance: 4,
+    category: "Investment Strategy",
+    guidance: "Compare allocation against digital transformation benchmarks (typically 5-15% for mature organizations). Include both direct costs and enabling investments.",
+  },
+  {
+    id: "csuite-q12",
+    text: "How effectively are Power Platform investments prioritized using portfolio management principles?",
+    type: "scale",
+    weight: 4,
+    importance: 4,
+    category: "Investment Strategy",
+    guidance: "Assess use of business case development, stage-gate processes, value scoring models, and executive investment committees for Power Platform projects.",
+  },
+
+  // Organizational Capability
+  {
+    id: "csuite-q13",
+    text: "Has organizational change readiness been assessed for scaled Power Platform adoption?",
+    type: "boolean",
+    weight: 4,
+    importance: 4,
+    category: "Change Management",
+    guidance: "Evaluate cultural readiness, digital literacy, change capacity, and leadership alignment. Consider using established change readiness frameworks (Kotter, ADKAR).",
+  },
+  {
+    id: "csuite-q14",
+    text: "What percentage of target business users are actively using Power Platform capabilities?",
+    type: "percentage",
+    weight: 4,
+    importance: 4,
+    category: "Adoption",
+    guidance: "Measure actual adoption against planned targets. Include both creators and consumers of Power Platform solutions. Target 20-40% for mature organizations.",
+  },
+  {
+    id: "csuite-q15",
+    text: "How mature is your Power Platform talent strategy (recruitment, development, retention)?",
+    type: "scale",
+    weight: 3,
+    importance: 4,
+    category: "Talent Management",
+    guidance: "Assess talent pipeline, career pathways, compensation strategies, and succession planning for critical Power Platform roles including architects and CoE leaders.",
+  },
+
+  // Governance Structure
+  {
+    id: "csuite-q16",
+    text: "Is there an executive steering committee providing strategic oversight for Power Platform?",
+    type: "boolean",
+    weight: 5,
+    importance: 5,
+    category: "Governance Structure",
+    guidance: "Document committee charter, membership (business and IT executives), meeting cadence, decision rights, and escalation pathways to board committees.",
+  },
+  {
+    id: "csuite-q17",
+    text: "How effective is the operating model for balancing innovation with control?",
+    type: "scale",
+    weight: 4,
+    importance: 5,
+    category: "Operating Model",
+    guidance: "Evaluate federated governance models, innovation sandboxes, graduated compliance requirements, and business-IT collaboration effectiveness.",
+  },
+  {
+    id: "csuite-q18",
+    text: "Are Power Platform governance policies endorsed by legal, compliance, and risk executives?",
+    type: "boolean",
+    weight: 4,
+    importance: 5,
+    category: "Governance Structure",
+    guidance: "Verify sign-off from General Counsel, Chief Compliance Officer, and Chief Risk Officer. Document policy exceptions process and executive accountability.",
+  },
+
+  // Strategic Metrics
+  {
+    id: "csuite-q19",
+    text: "Is Power Platform performance included in executive dashboards and board reporting?",
+    type: "boolean",
+    weight: 4,
+    importance: 4,
+    category: "Performance Management",
+    guidance: "Confirm inclusion in balanced scorecards, OKRs, or other executive performance frameworks. Focus on business outcomes, not technical metrics.",
+  },
+  {
+    id: "csuite-q20",
+    text: "How mature is your Power Platform innovation measurement (new capabilities, speed to market)?",
+    type: "scale",
+    weight: 3,
+    importance: 4,
+    category: "Innovation",
+    guidance: "Track innovation velocity, time-to-value for new solutions, business model innovations enabled, and competitive advantages created through Power Platform.",
+  },
+]
+
+// Business Value Realization Questions
+export const businessValueQuestions: Question[] = [
+  {
+    id: "value-q1",
+    text: "Are baseline metrics captured before Power Platform solution deployment?",
+    type: "boolean",
+    weight: 5,
+    importance: 5,
+    category: "Measurement",
+    guidance: "Document current state KPIs for process time, cost, quality, and customer satisfaction before automation. Essential for ROI calculation.",
+  },
+  {
+    id: "value-q2",
+    text: "What is the average time reduction achieved through Power Platform automation?",
+    type: "percentage",
+    weight: 4,
+    importance: 4,
+    category: "Efficiency",
+    guidance: "Measure end-to-end process time improvements. Industry benchmarks show 40-70% time reduction for automated processes.",
+  },
+  {
+    id: "value-q3",
+    text: "How many FTE hours are saved annually through Power Platform solutions?",
+    type: "numeric",
+    weight: 4,
+    importance: 4,
+    category: "Productivity",
+    guidance: "Calculate total hours saved across all automated processes. Convert to FTE equivalent and monetary value using loaded labor costs.",
+  },
+  {
+    id: "value-q4",
+    text: "Is there a benefits realization framework with post-implementation reviews?",
+    type: "boolean",
+    weight: 4,
+    importance: 4,
+    category: "Governance",
+    guidance: "Implement structured reviews at 3, 6, and 12 months post-deployment. Compare actual vs. projected benefits and document lessons learned.",
+  },
+  {
+    id: "value-q5",
+    text: "What percentage of Power Platform projects deliver expected business value?",
+    type: "percentage",
+    weight: 5,
+    importance: 5,
+    category: "Success Rate",
+    guidance: "Track value delivery success rate. Best-in-class organizations achieve 70-80% success rate with clear value definition and measurement.",
+  },
+]
+
+// Enterprise Risk Management Questions
+export const enterpriseRiskQuestions: Question[] = [
+  {
+    id: "risk-q1",
+    text: "Is shadow IT risk from ungoverned Power Platform use formally assessed?",
+    type: "boolean",
+    weight: 5,
+    importance: 5,
+    category: "Operational Risk",
+    guidance: "Evaluate proliferation of unmanaged solutions, data sprawl, and compliance gaps. Implement discovery tools and amnesty programs.",
+  },
+  {
+    id: "risk-q2",
+    text: "How comprehensive is your third-party risk assessment for Power Platform connectors?",
+    type: "scale",
+    weight: 4,
+    importance: 5,
+    category: "Vendor Risk",
+    guidance: "Assess security, privacy, and reliability of third-party connectors. Include vendor assessments, SLA reviews, and data residency considerations.",
+  },
+  {
+    id: "risk-q3",
+    text: "Are business continuity plans updated to include Power Platform dependencies?",
+    type: "boolean",
+    weight: 4,
+    importance: 4,
+    category: "Continuity Risk",
+    guidance: "Document critical process dependencies, recovery procedures, and alternative workflows. Test failover scenarios quarterly.",
+  },
+  {
+    id: "risk-q4",
+    text: "Is regulatory compliance risk actively managed for automated processes?",
+    type: "boolean",
+    weight: 5,
+    importance: 5,
+    category: "Compliance Risk",
+    guidance: "Map automated processes to regulatory requirements (SOX, GDPR, HIPAA). Implement controls for audit trails and data retention.",
+  },
+  {
+    id: "risk-q5",
+    text: "How mature is your Power Platform risk monitoring and early warning system?",
+    type: "scale",
+    weight: 4,
+    importance: 4,
+    category: "Risk Monitoring",
+    guidance: "Implement automated monitoring for policy violations, unusual activity, and performance degradation. Create risk heat maps and trend analysis.",
+  },
+]
+
+// Change Readiness Assessment Questions
+export const changeReadinessQuestions: Question[] = [
+  {
+    id: "change-q1",
+    text: "Has leadership commitment to Power Platform been visibly demonstrated?",
+    type: "boolean",
+    weight: 5,
+    importance: 5,
+    category: "Leadership",
+    guidance: "Look for executive communications, town halls, success story sharing, and leaders using Power Platform solutions themselves.",
+  },
+  {
+    id: "change-q2",
+    text: "What percentage of middle management actively supports citizen development?",
+    type: "percentage",
+    weight: 4,
+    importance: 5,
+    category: "Management Buy-in",
+    guidance: "Survey managers on support for team members building solutions. Address concerns about control, quality, and role changes.",
+  },
+  {
+    id: "change-q3",
+    text: "How mature is your change management approach for Power Platform adoption?",
+    type: "scale",
+    weight: 4,
+    importance: 4,
+    category: "Change Process",
+    guidance: "Evaluate stakeholder engagement, communication plans, resistance management, and adoption tracking against change management frameworks.",
+  },
+  {
+    id: "change-q4",
+    text: "Is there a cultural transformation program supporting digital empowerment?",
+    type: "boolean",
+    weight: 4,
+    importance: 4,
+    category: "Culture",
+    guidance: "Assess programs promoting innovation, experimentation, continuous learning, and collaborative problem-solving aligned with Power Platform.",
+  },
+  {
+    id: "change-q5",
+    text: "How effective are incentives and recognition programs for Power Platform adoption?",
+    type: "scale",
+    weight: 3,
+    importance: 3,
+    category: "Motivation",
+    guidance: "Review both financial and non-financial incentives, innovation challenges, hackathons, and career advancement opportunities for makers.",
+  },
+]
+
+// C-Suite Assessment Standard Definitions
+export const cSuiteAssessmentStandards: AssessmentStandard[] = [
+  {
+    slug: "strategic-governance",
+    name: "Strategic Governance & Executive Leadership",
+    weight: 25,
+    description: "Assessment of executive governance structures, strategic alignment, and leadership commitment to Power Platform as a business transformation enabler.",
+    questions: cSuiteStrategicGovernanceQuestions,
+  },
+  {
+    slug: "business-value",
+    name: "Business Value Realization & ROI",
+    weight: 20,
+    description: "Evaluation of value measurement frameworks, ROI tracking, and benefits realization processes for Power Platform investments.",
+    questions: businessValueQuestions,
+  },
+  {
+    slug: "enterprise-risk",
+    name: "Enterprise Risk Management",
+    weight: 20,
+    description: "Assessment of risk identification, mitigation strategies, and executive oversight for Power Platform-related risks across all dimensions.",
+    questions: enterpriseRiskQuestions,
+  },
+  {
+    slug: "change-readiness",
+    name: "Organizational Change Readiness",
+    weight: 15,
+    description: "Evaluation of organizational capacity, culture, and change management maturity for enterprise-wide Power Platform adoption.",
+    questions: changeReadinessQuestions,
+  },
+]
