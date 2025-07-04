@@ -183,6 +183,7 @@ export default function Microsoft2025BeautifulPage() {
   const [taskStatuses, setTaskStatuses] = useState<Record<string, string>>({})
   const [showReport, setShowReport] = useState(false)
   const [taskTracking, setTaskTracking] = useState<Record<string, TaskTracking>>({})
+  const [taskBasedScoreAdjustments, setTaskBasedScoreAdjustments] = useState<Record<string, number>>({})
   const [organizationFactors, setOrganizationFactors] = useState<TimeEstimationFactors>({
     organizationSize: 'medium',
     teamExperience: 'intermediate',
@@ -216,7 +217,10 @@ export default function Microsoft2025BeautifulPage() {
       }
     })
     
-    return count > 0 ? Math.round(total / count) : 0
+    const baseScore = count > 0 ? Math.round(total / count) : 0
+    const taskAdjustment = taskBasedScoreAdjustments[pillarId] || 0
+    
+    return Math.min(100, baseScore + taskAdjustment)
   }
 
   const pillarScores = assessmentPillars.reduce((acc, pillar) => {
@@ -315,6 +319,9 @@ export default function Microsoft2025BeautifulPage() {
         }
       })
     }
+    
+    // Reset task-based score adjustments when loading demo data
+    setTaskBasedScoreAdjustments({})
     
     setResponses({
       'gov-2025-1': 4,
@@ -2053,7 +2060,7 @@ export default function Microsoft2025BeautifulPage() {
                                                           const updated = updateTaskStatus(tracking, value, "Current User", value === 'Blocked' ? 'Task blocked' : undefined)
                                                           setTaskTracking(prev => ({ ...prev, [task.id]: updated }))
                                                           
-                                                          // Add audit trail entry for task completion
+                                                          // Handle task status changes
                                                           if (value === 'Completed' && tracking.currentStatus !== 'Completed') {
                                                             // Calculate score impact
                                                             const completedTasks = phase.tasks.filter(t => 
@@ -2070,6 +2077,14 @@ export default function Microsoft2025BeautifulPage() {
                                                               hasEvidence,
                                                               currentPillarScore
                                                             )
+                                                            
+                                                            // Update task-based score adjustments
+                                                            const pillarId = rec.category.toLowerCase()
+                                                            const improvement = scoreImpact.projectedScore - currentPillarScore
+                                                            setTaskBasedScoreAdjustments(prev => ({
+                                                              ...prev,
+                                                              [pillarId]: (prev[pillarId] || 0) + improvement
+                                                            }))
                                                             
                                                             // Create and add audit entry
                                                             const auditEntry = createTaskCompletionAuditEntry(
@@ -2094,6 +2109,58 @@ export default function Microsoft2025BeautifulPage() {
                                                               )
                                                               addAuditEntry(scoreUpdateEntry)
                                                             }
+                                                          } else if (tracking.currentStatus === 'Completed' && value !== 'Completed') {
+                                                            // Handle task being uncompleted
+                                                            const pillarId = rec.category.toLowerCase()
+                                                            const completedTasks = phase.tasks.filter(t => 
+                                                              taskTracking[t.id]?.currentStatus === 'Completed' && t.id !== task.id
+                                                            ).map(t => t.id)
+                                                            
+                                                            const hasEvidence = uploadedFiles[`evidence-${rec.title}`]?.length > 0
+                                                            const currentPillarScore = pillarScores[rec.category.toLowerCase()] || 0
+                                                            
+                                                            // Calculate the score impact of removing this task
+                                                            const scoreImpactBefore = calculateScoreImpact(
+                                                              rec,
+                                                              [...completedTasks, task.id],
+                                                              phase.tasks.length,
+                                                              hasEvidence,
+                                                              currentPillarScore - (taskBasedScoreAdjustments[pillarId] || 0)
+                                                            )
+                                                            
+                                                            const scoreImpactAfter = calculateScoreImpact(
+                                                              rec,
+                                                              completedTasks,
+                                                              phase.tasks.length,
+                                                              hasEvidence,
+                                                              currentPillarScore - (taskBasedScoreAdjustments[pillarId] || 0)
+                                                            )
+                                                            
+                                                            const reduction = scoreImpactBefore.projectedScore - scoreImpactAfter.projectedScore
+                                                            
+                                                            // Update task-based score adjustments
+                                                            setTaskBasedScoreAdjustments(prev => ({
+                                                              ...prev,
+                                                              [pillarId]: Math.max(0, (prev[pillarId] || 0) - reduction)
+                                                            }))
+                                                            
+                                                            // Create audit entry for task status change
+                                                            addAuditEntry({
+                                                              id: Date.now().toString(),
+                                                              timestamp: new Date().toISOString(),
+                                                              type: 'task_status_change',
+                                                              description: `Task "${task.name}" status changed from Completed to ${value}`,
+                                                              category: rec.category,
+                                                              user: "Current User",
+                                                              previousValue: 'Completed',
+                                                              newValue: value,
+                                                              metadata: {
+                                                                taskId: task.id,
+                                                                recommendation: rec.title,
+                                                                phase: phase.name,
+                                                                scoreReduction: reduction
+                                                              }
+                                                            })
                                                           }
                                                         }}
                                                       >
