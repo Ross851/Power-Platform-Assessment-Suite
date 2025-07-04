@@ -59,6 +59,7 @@ import {
   calculateGapClosure
 } from '@/lib/audit-trail'
 import { SpiderChart } from '@/components/charts/spider-chart'
+import { EnhancedSpiderChart } from '@/components/charts/enhanced-spider-chart'
 import {
   Select,
   SelectContent,
@@ -126,7 +127,7 @@ const RadialChart = ({ value, label, color }: { value: number; label: string; co
 
 export default function Microsoft2025BeautifulPage() {
   // Get audit trail functions from store
-  const { addAuditEntry, getAuditTrail } = useAssessmentStore()
+  const { addAuditEntry, getAuditTrail, auditTrail, setBaseline } = useAssessmentStore()
   
   // Error boundary for browser extensions and storage issues
   useEffect(() => {
@@ -279,6 +280,42 @@ export default function Microsoft2025BeautifulPage() {
   }
 
   const loadDemoData = () => {
+    // Create baseline if it doesn't exist before loading demo data
+    if (!auditTrail?.baseline) {
+      const baselineScores = assessmentPillars.reduce((acc, pillar) => {
+        acc[pillar.id] = 25 + Math.random() * 30 // Demo baseline between 25-55%
+        return acc
+      }, {} as Record<string, number>)
+      
+      const baseline = createBaselineSnapshot(
+        Object.values(baselineScores).reduce((a, b) => a + b, 0) / Object.keys(baselineScores).length,
+        baselineScores,
+        []
+      )
+      
+      // Save baseline to store
+      setBaseline(baseline)
+      
+      // Create audit entry for baseline
+      addAuditEntry({
+        id: `audit-baseline-${Date.now()}`,
+        timestamp: new Date(),
+        type: 'assessment_changed',
+        category: 'baseline',
+        pillar: 'all',
+        user: 'System',
+        details: {
+          previousScore: 0,
+          newScore: baseline.overallScore,
+          scoreImprovement: baseline.overallScore
+        },
+        metadata: {
+          sessionId: `session-${Date.now()}`,
+          environmentId: 'production'
+        }
+      })
+    }
+    
     setResponses({
       'gov-2025-1': 4,
       'gov-2025-2': 3,
@@ -641,20 +678,72 @@ export default function Microsoft2025BeautifulPage() {
             <Card>
               <CardHeader>
                 <CardTitle>Assessment Radar - Areas for Improvement</CardTitle>
-                <p className="text-sm text-muted-foreground">Visual representation of scores across all pillars</p>
+                <p className="text-sm text-muted-foreground">Shows your journey from baseline to current with Microsoft maturity levels</p>
               </CardHeader>
               <CardContent>
                 <div className="flex justify-center">
-                  <SpiderChart 
-                    data={assessmentPillars.map(pillar => ({
-                      label: pillar.name,
-                      value: animatedScores[pillar.id] || 0,
-                      maxValue: 100
-                    }))}
+                  <EnhancedSpiderChart 
+                    labels={assessmentPillars.map(p => p.name)}
+                    series={[
+                      {
+                        name: 'Baseline',
+                        data: assessmentPillars.map(pillar => 
+                          auditTrail?.baseline?.pillarScores?.[pillar.id] || 0
+                        ),
+                        color: '#3b82f6',
+                        fillOpacity: 0.1,
+                        strokeDasharray: '4 4'
+                      },
+                      {
+                        name: 'Current',
+                        data: assessmentPillars.map(pillar => 
+                          animatedScores[pillar.id] || 0
+                        ),
+                        color: '#10b981',
+                        fillOpacity: 0.3
+                      },
+                      {
+                        name: 'Microsoft Target',
+                        data: assessmentPillars.map(pillar => 
+                          microsoftExpectedScores[pillar.id] || 80
+                        ),
+                        color: '#8b5cf6',
+                        fillOpacity: 0.1,
+                        strokeDasharray: '2 2'
+                      }
+                    ]}
+                    microsoftLevels={{
+                      basic: 40,
+                      intermediate: 65,
+                      advanced: 85
+                    }}
                     width={500}
                     height={400}
                     className="w-full max-w-lg"
+                    showLegend={true}
                   />
+                </div>
+                
+                {/* Gap Closure Summary */}
+                <div className="mt-6 grid grid-cols-3 gap-4 text-center">
+                  <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                    <div className="text-2xl font-bold text-blue-600">
+                      {auditTrail?.baseline?.overallScore?.toFixed(0) || 0}%
+                    </div>
+                    <div className="text-xs text-muted-foreground">Baseline Score</div>
+                  </div>
+                  <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                    <div className="text-2xl font-bold text-green-600">
+                      {overallScore}%
+                    </div>
+                    <div className="text-xs text-muted-foreground">Current Score</div>
+                  </div>
+                  <div className="p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
+                    <div className="text-2xl font-bold text-purple-600">
+                      +{Math.max(0, overallScore - (auditTrail?.baseline?.overallScore || 0)).toFixed(0)}%
+                    </div>
+                    <div className="text-xs text-muted-foreground">Improvement</div>
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -774,24 +863,149 @@ export default function Microsoft2025BeautifulPage() {
             <Card>
               <CardHeader>
                 <CardTitle>Key Performance Indicators</CardTitle>
+                <p className="text-sm text-muted-foreground">Progress from baseline with gap closure tracking</p>
               </CardHeader>
               <CardContent>
-                <div className="flex justify-around items-center">
-                  <RadialChart 
-                    value={securityScore?.percentage || 0} 
-                    label="Security" 
-                    color="#3b82f6" 
-                  />
-                  <RadialChart 
-                    value={maturityLevel?.score || 0} 
-                    label="Maturity" 
-                    color="#10b981" 
-                  />
-                  <RadialChart 
-                    value={overallScore} 
-                    label="Overall" 
-                    color="#8b5cf6" 
-                  />
+                <div className="space-y-6">
+                  {/* KPI Grid */}
+                  <div className="grid grid-cols-3 gap-6">
+                    {[
+                      { 
+                        label: 'Security',
+                        current: securityScore?.percentage || 0,
+                        baseline: auditTrail?.baseline?.pillarScores?.security || 0,
+                        color: '#3b82f6',
+                        icon: Shield
+                      },
+                      { 
+                        label: 'Maturity',
+                        current: maturityLevel?.score || 0,
+                        baseline: auditTrail?.baseline?.overallScore || 0,
+                        color: '#10b981',
+                        icon: TrendingUp
+                      },
+                      { 
+                        label: 'Overall',
+                        current: overallScore,
+                        baseline: auditTrail?.baseline?.overallScore || 0,
+                        color: '#8b5cf6',
+                        icon: Award
+                      }
+                    ].map((kpi, index) => {
+                      const improvement = kpi.current - kpi.baseline
+                      const target = 100
+                      const gapToTarget = target - kpi.baseline
+                      const gapClosed = gapToTarget > 0 ? (improvement / gapToTarget) * 100 : 0
+                      
+                      return (
+                        <div key={index} className="text-center">
+                          {/* Enhanced Radial Chart with layers */}
+                          <div className="relative inline-block">
+                            {/* Background circle for target */}
+                            <svg className="transform -rotate-90 w-32 h-32">
+                              {/* Target ring (100%) */}
+                              <circle
+                                cx="64"
+                                cy="64"
+                                r="45"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="8"
+                                className="text-gray-200 dark:text-gray-700"
+                              />
+                              {/* Baseline indicator */}
+                              <circle
+                                cx="64"
+                                cy="64"
+                                r="45"
+                                fill="none"
+                                stroke={kpi.color}
+                                strokeWidth="8"
+                                strokeDasharray={`${2 * Math.PI * 45 * (kpi.baseline / 100)} ${2 * Math.PI * 45}`}
+                                className="opacity-30"
+                              />
+                              {/* Current progress */}
+                              <circle
+                                cx="64"
+                                cy="64"
+                                r="45"
+                                fill="none"
+                                stroke={kpi.color}
+                                strokeWidth="8"
+                                strokeDasharray={`${2 * Math.PI * 45 * (kpi.current / 100)} ${2 * Math.PI * 45}`}
+                                className="transition-all duration-1000"
+                              />
+                            </svg>
+                            <div className="absolute inset-0 flex flex-col items-center justify-center">
+                              <kpi.icon className="w-6 h-6 mb-1" style={{ color: kpi.color }} />
+                              <div className="text-2xl font-bold">{kpi.current}%</div>
+                            </div>
+                          </div>
+                          
+                          {/* Labels and progress */}
+                          <div className="mt-3">
+                            <div className="font-medium">{kpi.label}</div>
+                            <div className="text-xs text-muted-foreground mt-1">
+                              From {kpi.baseline}% → {kpi.current}%
+                            </div>
+                            
+                            {/* Mini progress bar showing gap closure */}
+                            <div className="mt-2 h-1 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                              <div 
+                                className="h-full bg-gradient-to-r from-blue-500 to-green-500 transition-all duration-1000"
+                                style={{ width: `${Math.min(100, gapClosed)}%` }}
+                              />
+                            </div>
+                            <div className="text-xs mt-1">
+                              <span className="text-green-600 font-medium">
+                                {gapClosed > 0 ? `${gapClosed.toFixed(0)}% gap closed` : 'No change'}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                  
+                  {/* Microsoft Maturity Level Progress */}
+                  <div className="border-t pt-4">
+                    <h4 className="text-sm font-medium mb-3">Microsoft Maturity Levels Progress</h4>
+                    <div className="space-y-2">
+                      {[
+                        { level: 'Basic', threshold: 40, color: 'bg-orange-500' },
+                        { level: 'Intermediate', threshold: 65, color: 'bg-yellow-500' },
+                        { level: 'Advanced', threshold: 85, color: 'bg-green-500' }
+                      ].map((level) => {
+                        const baselineReached = (auditTrail?.baseline?.overallScore || 0) >= level.threshold
+                        const currentReached = overallScore >= level.threshold
+                        const isNewlyReached = !baselineReached && currentReached
+                        
+                        return (
+                          <div key={level.level} className="flex items-center gap-3">
+                            <div className="w-24 text-sm font-medium">{level.level}</div>
+                            <div className="flex-1 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                              <div 
+                                className={`h-full ${level.color} transition-all duration-1000`}
+                                style={{ 
+                                  width: `${Math.min(100, (overallScore / level.threshold) * 100)}%` 
+                                }}
+                              />
+                            </div>
+                            <div className="text-xs w-20 text-right">
+                              {currentReached ? (
+                                <span className="text-green-600">✓ Achieved</span>
+                              ) : (
+                                <span>{level.threshold}% needed</span>
+                              )}
+                            </div>
+                            {isNewlyReached && (
+                              <Badge variant="default" className="text-xs">New!</Badge>
+                            )}
+                          </div>
+                        )
+                      })}
+                    </div>
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -2309,12 +2523,12 @@ export default function Microsoft2025BeautifulPage() {
                   const auditTrail = getAuditTrail()
                   if (!auditTrail?.baseline && securityScore) {
                     const baseline = createBaselineSnapshot(
-                      maturityLevel?.level || 0,
+                      overallScore,
                       pillarScores,
                       securityScore.recommendations || []
                     )
-                    // In a real app, you'd save this to the store
-                    console.log('Baseline created:', baseline)
+                    // Save baseline to store
+                    setBaseline(baseline)
                   }
                   
                   // Create current snapshot

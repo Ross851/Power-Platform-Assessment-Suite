@@ -63,6 +63,7 @@ interface AssessmentState {
   addAuditEntry: (entry: AuditEntry) => void
   getAuditTrail: () => AuditTrail
   clearAuditTrail: () => void
+  setBaseline: (baseline: any) => void
 }
 
 const customStorage: StateStorage = {
@@ -592,8 +593,8 @@ export const useAssessmentStore = create<AssessmentState>()(
 
       // Audit Trail Actions
       addAuditEntry: (entry) =>
-        set((state) => ({
-          auditTrail: {
+        set((state) => {
+          const newAuditTrail = {
             ...state.auditTrail,
             entries: [...state.auditTrail.entries, entry],
             lastUpdated: new Date(),
@@ -604,7 +605,19 @@ export const useAssessmentStore = create<AssessmentState>()(
               ? state.auditTrail.verifiedImprovements + 1
               : state.auditTrail.verifiedImprovements
           }
-        })),
+          
+          // If this is a baseline creation entry, extract and save the baseline
+          if (entry.type === 'assessment_changed' && entry.category === 'baseline' && 
+              entry.details.previousScore === 0 && !state.auditTrail.baseline) {
+            // Extract baseline from the entry metadata if available
+            const baselineData = (entry as any).baseline
+            if (baselineData) {
+              newAuditTrail.baseline = baselineData
+            }
+          }
+          
+          return { auditTrail: newAuditTrail }
+        }),
 
       getAuditTrail: () => get().auditTrail,
 
@@ -615,6 +628,14 @@ export const useAssessmentStore = create<AssessmentState>()(
             lastUpdated: new Date(),
             totalImprovements: 0,
             verifiedImprovements: 0
+          }
+        })),
+        
+      setBaseline: (baseline) =>
+        set((state) => ({
+          auditTrail: {
+            ...state.auditTrail,
+            baseline
           }
         })),
     }),
