@@ -5,7 +5,7 @@ import { Providers } from "./providers"
 import { Toaster } from "@/components/ui/toaster"
 import "@/lib/init-storage"
 import { ClientLayout } from './client-layout'
-import { ExtensionBlocker } from '@/components/extension-blocker'
+// ExtensionBlocker removed - anti-pattern that interferes with password managers and accessibility tools
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -28,7 +28,11 @@ export const metadata: Metadata = {
     address: false,
     telephone: false,
   },
-  metadataBase: new URL("https://power-platform-assessment.vercel.app"),
+  // metadataBase should be set via environment variable for different deployments
+  // metadataBase: new URL(process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"),
+  metadataBase: process.env.NEXT_PUBLIC_BASE_URL
+    ? new URL(process.env.NEXT_PUBLIC_BASE_URL)
+    : undefined, // Will use default behavior in development
   openGraph: {
     title: "Power Platform Assessment Suite",
     description: "Evaluate your organisation's Power Platform maturity against Microsoft best practices",
@@ -69,7 +73,6 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
-        <ExtensionBlocker />
         <Providers>
           <ClientLayout>
             <div className="min-h-screen bg-background font-sans antialiased">

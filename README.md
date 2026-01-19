@@ -5,6 +5,28 @@ A comprehensive assessment tool for evaluating Power Platform maturity against M
 [![Deployed on Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?style=for-the-badge&logo=vercel)](https://vercel.com/rosshastie85-8737s-projects/v0-image-analysis)
 [![Built with Next.js](https://img.shields.io/badge/Built%20with-Next.js-black?style=for-the-badge&logo=next.js)](https://nextjs.org/)
 
+## ⚠️ IMPORTANT: Security & Production Readiness
+
+**Current Status:** ⚠️ **DEVELOPMENT PHASE - NOT PRODUCTION READY**
+
+This application is currently suitable for:
+- ✅ Local demos and proof-of-concepts
+- ✅ Template generation for reports
+- ✅ Training and education
+- ✅ Single-user assessments with manual backups
+
+This application is **NOT** suitable for:
+- ❌ Multi-user enterprise deployments
+- ❌ Storing sensitive or regulated data
+- ❌ Production use without authentication
+- ❌ Scenarios requiring guaranteed data persistence
+
+**Why?** This application uses browser `localStorage` for data storage. If browser cache is cleared, **all data is permanently lost**. There is no backend server, no database, and no authentication.
+
+**See [SECURITY.md](SECURITY.md) for complete security assessment and roadmap.**
+
+---
+
 ## 🎯 Overview
 
 The Power Platform Assessment Suite helps organizations evaluate their Power Platform maturity across 10 key areas:
