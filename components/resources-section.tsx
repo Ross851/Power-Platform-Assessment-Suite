@@ -8,7 +8,6 @@ import {
   FileText,
   BookOpen,
   Video,
-  Download,
   ExternalLink,
   Github,
   MessageSquare,

@@ -25,3 +25,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Assessment export outputs (generated files)
+*_Executive_Summary.docx
+*_Technical_Implementation_Guide.docx
+*_Baseline_Justification.docx
+*.xlsx

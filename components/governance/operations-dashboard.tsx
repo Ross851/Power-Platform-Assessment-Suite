@@ -15,7 +15,6 @@ import {
   Clock,
   BarChart3,
   LineChart,
-  PieChart,
   Target,
   Zap,
   Shield,

@@ -370,8 +370,7 @@ export class OperationsManager {
 
     this.alerts.unshift(newAlert)
     
-    // Governance audit log
-    console.log(`[Governance] New alert created: ${alert.title} (${alert.severity})`)
+    // Governance audit log: Alert created
     
     return id
   }

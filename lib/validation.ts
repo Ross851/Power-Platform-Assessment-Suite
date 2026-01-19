@@ -38,7 +38,7 @@ export const AssessmentResponseSchema = z.object({
 })
 
 // Validate assessment data integrity
-export function validateAssessmentData(data: any): boolean {
+export function validateAssessmentData(data: unknown): boolean {
   try {
     // Basic structure validation
     if (!data || typeof data !== "object") return false

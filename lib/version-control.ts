@@ -14,8 +14,8 @@ export interface AssessmentVersion {
 export interface VersionChange {
   type: "added" | "modified" | "removed"
   path: string
-  oldValue?: any
-  newValue?: any
+  oldValue?: unknown
+  newValue?: unknown
   timestamp: Date
 }
 
@@ -32,8 +32,8 @@ export interface VersionComparison {
 export interface ComparisonItem {
   area: string
   metric: string
-  oldValue: any
-  newValue: any
+  oldValue: unknown
+  newValue: unknown
   change: number
   impact: "high" | "medium" | "low"
 }

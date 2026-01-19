@@ -164,7 +164,7 @@ export class MCPIntegrationManager {
       })
     }
 
-    console.log('[Governance] MCP connections initialized')
+    // MCP connections initialized
   }
 
   /**

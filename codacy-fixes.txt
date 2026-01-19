@@ -1,0 +1,2902 @@
+diff --git a/docs/governance/Quick_Reference_Card.md b/docs/governance/Quick_Reference_Card.md
+--- a/docs/governance/Quick_Reference_Card.md
++++ b/docs/governance/Quick_Reference_Card.md
+@@ -109,1 +109,1 @@
+-| Admin Center | https://admin.powerplatform.microsoft.com |
++| Admin Center | <https://admin.powerplatform.microsoft.com> |
+@@ -110,1 +110,1 @@
+-| Maker Portal | https://make.powerapps.com |
++| Maker Portal | <https://make.powerapps.com> |
+@@ -112,1 +112,1 @@
+-| Azure DevOps | https://dev.azure.com/[your-org] |
++| Azure DevOps | <https://dev.azure.com/[your-org>] |
+diff --git a/COMPLETE_DELIVERY_SUMMARY.md b/COMPLETE_DELIVERY_SUMMARY.md
+--- a/COMPLETE_DELIVERY_SUMMARY.md
++++ b/COMPLETE_DELIVERY_SUMMARY.md
+@@ -27,1 +27,1 @@
+-### Before This Project
++### Before This Project
+
+@@ -28,1 +28,1 @@
+-- â No governance documentation
++
+- â No governance documentation
+@@ -37,1 +37,1 @@
+-### After This Project
++### After This Project
+
+@@ -38,1 +38,1 @@
+-- â 8 comprehensive governance documents
++
+- â 8 comprehensive governance documents
+@@ -51,1 +51,1 @@
+-### Commit 1 (91e8d8e): Initial Governance Integration
++### Commit 1 (91e8d8e): Initial Governance Integration
+
+@@ -56,1 +56,1 @@
+-- 8 governance documentation files in `/docs/governance/`
++
+- 8 governance documentation files in `/docs/governance/`
+@@ -62,1 +62,1 @@
+-- Implementation Workbook (8-part guide)
++
+- Implementation Workbook (8-part guide)
+@@ -69,1 +69,1 @@
+-### Commit 2 (22d325f): Application Integration & Branding
++### Commit 2 (22d325f): Application Integration & Branding
+
+@@ -74,1 +74,1 @@
+-- Integrated governance standards into `lib/constants.ts`
++
+- Integrated governance standards into `lib/constants.ts`
+@@ -80,1 +80,1 @@
+-- 13 governance questions live in application
++
+- 13 governance questions live in application
+@@ -87,1 +87,1 @@
+-### Commit 3 (1944b5c): Documentation & Validation
++### Commit 3 (1944b5c): Documentation & Validation
+
+@@ -92,1 +92,1 @@
+-- Governance alignment summary
++
+- Governance alignment summary
+@@ -100,1 +100,1 @@
+-### Commit 4 (b981f49): Testing Framework & Type Improvements
++### Commit 4 (b981f49): Testing Framework & Type Improvements
+
+@@ -104,1 +104,1 @@
+-- Vitest testing framework installed
++
+- Vitest testing framework installed
+@@ -111,1 +111,1 @@
+-- Test coverage baseline established
++
+- Test coverage baseline established
+@@ -118,1 +118,1 @@
+-### Commit 5 (367170f): Security & Legal Compliance â
++### Commit 5 (367170f): Security & Legal Compliance â
+
+@@ -122,1 +122,1 @@
+-- Added MIT LICENSE file
++
+- Added MIT LICENSE file
+@@ -143,1 +143,1 @@
+-### â Safe for Immediate Use
++### â Safe for Immediate Use
+
+@@ -144,1 +144,1 @@
+-1. **Local Demos** - Perfect for customer demonstrations
++
+1. **Local Demos** - Perfect for customer demonstrations
+@@ -149,1 +149,1 @@
+-### â ï¸ Acknowledged Limitations
++### â ï¸ Acknowledged Limitations
+
+@@ -150,1 +150,1 @@
+-1. **localStorage Only** - Data loss if browser cache cleared (documented)
++
+1. **localStorage Only** - Data loss if browser cache cleared (documented)
+@@ -156,1 +156,1 @@
+-- README.md (top of file)
++
+- README.md (top of file)
+@@ -164,1 +164,1 @@
+-### User-Facing Documentation
++### User-Facing Documentation
+
+@@ -165,1 +165,1 @@
+-1. **README.md** - Updated with security warnings and governance section
++
+1. **README.md** - Updated with security warnings and governance section
+@@ -170,1 +170,1 @@
+-### Governance Documentation (`/docs/governance/`)
++### Governance Documentation (`/docs/governance/`)
+
+@@ -171,1 +171,1 @@
+-1. **README.md** - Navigation index with reading paths
++
+1. **README.md** - Navigation index with reading paths
+@@ -181,1 +181,1 @@
+-### Technical Documentation
++### Technical Documentation
+
+@@ -182,1 +182,1 @@
+-1. **IMPLEMENTATION_TRACKING.md** - Complete change log
++
+1. **IMPLEMENTATION_TRACKING.md** - Complete change log
+@@ -190,1 +190,1 @@
+-### Testing Documentation
++### Testing Documentation
+
+@@ -191,1 +191,1 @@
+-1. **vitest.config.ts** - Test configuration
++
+1. **vitest.config.ts** - Test configuration
+@@ -192,1 +192,1 @@
+-2. **lib/__tests__/constants.test.ts** - Question validation
++2. **lib/**tests__/constants.test.ts** - Question validation
+@@ -193,1 +193,1 @@
+-3. **lib/__tests__/date-formatter.test.ts** - Locale testing
++3. **lib/**tests__/date-formatter.test.ts** - Locale testing
+@@ -199,1 +199,1 @@
+-### Code Quality
++### Code Quality
+
+@@ -200,1 +200,1 @@
+-- **Type Safety:** Enhanced with microsoft-aligned fields
++
+- **Type Safety:** Enhanced with microsoft-aligned fields
+@@ -205,1 +205,1 @@
+-### Architecture
++### Architecture
+
+@@ -206,1 +206,1 @@
+-- **Governance Integration:** 13 questions live in app
++
+- **Governance Integration:** 13 questions live in app
+@@ -211,1 +211,1 @@
+-### Branding
++### Branding
+
+@@ -212,1 +212,1 @@
+-- **Primary Color:** Bytes Blue (HSL 210 100% 45%)
++
+- **Primary Color:** Bytes Blue (HSL 210 100% 45%)
+@@ -221,1 +221,1 @@
+-### For Demos (Recommended)
++### For Demos (Recommended)
+
+@@ -245,1 +245,1 @@
+-### For Template Creation
++### For Template Creation
+
+@@ -254,1 +254,1 @@
+-### For Testing
++### For Testing
+
+@@ -315,1 +315,1 @@
+-### Governance
++### Governance
+
+@@ -316,1 +316,1 @@
+-- â 8 comprehensive documentation files
++
+- â 8 comprehensive documentation files
+@@ -321,1 +321,1 @@
+-### Security
++### Security
+
+@@ -322,1 +322,1 @@
+-- â Legal: MIT LICENSE added
++
+- â Legal: MIT LICENSE added
+@@ -327,1 +327,1 @@
+-### Quality
++### Quality
+
+@@ -328,1 +328,1 @@
+-- â Testing: 118+ automated tests
++
+- â Testing: 118+ automated tests
+@@ -334,1 +334,1 @@
+-- â Bytes Blue/Teal colors throughout
++
+- â Bytes Blue/Teal colors throughout
+@@ -343,1 +343,1 @@
+-### Immediate Benefits
++### Immediate Benefits
+
+diff --git a/README.md b/README.md
+--- a/README.md
++++ b/README.md
+@@ -13,1 +13,1 @@
+-- â Local demos and proof-of-concepts
++
+- â Local demos and proof-of-concepts
+@@ -19,1 +19,1 @@
+-- â Multi-user enterprise deployments
++
+- â Multi-user enterprise deployments
+@@ -152,1 +152,1 @@
+-### Strategic Documentation
++### Strategic Documentation
+
+@@ -153,1 +153,1 @@
+-- **[Environmental Strategy](docs/governance/Environmental_Strategy.md)** - Three-container architecture and implementation approach
++
+- **[Environmental Strategy](docs/governance/Environmental_Strategy.md)** - Three-container architecture and implementation approach
+@@ -157,1 +157,1 @@
+-### Quick Reference Resources
++### Quick Reference Resources
+
+@@ -158,1 +158,1 @@
+-- **[Quick Reference Card](docs/governance/Quick_Reference_Card.md)** - Single-page desk reference
++
+- **[Quick Reference Card](docs/governance/Quick_Reference_Card.md)** - Single-page desk reference
+@@ -162,1 +162,1 @@
+-### Practical Guides
++### Practical Guides
+
+@@ -163,1 +163,1 @@
+-- **[Junior Developer Guide](docs/governance/Junior_Developer_Guide.md)** - Maker onboarding resource
++
+- **[Junior Developer Guide](docs/governance/Junior_Developer_Guide.md)** - Maker onboarding resource
+@@ -166,1 +166,1 @@
+-### Assessment Integration
++### Assessment Integration
+
+@@ -168,1 +168,1 @@
+-- Governance Workbook assessment questions
++
+- Governance Workbook assessment questions
+diff --git a/TEMPLATE_READINESS_REVIEW.md b/TEMPLATE_READINESS_REVIEW.md
+--- a/TEMPLATE_READINESS_REVIEW.md
++++ b/TEMPLATE_READINESS_REVIEW.md
+@@ -7,1 +7,1 @@
+-### â Improvements Made
++### â Improvements Made
+
+@@ -8,1 +8,1 @@
+-1.  **High-Quality Data Injection:** The application now actively loads the "Microsoft Aligned" question set which includes:
++
+1.  **High-Quality Data Injection:** The application now actively loads the "Microsoft Aligned" question set which includes:
+@@ -9,1 +9,1 @@
+-    *   Managed Environments (Production vs Dev)
++    * Managed Environments (Production vs Dev)
+@@ -10,1 +10,1 @@
+-    *   CoE Starter Kit usage
++    * CoE Starter Kit usage
+@@ -11,1 +11,1 @@
+-    *   Security Baseline (Conditional Access)
++    * Security Baseline (Conditional Access)
+@@ -12,1 +12,1 @@
+-    *   *This replaces the generic questions used previously.*
++    * *This replaces the generic questions used previously.*
+@@ -13,1 +13,1 @@
+-2.  **Export Engine Upgrade:** The Word Document generator has been rewritten to include:
++2. **Export Engine Upgrade:** The Word Document generator has been rewritten to include:
+@@ -14,1 +14,1 @@
+-    *   **AI Insights:** Strategic suggestions based on findings.
++    * **AI Insights:** Strategic suggestions based on findings.
+@@ -15,1 +15,1 @@
+-    *   **Microsoft Guidance:** Direct quotes and best practices.
++    * **Microsoft Guidance:** Direct quotes and best practices.
+@@ -16,1 +16,1 @@
+-    *   **Implementation Steps:** Bulleted lists of what to do next.
++    * **Implementation Steps:** Bulleted lists of what to do next.
+@@ -17,1 +17,1 @@
+-3.  **UI Enablement:** I added a "Export Reports" section to the homepage. You no longer need to hunt for a hidden button.
++3. **UI Enablement:** I added a "Export Reports" section to the homepage. You no longer need to hunt for a hidden button.
+@@ -19,1 +19,1 @@
+-### â ï¸ Critical User Instructions
++### â ï¸ Critical User Instructions
+
+@@ -22,1 +22,1 @@
+-1.  **Start Local Server:** `npm run dev`
++1. **Start Local Server:** `npm run dev`
+@@ -23,1 +23,1 @@
+-2.  **Create Project:** On the homepage, click "Start New Assessment" and name it (e.g., "Client X Test").
++2. **Create Project:** On the homepage, click "Start New Assessment" and name it (e.g., "Client X Test").
+@@ -24,1 +24,1 @@
+-    *   *Note: This initializes the store with the NEW high-quality questions.*
++    * *Note: This initializes the store with the NEW high-quality questions.*
+@@ -25,1 +25,1 @@
+-3.  **Choose "Operational Assessment":**
++3. **Choose "Operational Assessment":**
+@@ -26,1 +26,1 @@
+-    *   Do **NOT** choose "Strategic Assessment" (the purple sparkly button) yet. That goes to a demo page that might not sync perfectly with the export engine I just fixed.
++    * Do **NOT** choose "Strategic Assessment" (the purple sparkly button) yet. That goes to a demo page that might not sync perfectly with the export engine I just fixed.
+@@ -27,1 +27,1 @@
+-    *   Choose **"Operational Assessment"** (the blue checkmark). This uses the standard robust engine.
++    * Choose **"Operational Assessment"** (the blue checkmark). This uses the standard robust engine.
+@@ -28,1 +28,1 @@
+-4.  **Answer Questions:** Go through the sections (Managed Environments, Security, etc.).
++4. **Answer Questions:** Go through the sections (Managed Environments, Security, etc.).
+@@ -29,1 +29,1 @@
+-    *   *Tip: You don't need 100% completion to export.*
++    * *Tip: You don't need 100% completion to export.*
+@@ -30,1 +30,1 @@
+-5.  **Export:** Return to the homepage. You will now see a **"Export Reports"** section. Click **"Technical Guide (Word)"**.
++5. **Export:** Return to the homepage. You will now see a **"Export Reports"** section. Click **"Technical Guide (Word)"**.
+@@ -32,1 +32,1 @@
+-### ð Known Limitations (For Local Test Only)
++### ð Known Limitations (For Local Test Only)
+
+@@ -33,1 +33,1 @@
+-*   **Browser Cache Only:** If you clear your browser history/cookies, **you will lose your work**. Do not use Incognito mode if you plan to close the window and come back.
++* **Browser Cache Only:** If you clear your browser history/cookies, **you will lose your work**. Do not use Incognito mode if you plan to close the window and come back.
+@@ -34,1 +34,1 @@
+-*   **Security:** The app is still running in "insecure" mode (API keys in client). This is fine for localhost testing but these keys must be revoked before any public deployment.
++* **Security:** The app is still running in "insecure" mode (API keys in client). This is fine for localhost testing but these keys must be revoked before any public deployment.
+@@ -36,1 +36,1 @@
+-## ð Next Phase (Post-Template)
++## ð Next Phase (Post-Template)
+
+@@ -38,1 +38,1 @@
+-1.  Setting up an Azure SQL or Dataverse backend.
++
+1.  Setting up an Azure SQL or Dataverse backend.
+@@ -39,1 +39,1 @@
+-2.  Moving the `export` logic to a Server Action to secure it.
++2. Moving the `export` logic to a Server Action to secure it.
+@@ -40,1 +40,1 @@
+-3.  Implementing true Entra ID login.
++3. Implementing true Entra ID login.
+diff --git a/docs/governance/Justification_and_Citations.md b/docs/governance/Justification_and_Citations.md
+--- a/docs/governance/Justification_and_Citations.md
++++ b/docs/governance/Justification_and_Citations.md
+@@ -6,1 +6,1 @@
+-> - [Environmental Strategy](./Power_Platform_Environmental_Strategy.md) - Full implementation brief
++>
+> - [Environmental Strategy](./Power_Platform_Environmental_Strategy.md) - Full implementation brief
+@@ -26,1 +26,1 @@
+-- **The Recommendation:** What we suggest
++
+- **The Recommendation:** What we suggest
+@@ -35,1 +35,1 @@
+-## 1. The Strategy: "Block by Default" for DLP
++## 1. The Strategy: "Block by Default" for DLP
+
+@@ -44,1 +44,1 @@
+-### ð¡ The Deep "Why" (Context for You)
++### ð¡ The Deep "Why" (Context for You)
+
+@@ -45,1 +45,1 @@
+-*   **The "Zero-Day" Connector Risk:** Microsoft and partners release new connectors every week. If your default policy is "Open" (Business or Non-Business), any new connectorâeven one that posts data to a public forum or unvetted storage serviceâis instantly available to all 5,000+ users the moment it is released.
++* **The "Zero-Day" Connector Risk:** Microsoft and partners release new connectors every week. If your default policy is "Open" (Business or Non-Business), any new connectorâeven one that posts data to a public forum or unvetted storage serviceâis instantly available to all 5,000+ users the moment it is released.
+@@ -46,1 +46,1 @@
+-*   **The "Shadow IT" Loophole:** You might have locked down Twitter and DropBox today, but if a new "FilesRUs" connector releases tomorrow, your users can use it to exfiltrate data *before* you even know it exists.
++-   **The "Shadow IT" Loophole:** You might have locked down Twitter and DropBox today, but if a new "FilesRUs" connector releases tomorrow, your users can use it to exfiltrate data *before* you even know it exists.
+@@ -47,1 +47,1 @@
+-*   **The Fix:** By setting the default to "Blocked", new connectors land in a quarantine functionality. You (IT Security) can review them and unblock them if they are safe. This shifts you from "Reactive Cleanup" to "Proactive Governance".
++* **The Fix:** By setting the default to "Blocked", new connectors land in a quarantine functionality. You (IT Security) can review them and unblock them if they are safe. This shifts you from "Reactive Cleanup" to "Proactive Governance".
+@@ -51,1 +51,1 @@
+-## 2. The Strategy: Personal Developer Environments (Not "Default")
++## 2. The Strategy: Personal Developer Environments (Not "Default")
+
+@@ -61,1 +61,1 @@
+-*   **The "Noisy Neighbor" Problem:** In the Default environment, everyone shares the same API limits. If one intern writes a bad infinite loop flow, they can throttle the API capacity for the *entire company*, causing the CEO's critical app to fail. Personal environments give every user their own isolated quota.
++
+*   **The "Noisy Neighbor" Problem:** In the Default environment, everyone shares the same API limits. If one intern writes a bad infinite loop flow, they can throttle the API capacity for the *entire company*, causing the CEO's critical app to fail. Personal environments give every user their own isolated quota.
+@@ -62,1 +62,1 @@
+-*   **The "Cleanup" Nightmare:** When 500 users build in one environment, you have thousands of apps named "Test", "Test1", "App". You cannot delete them because you don't know which "Test" app is actually crucial for the Finance workflow.
++-   **The "Cleanup" Nightmare:** When 500 users build in one environment, you have thousands of apps named "Test", "Test1", "App". You cannot delete them because you don't know which "Test" app is actually crucial for the Finance workflow.
+@@ -63,1 +63,1 @@
+-*   **Disposability:** If a user leaves the company, you can simply delete their Personal Environment. You can safely wipe 100% of their "junk" without fear of deleting a shared team resource. You cannot do this in the Default environment.
++* **Disposability:** If a user leaves the company, you can simply delete their Personal Environment. You can safely wipe 100% of their "junk" without fear of deleting a shared team resource. You cannot do this in the Default environment.
+@@ -67,1 +67,1 @@
+-## 3. The Strategy: Environment Groups & Rules (Controlling the "Keys to the Kingdom")
++## 3. The Strategy: Environment Groups & Rules (Controlling the "Keys to the Kingdom")
+
+@@ -76,1 +76,1 @@
+-### ð¡ The Deep "Why" (Video Insight)
++### ð¡ The Deep "Why" (Video Insight)
+
+@@ -77,1 +77,1 @@
+-*   **The Paradox:** In a Personal Developer Environment, the user *must* be a System Admin to build freely. But a System Admin can normally change *any* setting (like turning on risky code components/PCF).
++* **The Paradox:** In a Personal Developer Environment, the user *must* be a System Admin to build freely. But a System Admin can normally change *any* setting (like turning on risky code components/PCF).
+@@ -78,1 +78,1 @@
+-*   **The Fix:** Environment Groups allow you to apply **Rules** (like "Block PCF Controls" or "Limit Sharing to 5 people") that *override* the System Admin permissions.
++* **The Fix:** Environment Groups allow you to apply **Rules** (like "Block PCF Controls" or "Limit Sharing to 5 people") that *override* the System Admin permissions.
+@@ -82,1 +82,1 @@
+-## 4. The Strategy: Tenant Isolation & Credit Control
++## 4. The Strategy: Tenant Isolation & Credit Control
+
+@@ -91,1 +91,1 @@
+-### ð¡ The Deep "Why" (Risk Scenarios)
++### ð¡ The Deep "Why" (Risk Scenarios)
+
+@@ -92,1 +92,1 @@
+-*   **The "Data Leak" Tunnel:** Without Tenant Isolation, a user can authenticate to *any* other Entra ID tenant (like their personal developer tenant). They can build a flow that triggers on "New Confidential Document" in your SharePoint and creates a file in their personal OneDrive. Tenant Isolation blocks this simplistic exfiltration path.
++-   **The "Data Leak" Tunnel:** Without Tenant Isolation, a user can authenticate to *any* other Entra ID tenant (like their personal developer tenant). They can build a flow that triggers on "New Confidential Document" in your SharePoint and creates a file in their personal OneDrive. Tenant Isolation blocks this simplistic exfiltration path.
+@@ -93,1 +93,1 @@
+-*   **The "Credit Race" Condition:** AI Builder credits (and other capacity add-ons) often pool at the tenant level. They reset monthly.
++-   **The "Credit Race" Condition:** AI Builder credits (and other capacity add-ons) often pool at the tenant level. They reset monthly.
+@@ -94,1 +94,1 @@
+-    *   *The Failure:* If you allow "Unassigned Usage," User A runs a massive test job on the 1st of the month, consuming 100% of the credits.
++  *   *The Failure:* If you allow "Unassigned Usage," User A runs a massive test job on the 1st of the month, consuming 100% of the credits.
+@@ -95,1 +95,1 @@
+-    *   *The Impact:* User B's production Invoice Scanning app stops working on the 2nd of the month because the "bucket is empty."
++    -   *The Impact:* User B's production Invoice Scanning app stops working on the 2nd of the month because the "bucket is empty."
+@@ -96,1 +96,1 @@
+-    *   *The Fix:* Disable unassigned usage so credits must be explicitly allocated to critical environments.
++    * *The Fix:* Disable unassigned usage so credits must be explicitly allocated to critical environments.
+@@ -97,1 +97,1 @@
+-*   **The "Data Residency" Trap (Preview Features):** Many "Preview" features (especially GenAI/Copilot) are hosted on US infrastructure to scale quickly. Even if your tenant is in the UK/EU, enabling these features may legally mean your data is being processed in the US.
++* **The "Data Residency" Trap (Preview Features):** Many "Preview" features (especially GenAI/Copilot) are hosted on US infrastructure to scale quickly. Even if your tenant is in the UK/EU, enabling these features may legally mean your data is being processed in the US.
+@@ -101,1 +101,1 @@
+-## 5. The Strategy: Naming Conventions & URL Prefixes
++## 5. The Strategy: Naming Conventions & URL Prefixes
+
+@@ -110,1 +110,1 @@
+-### ð¡ The Deep "Why" (Automation & Confusion)
++### ð¡ The Deep "Why" (Automation & Confusion)
+
+@@ -111,1 +111,1 @@
+-*   **Automation Dependency:** You cannot automate "boring" tasks (like backups, user access audits, or tear-downs) if you cannot programmatically identify the target. A script can easily find `*-Dev`, but it cannot guess that `Test Env Ross` is a developer environment.
++-   **Automation Dependency:** You cannot automate "boring" tasks (like backups, user access audits, or tear-downs) if you cannot programmatically identify the target. A script can easily find `*-Dev`, but it cannot guess that `Test Env Ross` is a developer environment.
+diff --git a/CODE_REVIEW_MICROSOFT_2026_UPDATES.md b/CODE_REVIEW_MICROSOFT_2026_UPDATES.md
+--- a/CODE_REVIEW_MICROSOFT_2026_UPDATES.md
++++ b/CODE_REVIEW_MICROSOFT_2026_UPDATES.md
+@@ -13,1 +13,1 @@
+-### Files Successfully Updated with "Microsoft 2026" Branding:
++### Files Successfully Updated with "Microsoft 2026" Branding
+@@ -28,1 +28,1 @@
+-#### 1. beautiful-page.tsx
++#### 1. beautiful-page.tsx
+
+@@ -33,1 +33,1 @@
+-- Line 652: `<h1 className="text-2xl font-bold">Microsoft 2026 Assessment Demo</h1>`
++
+- Line 652: `<h1 className="text-2xl font-bold">Microsoft 2026 Assessment Demo</h1>`
+@@ -40,1 +40,1 @@
+-#### 2. client-page.tsx
++#### 2. client-page.tsx
+
+@@ -45,1 +45,1 @@
+-- Line 80: `Microsoft 2026 Assessment Demo`
++
+- Line 80: `Microsoft 2026 Assessment Demo`
+@@ -53,1 +53,1 @@
+-#### 3. static-page.tsx
++#### 3. static-page.tsx
+
+@@ -58,1 +58,1 @@
+-- Line 94: `<h1 className="text-2xl font-bold">Microsoft 2026 Assessment</h1>`
++
+- Line 94: `<h1 className="text-2xl font-bold">Microsoft 2026 Assessment</h1>`
+@@ -67,1 +67,1 @@
+-#### 4. assessment-faq.tsx
++#### 4. assessment-faq.tsx
+
+@@ -72,1 +72,1 @@
+-- Line 17: "The Microsoft 2026 Framework focuses on strategic planning..."
++
+- Line 17: "The Microsoft 2026 Framework focuses on strategic planning..."
+@@ -85,1 +85,1 @@
+-#### 5. assessment-decision-helper.tsx
++#### 5. assessment-decision-helper.tsx
+
+@@ -90,1 +90,1 @@
+-- Line 126: `title: 'Microsoft 2026 Framework'`
++
+- Line 126: `title: 'Microsoft 2026 Framework'`
+@@ -100,1 +100,1 @@
+-#### 6. assessment-quick-start.tsx
++#### 6. assessment-quick-start.tsx
+
+@@ -105,1 +105,1 @@
+-- Line 149: Tab trigger value="microsoft2025" with label "Microsoft 2026" (visual display correct)
++
+- Line 149: Tab trigger value="microsoft2025" with label "Microsoft 2026" (visual display correct)
+@@ -114,1 +114,1 @@
+-#### 7. app/page.tsx
++#### 7. app/page.tsx
+
+@@ -119,1 +119,1 @@
+-- Line 122: `<h1 className="text-5xl font-bold">Power Platform Assessment</h1>`
++
+- Line 122: `<h1 className="text-5xl font-bold">Power Platform Assessment</h1>`
+@@ -136,1 +136,1 @@
+-- Line 1: `"use client"` directive (client-side rendering)
++
+- Line 1: `"use client"` directive (client-side rendering)
+@@ -180,1 +180,1 @@
+-- **Location:** `lib/date-formatter.ts`
++
+- **Location:** `lib/date-formatter.ts`
+@@ -198,1 +198,1 @@
+-- Primary: HSL 210 100% 45% (Bytes Blue)
++
+- Primary: HSL 210 100% 45% (Bytes Blue)
+@@ -216,1 +216,1 @@
+-1. `lib/__tests__/constants.test.ts` - 118+ test cases for assessment standards
++
+1. `lib/__tests__/constants.test.ts` - 118+ test cases for assessment standards
+@@ -239,1 +239,1 @@
+-1. README.md - Navigation index
++
+1. README.md - Navigation index
+@@ -250,1 +250,1 @@
+-- `/lib/governance/integration/governance-workbook-questions.ts`
++
+- `/lib/governance/integration/governance-workbook-questions.ts`
+@@ -255,1 +255,1 @@
+-- `lib/constants.ts` imports governance standards
++
+- `lib/constants.ts` imports governance standards
+@@ -266,1 +266,1 @@
+-1. â **LICENSE** - MIT License with Bytes Software Services copyright
++
+1. â **LICENSE** - MIT License with Bytes Software Services copyright
+@@ -272,1 +272,1 @@
+-- â ExtensionBlocker anti-pattern removed from layout.tsx
++
+- â ExtensionBlocker anti-pattern removed from layout.tsx
+@@ -283,1 +283,1 @@
+-### Minor Inconsistencies to Address:
++### Minor Inconsistencies to Address
+@@ -304,1 +304,1 @@
+-### Optional Enhancements:
++### Optional Enhancements
+@@ -321,1 +321,1 @@
+-- All 6 target files have been successfully updated with "Microsoft 2026" branding
++
+- All 6 target files have been successfully updated with "Microsoft 2026" branding
+@@ -329,1 +329,1 @@
+-1. One button text inconsistency (line 192 of assessment-decision-helper.tsx)
++
+1. One button text inconsistency (line 192 of assessment-decision-helper.tsx)
+@@ -340,1 +340,1 @@
+-### Immediate Actions (Optional):
++### Immediate Actions (Optional)
+@@ -341,1 +341,1 @@
+-1. Update line 192 of `assessment-decision-helper.tsx` button text
++
+1. Update line 192 of `assessment-decision-helper.tsx` button text
+@@ -345,1 +345,1 @@
+-### Future Refactoring (Phase 2):
++### Future Refactoring (Phase 2)
+@@ -346,1 +346,1 @@
+-1. Rename `microsoft-2025-demo` folder to `microsoft-2026-demo`
++
+1. Rename `microsoft-2025-demo` folder to `microsoft-2026-demo`
+diff --git a/INTEGRATION_VERIFICATION.md b/INTEGRATION_VERIFICATION.md
+--- a/INTEGRATION_VERIFICATION.md
++++ b/INTEGRATION_VERIFICATION.md
+@@ -12,1 +12,1 @@
+-### Governance Integration Directory
++### Governance Integration Directory
+
+@@ -49,1 +49,1 @@
+-### Assessment Standard 1: Governance Workbook Compliance (2026)
++### Assessment Standard 1: Governance Workbook Compliance (2026)
+
+@@ -54,1 +54,1 @@
+-#### Question List:
++#### Question List:
+
+@@ -55,1 +55,1 @@
+-1. **gov-workbook-t1** - Tenant Isolation (Cross-Tenant Restrictions)
++
+1. **gov-workbook-t1** - Tenant Isolation (Cross-Tenant Restrictions)
+@@ -75,1 +75,1 @@
+-### Assessment Standard 2: Environmental Strategy Alignment (2026)
++### Assessment Standard 2: Environmental Strategy Alignment (2026)
+
+@@ -81,1 +81,1 @@
+-1. **strat-risk-1** - Data Residency Compliance
++
+1. **strat-risk-1** - Data Residency Compliance
+@@ -100,1 +100,1 @@
+-### Source Location
++### Source Location
+
+@@ -117,1 +117,1 @@
+-### Method 1: Via Homepage Dashboard
++### Method 1: Via Homepage Dashboard
+
+@@ -118,1 +118,1 @@
+-1. Navigate to `http://localhost:3000/` (or deployed URL)
++
+1. Navigate to `http://localhost:3000/` (or deployed URL)
+@@ -126,1 +126,1 @@
+-### Method 2: Direct URL Navigation
++### Method 2: Direct URL Navigation
+
+@@ -132,1 +132,1 @@
+-### Method 3: Via Assessment Router
++### Method 3: Via Assessment Router
+
+@@ -134,1 +134,1 @@
+-- Loads the correct standard by slug
++
+- Loads the correct standard by slug
+@@ -144,1 +144,1 @@
+-### 1. Type Safety â
++### 1. Type Safety â
+
+@@ -162,1 +162,1 @@
+-### 2. Assessment Standard Structure â
++### 2. Assessment Standard Structure â
+
+@@ -174,1 +174,1 @@
+-### 3. Store Integration â
++### 3. Store Integration â
+
+@@ -176,1 +176,1 @@
+-- `getStandardBySlug()` - Retrieves governance standards
++
+- `getStandardBySlug()` - Retrieves governance standards
+@@ -181,1 +181,1 @@
+-### 4. Export Integration â
++### 4. Export Integration â
+
+@@ -183,1 +183,1 @@
+-- Governance question responses
++
+- Governance question responses
+@@ -229,1 +229,1 @@
+-### Total Test Coverage
++### Total Test Coverage
+
+@@ -230,1 +230,1 @@
+-- **118+ tests** covering constants and date formatters
++
+- **118+ tests** covering constants and date formatters
+@@ -238,1 +238,1 @@
+-### Security Questions (3)
++### Security Questions (3)
+
+@@ -239,1 +239,1 @@
+-1. Tenant Isolation (gov-workbook-t1) - Weight: 5, Importance: 5, References: 1
++
+1. Tenant Isolation (gov-workbook-t1) - Weight: 5, Importance: 5, References: 1
+@@ -243,1 +243,1 @@
+-### Environment Strategy Questions (3)
++### Environment Strategy Questions (3)
+
+@@ -244,1 +244,1 @@
+-4. Default Environment Renaming (gov-workbook-env1) - Weight: 3, Importance: 4
++
+4. Default Environment Renaming (gov-workbook-env1) - Weight: 3, Importance: 4
+@@ -248,1 +248,1 @@
+-### Compliance Risk Questions (1)
++### Compliance Risk Questions (1)
+
+@@ -249,1 +249,1 @@
+-7. Data Residency Compliance (strat-risk-1) - Weight: 5, Importance: 5
++
+7. Data Residency Compliance (strat-risk-1) - Weight: 5, Importance: 5
+@@ -251,1 +251,1 @@
+-### Operational Risk Questions (1)
++### Operational Risk Questions (1)
+
+@@ -252,1 +252,1 @@
+-8. Production Rollback Plan (strat-risk-2) - Weight: 5, Importance: 5
++
+8. Production Rollback Plan (strat-risk-2) - Weight: 5, Importance: 5
+@@ -254,1 +254,1 @@
+-### Audit Risk Questions (1)
++### Audit Risk Questions (1)
+
+@@ -255,1 +255,1 @@
+-9. Deployment Audit Trail (strat-risk-3) - Weight: 4, Importance: 4
++
+9. Deployment Audit Trail (strat-risk-3) - Weight: 4, Importance: 4
+@@ -257,1 +257,1 @@
+-### Prerequisites Questions (2)
++### Prerequisites Questions (2)
+
+@@ -258,1 +258,1 @@
+-10. Environment Inventory (strat-p1-1) - Weight: 3, Importance: 5
++
+10. Environment Inventory (strat-p1-1) - Weight: 3, Importance: 5
+@@ -267,1 +267,1 @@
+-1. **gov-workbook-t1:** https://learn.microsoft.com/en-us/power-platform/admin/cross-tenant-restrictions
++1. **gov-workbook-t1:** <https://learn.microsoft.com/en-us/power-platform/admin/cross-tenant-restrictions>
+@@ -268,1 +268,1 @@
+-2. **gov-workbook-dlp1:** https://learn.microsoft.com/en-us/microsoft-365/community/power-platform-dlp-policies-you-should-be-considering-on-day-1
++2. **gov-workbook-dlp1:** <https://learn.microsoft.com/en-us/microsoft-365/community/power-platform-dlp-policies-you-should-be-considering-on-day-1>
+@@ -269,1 +269,1 @@
+-3. **gov-workbook-env3:** https://learn.microsoft.com/en-us/power-platform/admin/default-environment-routing
++3. **gov-workbook-env3:** <https://learn.microsoft.com/en-us/power-platform/admin/default-environment-routing>
+@@ -277,1 +277,1 @@
+-### File Status
++### File Status
+
+diff --git a/docs/governance/Environmental_Strategy.md b/docs/governance/Environmental_Strategy.md
+--- a/docs/governance/Environmental_Strategy.md
++++ b/docs/governance/Environmental_Strategy.md
+@@ -6,1 +6,1 @@
+-> - [Governance Top Tips](./Governance_Top_Tips_and_Talking_Points.md) - Quick wins and talking points
++>
+> - [Governance Top Tips](./Governance_Top_Tips_and_Talking_Points.md) - Quick wins and talking points
+@@ -24,1 +24,1 @@
+-1. Start with "Problem Statement" to understand urgency
++
+1. Start with "Problem Statement" to understand urgency
+@@ -33,1 +33,1 @@
+-### The Default Environment Sprawl Crisis
++### The Default Environment Sprawl Crisis
+
+@@ -37,1 +37,1 @@
+-- The Default Environment becomes the primary location for solution development
++
+- The Default Environment becomes the primary location for solution development
+@@ -44,1 +44,1 @@
+-- **Multiple unmanaged environments** scattered across the tenant
++
+- **Multiple unmanaged environments** scattered across the tenant
+@@ -53,1 +53,1 @@
+-1. **Compliance Risk:** Cannot prove data residency compliance without environment-level controls and proper geographic isolation
++
+1. **Compliance Risk:** Cannot prove data residency compliance without environment-level controls and proper geographic isolation
+@@ -62,1 +62,1 @@
+-- Test solutions before production deployment
++
+- Test solutions before production deployment
+@@ -74,1 +74,1 @@
+-## Overview
++## Overview
+
+@@ -86,1 +86,1 @@
+-> - Every user who runs an app in that environment requires a **Power Apps Premium licence**
++>
+> - Every user who runs an app in that environment requires a **Power Apps Premium licence**
+@@ -91,1 +91,1 @@
+-> - You have 500 users running a simple leave request app in Production
++>
+> - You have 500 users running a simple leave request app in Production
+@@ -96,1 +96,1 @@
+-> 1. Count ALL users who will run apps in that environment
++>
+> 1. Count ALL users who will run apps in that environment
+@@ -102,1 +102,1 @@
+-> - Keep Default Environment as **Standard** (not Managed)
++>
+> - Keep Default Environment as **Standard** (not Managed)
+@@ -110,1 +110,1 @@
+-### Phase 1: Discovery & Assessment (Prerequisites)
++### Phase 1: Discovery & Assessment (Prerequisites)
+
+@@ -114,1 +114,1 @@
+-- Catalog all existing environments, apps, and flows
++
+- Catalog all existing environments, apps, and flows
+@@ -120,1 +120,1 @@
+-- Classify solutions by criticality (Critical/Important/Low/Experimental)
++
+- Classify solutions by criticality (Critical/Important/Low/Experimental)
+@@ -126,1 +126,1 @@
+-- Security and compliance gap analysis
++
+- Security and compliance gap analysis
+@@ -139,1 +139,1 @@
+-#### Tenant Level Strategy
++#### Tenant Level Strategy
+
+@@ -141,1 +141,1 @@
+-- License tracking and management
++
+- License tracking and management
+@@ -145,1 +145,1 @@
+-- Central governance and policy management
++
+- Central governance and policy management
+@@ -149,1 +149,1 @@
+-- Access Groups for role-based permissions
++
+- Access Groups for role-based permissions
+@@ -153,1 +153,1 @@
+-- Data Loss Prevention policies enforced at tenant level
++
+- Data Loss Prevention policies enforced at tenant level
+@@ -158,1 +158,1 @@
+-- Considerations for integration patterns
++
+- Considerations for integration patterns
+@@ -162,1 +162,1 @@
+-- Integration with Azure services
++
+- Integration with Azure services
+@@ -166,1 +166,1 @@
+-#### Environment Level Strategy
++#### Environment Level Strategy
+
+@@ -169,1 +169,1 @@
+-### Container 1: Default Environment - Lock Down & Route Away
++### Container 1: Default Environment - Lock Down & Route Away
+
+@@ -173,1 +173,1 @@
+-1.  **Rename for Clarity:**
++1. **Rename for Clarity:**
+@@ -176,1 +176,1 @@
+-2.  **Implement Default Environment Routing (CRITICAL):**
++2. **Implement Default Environment Routing (CRITICAL):**
+@@ -181,1 +181,1 @@
+-3.  **Restrict BUILD Permissions:**
++3. **Restrict BUILD Permissions:**
+@@ -187,1 +187,1 @@
+-- Default Environment no longer accumulates sprawl
++
+- Default Environment no longer accumulates sprawl
+@@ -193,1 +193,1 @@
+-### Container 2: Personal Developer Environments (NOT Shared Maker Playground)
++### Container 2: Personal Developer Environments (NOT Shared Maker Playground)
+
+@@ -200,1 +200,1 @@
+-- Each maker gets their own private environment (e.g., "John-Dev-UK", "Mary-Dev-EU")
++
+- Each maker gets their own private environment (e.g., "John-Dev-UK", "Mary-Dev-EU")
+@@ -206,1 +206,1 @@
+-- Personal environments created via routing are automatically **Managed Environments**
++
+- Personal environments created via routing are automatically **Managed Environments**
+@@ -212,1 +212,1 @@
+-- Personal environments must be created in the appropriate region
++
+- Personal environments must be created in the appropriate region
+@@ -217,1 +217,1 @@
+-- **No collision:** Makers can't overwrite each other's connections or apps
++
+- **No collision:** Makers can't overwrite each other's connections or apps
+@@ -224,1 +224,1 @@
+-- DLP policies still apply to personal environments
++
+- DLP policies still apply to personal environments
+@@ -231,1 +231,1 @@
+-### Graduation to Container 3 (THE INTEGRATION GAP)
++### Graduation to Container 3 (THE INTEGRATION GAP)
+
+@@ -238,1 +238,1 @@
+-1.  **Commit:** Makers use `pac solution clone` (VS Code) to sync their Personal Environment work to Git (Azure DevOps Repo).
++
+1.  **Commit:** Makers use `pac solution clone` (VS Code) to sync their Personal Environment work to Git (Azure DevOps Repo).
+diff --git a/docs/governance/Workshop_Script.md b/docs/governance/Workshop_Script.md
+--- a/docs/governance/Workshop_Script.md
++++ b/docs/governance/Workshop_Script.md
+@@ -6,1 +6,1 @@
+-> - [Environmental Strategy](./Power_Platform_Environmental_Strategy.md) - Full implementation brief
++>
+> - [Environmental Strategy](./Power_Platform_Environmental_Strategy.md) - Full implementation brief
+@@ -14,1 +14,1 @@
+-- **Ask:** Start with the discovery questions to gauge their maturity.
++
+- **Ask:** Start with the discovery questions to gauge their maturity.
+@@ -38,1 +38,1 @@
+-## Chapter 0: The Maturity Assessment (10 min)
++## Chapter 0: The Maturity Assessment (10 min)
+
+@@ -41,1 +41,1 @@
+-### ð£ï¸ Leading the Conversation (The 5 Levels)
++### ð£ï¸ Leading the Conversation (The 5 Levels)
+
+@@ -42,1 +42,1 @@
+-*   **Level 0 (Chaos):** >10 Environments, No DLP, "Default" is used for everything. (Most common starting point).
++-   **Level 0 (Chaos):** >10 Environments, No DLP, "Default" is used for everything. (Most common starting point).
+@@ -43,1 +43,1 @@
+-*   **Level 1 (Reactive):** "Block by Default" DLP exists. Manual environment creation.
++-   **Level 1 (Reactive):** "Block by Default" DLP exists. Manual environment creation.
+@@ -44,1 +44,1 @@
+-*   **Level 2 (Proactive):** Environment Routing enabled. App Makers have their own space. COE Kit installed.
++* **Level 2 (Proactive):** Environment Routing enabled. App Makers have their own space. COE Kit installed.
+@@ -45,1 +45,1 @@
+-*   **Level 3 (Optimized):** Automated Pipelines (ALM). Self-service Maker requests.
++* **Level 3 (Optimized):** Automated Pipelines (ALM). Self-service Maker requests.
+@@ -46,1 +46,1 @@
+-*   **Level 4 (Strategic):** Governance drives business KPIs. AI-driven monitoring.
++* **Level 4 (Strategic):** Governance drives business KPIs. AI-driven monitoring.
+@@ -52,1 +52,1 @@
+-## Chapter 1: The Reality Check (Current State) (15 min)
++## Chapter 1: The Reality Check (Current State) (15 min)
+
+@@ -55,1 +55,1 @@
+-### â Discovery Questions
++### â Discovery Questions
+
+@@ -56,1 +56,1 @@
+-*   "If I asked you right nowâ'How many apps do you have, and who owns them?'âcould you answer with 100% confidence?"
++-   "If I asked you right nowâ'How many apps do you have, and who owns them?'âcould you answer with 100% confidence?"
+@@ -57,1 +57,1 @@
+-*   "Do you currently have a way to distinguish between a 'test' app and a critical business process running in your Default environment?"
++-   "Do you currently have a way to distinguish between a 'test' app and a critical business process running in your Default environment?"
+@@ -58,1 +58,1 @@
+-*   "What keeps you up at night regarding the platform? Is it data leakage, licensing costs, or just the fear of the unknown?"
++* "What keeps you up at night regarding the platform? Is it data leakage, licensing costs, or just the fear of the unknown?"
+@@ -60,1 +60,1 @@
+-### ð£ï¸ Leading the Conversation (The "Why")
++### ð£ï¸ Leading the Conversation (The "Why")
+
+@@ -61,1 +61,1 @@
+-*   **The Sprawl Trap:** Explain that without governance, the Default Environment becomes a "wild west".
++-   **The Sprawl Trap:** Explain that without governance, the Default Environment becomes a "wild west".
+@@ -62,1 +62,1 @@
+-*   **The Root Cause:** Most organizations fail because they treat Power Platform like Office (personal) rather than Azure (enterprise dev).
++-   **The Root Cause:** Most organizations fail because they treat Power Platform like Office (personal) rather than Azure (enterprise dev).
+@@ -63,1 +63,1 @@
+-*   **The Risk:** Highlight that unknown data connections and "Shadow IT" are the biggest risks to their compliance posture.
++-   **The Risk:** Highlight that unknown data connections and "Shadow IT" are the biggest risks to their compliance posture.
+@@ -67,1 +67,1 @@
+-## Chapter 1b: The Invisible Perimeter (Tenant Settings) (10 min)
++## Chapter 1b: The Invisible Perimeter (Tenant Settings) (10 min)
+
+@@ -71,1 +71,1 @@
+-*   "Are you aware that by default, any user can connect their corporate Power Automate flow to a personal OneDrive in another tenant?"
++* "Are you aware that by default, any user can connect their corporate Power Automate flow to a personal OneDrive in another tenant?"
+@@ -72,1 +72,1 @@
+-*   "Who controls your AI budget? Do you let users spend 'credits' freely until they run out, or is it allocated?"
++* "Who controls your AI budget? Do you let users spend 'credits' freely until they run out, or is it allocated?"
+@@ -73,1 +73,1 @@
+-*   "If a maker uses a 'Preview' feature, are you comfortable with that data potentially leaving the UK/EU to go to US servers?"
++-   "If a maker uses a 'Preview' feature, are you comfortable with that data potentially leaving the UK/EU to go to US servers?"
+@@ -76,1 +76,1 @@
+-*   **Tenant Isolation (The Firewalls):**
++
+*   **Tenant Isolation (The Firewalls):**
+@@ -77,1 +77,1 @@
+-    *   *The Concept:* You can configure **Inbound** and **Outbound** restrictions.
++    * *The Concept:* You can configure **Inbound** and **Outbound** restrictions.
+@@ -78,1 +78,1 @@
+-    *   *The Risk:* Without this, a malicious actor (or just a helpful user) could move files from your Corporate Tenant to their Personal Tenant via a simple flow.
++    -   *The Risk:* Without this, a malicious actor (or just a helpful user) could move files from your Corporate Tenant to their Personal Tenant via a simple flow.
+diff --git a/SECURITY.md b/SECURITY.md
+--- a/SECURITY.md
++++ b/SECURITY.md
+@@ -20,1 +20,1 @@
+-- All assessment data is stored in browser `localStorage` only
++
+- All assessment data is stored in browser `localStorage` only
+@@ -26,1 +26,1 @@
+-- â **Local Demo Use Only** - Acceptable for single-user demos and templates
++
+- â **Local Demo Use Only** - Acceptable for single-user demos and templates
+@@ -45,1 +45,1 @@
+-- Any Cross-Site Scripting (XSS) vulnerability could expose all assessment data
++
+- Any Cross-Site Scripting (XSS) vulnerability could expose all assessment data
+@@ -51,1 +51,1 @@
+-- For sensitive assessments, use server-side storage
++
+- For sensitive assessments, use server-side storage
+@@ -73,1 +73,1 @@
+-- Google Drive integration code remains but keys are NOT configured
++
+- Google Drive integration code remains but keys are NOT configured
+@@ -94,1 +94,1 @@
+-- Anyone with URL can access application
++
+- Anyone with URL can access application
+@@ -131,1 +131,1 @@
+-- Single user could create thousands of projects
++
+- Single user could create thousands of projects
+@@ -136,1 +136,1 @@
+-- Acceptable for demo/local use
++
+- Acceptable for demo/local use
+@@ -143,1 +143,1 @@
+-### 1. Type Safety
++### 1. Type Safety
+
+@@ -144,1 +144,1 @@
+-- â TypeScript throughout application
++
+- â TypeScript throughout application
+@@ -148,1 +148,1 @@
+-### 2. Secure Defaults
++### 2. Secure Defaults
+
+@@ -149,1 +149,1 @@
+-- â No NEXT_PUBLIC_ API keys in codebase
++
+- â No NEXT_PUBLIC_ API keys in codebase
+@@ -154,1 +154,1 @@
+-### 3. MIT License
++### 3. MIT License
+
+@@ -155,1 +155,1 @@
+-- â Clear licensing terms
++
+- â Clear licensing terms
+@@ -162,1 +162,1 @@
+-### Phase 1: Demo/Template Use (CURRENT)
++### Phase 1: Demo/Template Use (CURRENT)
+
+@@ -163,1 +163,1 @@
+-- â Remove critical anti-patterns
++
+- â Remove critical anti-patterns
+@@ -168,1 +168,1 @@
+-### Phase 2: Backend Implementation (PLANNED)
++### Phase 2: Backend Implementation (PLANNED)
+
+@@ -169,1 +169,1 @@
+-- [ ] Implement Next.js API routes
++
+- [ ] Implement Next.js API routes
+@@ -174,1 +174,1 @@
+-### Phase 3: Enterprise Hardening (FUTURE)
++### Phase 3: Enterprise Hardening (FUTURE)
+
+@@ -175,1 +175,1 @@
+-- [ ] Implement CSP headers
++
+- [ ] Implement CSP headers
+@@ -199,1 +199,1 @@
+-### â Acceptable Use Cases (Current State)
++### â Acceptable Use Cases (Current State)
+
+@@ -200,1 +200,1 @@
+-- Local demos and proof-of-concepts
++
+- Local demos and proof-of-concepts
+@@ -205,1 +205,1 @@
+-### â NOT Acceptable Use Cases
++### â NOT Acceptable Use Cases
+
+@@ -206,1 +206,1 @@
+-- Multi-user team deployments
++
+- Multi-user team deployments
+@@ -240,1 +240,1 @@
+-2. Email: security@bytessoftware.co.uk (if applicable)
++2. Email: <security@bytessoftware.co.uk> (if applicable)
+diff --git a/GOVERNANCE_ALIGNMENT_SUMMARY.md b/GOVERNANCE_ALIGNMENT_SUMMARY.md
+--- a/GOVERNANCE_ALIGNMENT_SUMMARY.md
++++ b/GOVERNANCE_ALIGNMENT_SUMMARY.md
+@@ -16,1 +16,1 @@
+-#### Implementation Workbook (Part 5.2)
++#### Implementation Workbook (Part 5.2)
+
+@@ -21,1 +21,1 @@
+-#### Justification and Citations (Section 7)
++#### Justification and Citations (Section 7)
+
+@@ -62,1 +62,1 @@
+-Regarding alignment with Microsoft MCP Learn (https://github.com/MicrosoftDocs/mcp):
++Regarding alignment with Microsoft MCP Learn (<https://github.com/MicrosoftDocs/mcp>):
+@@ -65,1 +65,1 @@
+-- AI agent integration protocols
++
+- AI agent integration protocols
+@@ -70,1 +70,1 @@
+-- Power Platform Governance (tenant, environments, DLP, ALM)
++
+- Power Platform Governance (tenant, environments, DLP, ALM)
+@@ -76,1 +76,1 @@
+-1. Expose assessment APIs via MCP protocol for AI agent consumption
++
+1. Expose assessment APIs via MCP protocol for AI agent consumption
+@@ -86,1 +86,1 @@
+-### Template Document Located
++### Template Document Located
+
+@@ -94,1 +94,1 @@
+-#### 1. Governance Assessment Reports
++#### 1. Governance Assessment Reports
+
+@@ -96,1 +96,1 @@
+-- Executive Summary
++
+- Executive Summary
+@@ -104,1 +104,1 @@
+-#### 2. Workshop Deliverables
++#### 2. Workshop Deliverables
+
+@@ -106,1 +106,1 @@
+-- Document maturity level assessment
++
+- Document maturity level assessment
+@@ -111,1 +111,1 @@
+-#### 3. Project Status Reports
++#### 3. Project Status Reports
+
+@@ -113,1 +113,1 @@
+-- Track implementation progress
++
+- Track implementation progress
+@@ -118,1 +118,1 @@
+-#### 4. Client Handover Documentation
++#### 4. Client Handover Documentation
+
+@@ -120,1 +120,1 @@
+-- Summarize governance posture
++
+- Summarize governance posture
+@@ -190,1 +190,1 @@
+-### Three-Container Architecture
++### Three-Container Architecture
+
+@@ -197,1 +197,1 @@
+-### Critical Security Controls
++### Critical Security Controls
+
+@@ -206,1 +206,1 @@
+-### ALM Best Practices
++### ALM Best Practices
+
+@@ -239,1 +239,1 @@
+-### â Followed Microsoft Guidance
++### â Followed Microsoft Guidance
+
+@@ -240,1 +240,1 @@
+-- All recommendations cite official Microsoft Learn documentation
++
+- All recommendations cite official Microsoft Learn documentation
+@@ -244,1 +244,1 @@
+-### â Real-World Practicality
++### â Real-World Practicality
+
+@@ -245,1 +245,1 @@
+-- Acknowledges common pitfalls (Managed Env licensing trap)
++
+- Acknowledges common pitfalls (Managed Env licensing trap)
+@@ -250,1 +250,1 @@
+-### â Enterprise-Grade Approach
++### â Enterprise-Grade Approach
+
+@@ -251,1 +251,1 @@
+-- Phase-based implementation (not "big bang")
++
+- Phase-based implementation (not "big bang")
+@@ -256,1 +256,1 @@
+-### â CoE Kit Best Practices
++### â CoE Kit Best Practices
+
+@@ -257,1 +257,1 @@
+-- â Dedicated standalone environment (documented)
++
+- â Dedicated standalone environment (documented)
+@@ -267,1 +267,1 @@
+-### Content Quality
++### Content Quality
+
+@@ -268,1 +268,1 @@
+-- [x] All statements backed by Microsoft citations
++
+- [x] All statements backed by Microsoft citations
+@@ -275,1 +275,1 @@
+-### Organization
++### Organization
+
+@@ -276,1 +276,1 @@
+-- [x] Multiple formats for different audiences:
++
+- [x] Multiple formats for different audiences:
+@@ -286,1 +286,1 @@
+-### Actionability
++### Actionability
+
+@@ -287,1 +287,1 @@
+-- [x] Checklists for implementation
++
+- [x] Checklists for implementation
+@@ -293,1 +293,1 @@
+-### Integration with Assessment Tool
++### Integration with Assessment Tool
+
+@@ -294,1 +294,1 @@
+-- [x] Questions derived from documentation
++
+- [x] Questions derived from documentation
+@@ -361,1 +361,1 @@
+-### For Bytes Consultants
++### For Bytes Consultants
+
+@@ -362,1 +362,1 @@
+-1. **Familiarize with documentation structure**
++
+1. **Familiarize with documentation structure**
+@@ -379,1 +379,1 @@
+-### For Customers (End of Engagement)
++### For Customers (End of Engagement)
+
+@@ -380,1 +380,1 @@
+-1. **Handover documentation package**
++
+1. **Handover documentation package**
+@@ -396,1 +396,1 @@
+-### CoE Standalone Environment Coverage
++### CoE Standalone Environment Coverage
+
+@@ -398,1 +398,1 @@
+-- Implementation Workbook Part 5.2
++
+- Implementation Workbook Part 5.2
+@@ -402,1 +402,1 @@
+-### Microsoft Learn Alignment
++### Microsoft Learn Alignment
+
+@@ -404,1 +404,1 @@
+-- All recommendations traceable to official guidance
++
+- All recommendations traceable to official guidance
+@@ -408,1 +408,1 @@
+-### Customer Template Integration
++### Customer Template Integration
+
+@@ -410,1 +410,1 @@
+-- Recommended customization provided above
++
+- Recommended customization provided above
+diff --git a/GOVERNANCE_QUESTIONS_INTEGRATION_REPORT.md b/GOVERNANCE_QUESTIONS_INTEGRATION_REPORT.md
+--- a/GOVERNANCE_QUESTIONS_INTEGRATION_REPORT.md
++++ b/GOVERNANCE_QUESTIONS_INTEGRATION_REPORT.md
+@@ -13,1 +13,1 @@
+-1. Copied to `/lib/governance/integration/`
++
+1. Copied to `/lib/governance/integration/`
+@@ -24,1 +24,1 @@
+-### File 1: governance-workbook-integration.ts
++### File 1: governance-workbook-integration.ts
+
+@@ -29,1 +29,1 @@
+-- `workbookTenantQuestions` (2 questions)
++
+- `workbookTenantQuestions` (2 questions)
+@@ -40,1 +40,1 @@
+-- Slug: `implementation-workbook-compliance`
++
+- Slug: `implementation-workbook-compliance`
+@@ -46,1 +46,1 @@
+-### File 2: environmental-strategy-integration.ts
++### File 2: environmental-strategy-integration.ts
+
+@@ -51,1 +51,1 @@
+-- `strategyRiskQuestions` (3 questions)
++
+- `strategyRiskQuestions` (3 questions)
+@@ -60,1 +60,1 @@
+-- Slug: `environmental-strategy-alignment`
++
+- Slug: `environmental-strategy-alignment`
+@@ -66,1 +66,1 @@
+-### File 3: pl600-governance-integration.ts
++### File 3: pl600-governance-integration.ts
+
+@@ -71,1 +71,1 @@
+-- File exists in repository: â YES
++
+- File exists in repository: â YES
+@@ -76,1 +76,1 @@
+-- Multiple choice format with `isCorrect` flags
++
+- Multiple choice format with `isCorrect` flags
+@@ -91,1 +91,1 @@
+-#### 1. lib/governance/integration/governance-workbook-questions.ts
++#### 1. lib/governance/integration/governance-workbook-questions.ts
+
+@@ -114,1 +114,1 @@
+-#### 2. lib/governance/integration/environmental-strategy-questions.ts
++#### 2. lib/governance/integration/environmental-strategy-questions.ts
+
+@@ -136,1 +136,1 @@
+-#### 3. lib/governance/integration/pl600-governance-scenarios.ts
++#### 3. lib/governance/integration/pl600-governance-scenarios.ts
+
+@@ -181,1 +181,1 @@
+-1. User navigates to `/assessment/implementation-workbook-compliance` or `/assessment/environmental-strategy-alignment`
++
+1. User navigates to `/assessment/implementation-workbook-compliance` or `/assessment/environmental-strategy-alignment`
+@@ -198,1 +198,1 @@
+-- `getStandardBySlug()` - Retrieves governance standards
++
+- `getStandardBySlug()` - Retrieves governance standards
+@@ -210,1 +210,1 @@
+-1. See "Governance Workbook Compliance (2026)" in the assessment list
++
+1. See "Governance Workbook Compliance (2026)" in the assessment list
+@@ -221,1 +221,1 @@
+-#### Security Category (2 questions)
++#### Security Category (2 questions)
+
+@@ -222,1 +222,1 @@
+-1. **Tenant Isolation (gov-workbook-t1)**
++
+1. **Tenant Isolation (gov-workbook-t1)**
+@@ -235,1 +235,1 @@
+-#### DLP Strategy Category (1 question)
++#### DLP Strategy Category (1 question)
+
+@@ -236,1 +236,1 @@
+-3. **Default DLP Block-by-Default (gov-workbook-dlp1)**
++
+3. **Default DLP Block-by-Default (gov-workbook-dlp1)**
+@@ -243,1 +243,1 @@
+-#### Environment Strategy Category (3 questions)
++#### Environment Strategy Category (3 questions)
+
+@@ -244,1 +244,1 @@
+-4. **Default Environment Renaming (gov-workbook-env1)**
++
+4. **Default Environment Renaming (gov-workbook-env1)**
+@@ -267,1 +267,1 @@
+-#### Compliance Risk Category (1 question)
++#### Compliance Risk Category (1 question)
+
+@@ -268,1 +268,1 @@
+-1. **Data Residency Compliance (strat-risk-1)**
++
+1. **Data Residency Compliance (strat-risk-1)**
+@@ -274,1 +274,1 @@
+-#### Operational Risk Category (1 question)
++#### Operational Risk Category (1 question)
+
+@@ -275,1 +275,1 @@
+-2. **Production Rollback Plan (strat-risk-2)**
++
+2. **Production Rollback Plan (strat-risk-2)**
+@@ -281,1 +281,1 @@
+-#### Audit Risk Category (1 question)
++#### Audit Risk Category (1 question)
+
+@@ -282,1 +282,1 @@
+-3. **Deployment Audit Trail (strat-risk-3)**
++
+3. **Deployment Audit Trail (strat-risk-3)**
+@@ -288,1 +288,1 @@
+-#### Prerequisites Category (2 questions)
++#### Prerequisites Category (2 questions)
+
+@@ -289,1 +289,1 @@
+-4. **Environment Inventory (strat-p1-1)**
++
+4. **Environment Inventory (strat-p1-1)**
+@@ -350,1 +350,1 @@
+-1. Both governance standards exist in ASSESSMENT_STANDARDS array
++
+1. Both governance standards exist in ASSESSMENT_STANDARDS array
+@@ -359,1 +359,1 @@
+-### Step 1: Create or Select Project
++### Step 1: Create or Select Project
+
+@@ -360,1 +360,1 @@
+-1. Navigate to home page (`/`)
++
+1. Navigate to home page (`/`)
+@@ -363,1 +363,1 @@
+-### Step 2: Navigate to Governance Assessment
++### Step 2: Navigate to Governance Assessment
+
+@@ -365,1 +365,1 @@
+-1. Scroll down to assessment standards list
++
+1. Scroll down to assessment standards list
+@@ -372,1 +372,1 @@
+-1. Navigate to `/assessment/implementation-workbook-compliance`
++
+1. Navigate to `/assessment/implementation-workbook-compliance`
+@@ -375,1 +375,1 @@
+-### Step 3: Complete Questions
++### Step 3: Complete Questions
+
+@@ -376,1 +376,1 @@
+-1. Answer each question (6 for Workbook, 5 for Strategy)
++
+1. Answer each question (6 for Workbook, 5 for Strategy)
+@@ -381,1 +381,1 @@
+-### Step 4: View Results
++### Step 4: View Results
+
+@@ -382,1 +382,1 @@
+-1. Dashboard shows maturity scores
++
+1. Dashboard shows maturity scores
+diff --git a/docs/governance/README.md b/docs/governance/README.md
+--- a/docs/governance/README.md
++++ b/docs/governance/README.md
+@@ -12,1 +12,1 @@
+-#### [Environmental Strategy](./Environmental_Strategy.md)
++#### [Environmental Strategy](./Environmental_Strategy.md)
+
+@@ -16,1 +16,1 @@
+-- Default Environment sprawl crisis and mitigation
++
+- Default Environment sprawl crisis and mitigation
+@@ -27,1 +27,1 @@
+-#### [Implementation Workbook](./Implementation_Workbook.md)
++#### [Implementation Workbook](./Implementation_Workbook.md)
+
+@@ -31,1 +31,1 @@
+-- Part 1: Tenant Configuration (Tenant Isolation, Environment Creation, AI Credits)
++
+- Part 1: Tenant Configuration (Tenant Isolation, Environment Creation, AI Credits)
+@@ -46,1 +46,1 @@
+-#### [Quick Reference Card](./Quick_Reference_Card.md)
++#### [Quick Reference Card](./Quick_Reference_Card.md)
+
+@@ -50,1 +50,1 @@
+-- Day 1 Actions checklist
++
+- Day 1 Actions checklist
+@@ -62,1 +62,1 @@
+-#### [Glossary](./Glossary.md)
++#### [Glossary](./Glossary.md)
+
+@@ -66,1 +66,1 @@
+-- Environment types and lifecycle stages
++
+- Environment types and lifecycle stages
+@@ -80,1 +80,1 @@
+-#### [Top Tips and Talking Points](./Top_Tips_and_Talking_Points.md)
++#### [Top Tips and Talking Points](./Top_Tips_and_Talking_Points.md)
+
+@@ -84,1 +84,1 @@
+-- "Block by Default" DLP strategy rationale
++
+- "Block by Default" DLP strategy rationale
+@@ -97,1 +97,1 @@
+-#### [Workshop Script](./Workshop_Script.md)
++#### [Workshop Script](./Workshop_Script.md)
+
+@@ -101,1 +101,1 @@
+-- Chapter 0: Maturity Assessment (5 levels)
++
+- Chapter 0: Maturity Assessment (5 levels)
+@@ -114,1 +114,1 @@
+-#### [Junior Developer Guide](./Junior_Developer_Guide.md)
++#### [Junior Developer Guide](./Junior_Developer_Guide.md)
+
+@@ -118,1 +118,1 @@
+-- Why Personal Environments matter
++
+- Why Personal Environments matter
+@@ -132,1 +132,1 @@
+-#### [Justification and Citations](./Justification_and_Citations.md)
++#### [Justification and Citations](./Justification_and_Citations.md)
+
+@@ -136,1 +136,1 @@
+-- 12 major strategies with official Microsoft quotes
++
+- 12 major strategies with official Microsoft quotes
+@@ -147,1 +147,1 @@
+-### For IT Leadership / C-Suite
++### For IT Leadership / C-Suite
+
+@@ -148,1 +148,1 @@
+-1. Start with [Quick Reference Card](./Quick_Reference_Card.md) for overview
++
+1. Start with [Quick Reference Card](./Quick_Reference_Card.md) for overview
+@@ -152,1 +152,1 @@
+-### For Implementation Teams
++### For Implementation Teams
+
+@@ -153,1 +153,1 @@
+-1. Begin with [Implementation Workbook](./Implementation_Workbook.md) for structured approach
++
+1. Begin with [Implementation Workbook](./Implementation_Workbook.md) for structured approach
+@@ -157,1 +157,1 @@
+-### For Governance Champions / Facilitators
++### For Governance Champions / Facilitators
+
+@@ -158,1 +158,1 @@
+-1. Study [Workshop Script](./Workshop_Script.md) for facilitation approach
++
+1. Study [Workshop Script](./Workshop_Script.md) for facilitation approach
+@@ -162,1 +162,1 @@
+-### For Makers / Developers
++### For Makers / Developers
+
+@@ -163,1 +163,1 @@
+-1. Start with [Junior Developer Guide](./Junior_Developer_Guide.md) for onboarding
++
+1. Start with [Junior Developer Guide](./Junior_Developer_Guide.md) for onboarding
+@@ -167,1 +167,1 @@
+-### For Architects
++### For Architects
+
+@@ -168,1 +168,1 @@
+-1. Deep dive into [Environmental Strategy](./Environmental_Strategy.md) for architecture patterns
++
+1. Deep dive into [Environmental Strategy](./Environmental_Strategy.md) for architecture patterns
+diff --git a/CHANGELOG.md b/CHANGELOG.md
+--- a/CHANGELOG.md
++++ b/CHANGELOG.md
+@@ -12,1 +12,1 @@
+-#### Comprehensive Governance Documentation
++#### Comprehensive Governance Documentation
+
+@@ -13,1 +13,1 @@
+-- Added 8 comprehensive Power Platform governance documentation files to `/docs/governance/`:
++
+- Added 8 comprehensive Power Platform governance documentation files to `/docs/governance/`:
+@@ -23,1 +23,1 @@
+-#### Governance Assessment Integration
++#### Governance Assessment Integration
+
+@@ -24,1 +24,1 @@
+-- Added TypeScript assessment modules to `/lib/governance/integration/`:
++
+- Added TypeScript assessment modules to `/lib/governance/integration/`:
+@@ -41,1 +41,1 @@
+-#### Documentation Enhancements
++#### Documentation Enhancements
+
+@@ -42,1 +42,1 @@
+-- Created `/docs/governance/README.md` - Comprehensive navigation index for all governance documentation with:
++
+- Created `/docs/governance/README.md` - Comprehensive navigation index for all governance documentation with:
+@@ -49,1 +49,1 @@
+-### Context
++### Context
+
+@@ -51,1 +51,1 @@
+-- Strategic guidance for three-container architecture (Default, Personal Developer, Managed Environments)
++
+- Strategic guidance for three-container architecture (Default, Personal Developer, Managed Environments)
+@@ -62,1 +62,1 @@
+-### Added
++### Added
+
+@@ -63,1 +63,1 @@
+-- Initial release with 10 assessment standards
++
+- Initial release with 10 assessment standards
+diff --git a/REFACTORING_PLAN.md b/REFACTORING_PLAN.md
+--- a/REFACTORING_PLAN.md
++++ b/REFACTORING_PLAN.md
+@@ -81,1 +81,1 @@
+-- â Clean break from old data
++
+- â Clean break from old data
+@@ -86,1 +86,1 @@
+-- â Preserves existing work
++
+- â Preserves existing work
+@@ -199,1 +199,1 @@
+-1. **`lib/__tests__/constants.test.ts`** - Validate question structure
++1. **`lib/__tests__/constants.test.ts`** - Validate question structure
+
+@@ -239,1 +239,1 @@
+-2. **`store/__tests__/assessment-store.test.ts`** - Test scoring logic
++2. **`store/__tests__/assessment-store.test.ts`** - Test scoring logic
+
+@@ -275,1 +275,1 @@
+-3. **`lib/__tests__/date-formatter.test.ts`** - Test our new utility
++3. **`lib/__tests__/date-formatter.test.ts`** - Test our new utility
+
+@@ -308,1 +308,1 @@
+-4. **`lib/governance/integration/__tests__/governance-questions.test.ts`**
++4. **`lib/governance/integration/__tests__/governance-questions.test.ts`**
+
+@@ -351,1 +351,1 @@
+-- Any `.backup` or `.old` files
++
+- Any `.backup` or `.old` files
+@@ -433,1 +433,1 @@
+-- How to run tests (`npm test`)
++
+- How to run tests (`npm test`)
+@@ -442,1 +442,1 @@
+-### Must Have (Blocking)
++### Must Have (Blocking)
+
+@@ -443,1 +443,1 @@
+-- [ ] All questions from microsoft-aligned-questions.ts integrated into constants.ts
++
+- [ ] All questions from microsoft-aligned-questions.ts integrated into constants.ts
+@@ -450,1 +450,1 @@
+-### Should Have (Important)
++### Should Have (Important)
+
+@@ -451,1 +451,1 @@
+-- [ ] 60%+ code coverage
++
+- [ ] 60%+ code coverage
+@@ -456,1 +456,1 @@
+-### Nice to Have (Optional)
++### Nice to Have (Optional)
+
+@@ -457,1 +457,1 @@
+-- [ ] 80%+ code coverage
++
+- [ ] 80%+ code coverage
+@@ -465,1 +465,1 @@
+-### Risk 1: Breaking Changes from Migration
++### Risk 1: Breaking Changes from Migration
+
+@@ -467,1 +467,1 @@
+-- Keep constants.ts.backup
++
+- Keep constants.ts.backup
+@@ -471,1 +471,1 @@
+-### Risk 2: Type Conflicts
++### Risk 2: Type Conflicts
+
+@@ -473,1 +473,1 @@
+-- Update types.ts FIRST
++
+- Update types.ts FIRST
+@@ -477,1 +477,1 @@
+-### Risk 3: Store Logic Breaks
++### Risk 3: Store Logic Breaks
+
+@@ -479,1 +479,1 @@
+-- Write store tests BEFORE migration
++
+- Write store tests BEFORE migration
+@@ -487,1 +487,1 @@
+-### Day 1 (Today)
++### Day 1 (Today)
+
+@@ -488,1 +488,1 @@
+-- [ ] Phase 1: Data Migration (2-3 hours)
++
+- [ ] Phase 1: Data Migration (2-3 hours)
+@@ -491,1 +491,1 @@
+-### Day 2
++### Day 2
+
+@@ -492,1 +492,1 @@
+-- [ ] Phase 2: Write Tests (2-3 hours)
++
+- [ ] Phase 2: Write Tests (2-3 hours)
+@@ -496,1 +496,1 @@
+-### Day 3
++### Day 3
+
+@@ -497,1 +497,1 @@
+-- [ ] Phase 5: Documentation (1 hour)
++
+- [ ] Phase 5: Documentation (1 hour)
+diff --git a/REFACTORING_STATUS.md b/REFACTORING_STATUS.md
+--- a/REFACTORING_STATUS.md
++++ b/REFACTORING_STATUS.md
+@@ -12,1 +12,1 @@
+-### Critical Issues Identified
++### Critical Issues Identified
+
+@@ -13,1 +13,1 @@
+-1. **Data Source Disconnect** - Better microsoft-aligned-questions.ts exists but unused
++
+1. **Data Source Disconnect** - Better microsoft-aligned-questions.ts exists but unused
+@@ -26,1 +26,1 @@
+-- â Installed Vitest testing framework
++
+- â Installed Vitest testing framework
+@@ -35,1 +35,1 @@
+-1. â `lib/__tests__/constants.test.ts` - 93 tests validating:
++
+1. â `lib/__tests__/constants.test.ts` - 93 tests validating:
+@@ -52,1 +52,1 @@
+-- Constants: ~90% coverage
++
+- Constants: ~90% coverage
+@@ -83,1 +83,1 @@
+-- â Type system now supports all microsoft-aligned-questions fields
++
+- â Type system now supports all microsoft-aligned-questions fields
+@@ -94,1 +94,1 @@
+-- â Deleted `app/google-drive-test/` experimental folder
++
+- â Deleted `app/google-drive-test/` experimental folder
+@@ -120,1 +120,1 @@
+-1. â **EXPERT_REVIEW.md** - Comprehensive code analysis
++
+1. â **EXPERT_REVIEW.md** - Comprehensive code analysis
+@@ -133,1 +133,1 @@
+-- [ ] Analyze all categories in microsoft-aligned-questions.ts
++
+- [ ] Analyze all categories in microsoft-aligned-questions.ts
+@@ -150,1 +150,1 @@
+-#### Commit 4 (b981f49) - Phase 1 Refactoring
++#### Commit 4 (b981f49) - Phase 1 Refactoring
+
+@@ -162,1 +162,1 @@
+-#### Previous Commits
++#### Previous Commits
+
+@@ -163,1 +163,1 @@
+-- Commit 1 (91e8d8e): Initial governance integration (15 files, 2,829 lines)
++
+- Commit 1 (91e8d8e): Initial governance integration (15 files, 2,829 lines)
+@@ -167,1 +167,1 @@
+-### Total Delivery So Far
++### Total Delivery So Far
+
+@@ -168,1 +168,1 @@
+-- **Commits:** 4
++
+- **Commits:** 4
+@@ -186,1 +186,1 @@
+-- â Constants validation (12 test cases)
++
+- â Constants validation (12 test cases)
+@@ -190,1 +190,1 @@
+-- All tests should pass with current codebase
++
+- All tests should pass with current codebase
+@@ -196,1 +196,1 @@
+-- Phase 1: Baseline established
++
+- Phase 1: Baseline established
+@@ -204,1 +204,1 @@
+-### Phase 2: Data Migration (Priority 1)
++### Phase 2: Data Migration (Priority 1)
+
+@@ -210,1 +210,1 @@
+-1. Backup current constants.ts
++
+1. Backup current constants.ts
+@@ -217,1 +217,1 @@
+-### Phase 3: Enhanced Testing (Priority 2)
++### Phase 3: Enhanced Testing (Priority 2)
+
+@@ -222,1 +222,1 @@
+-1. Create store tests (scoring logic)
++
+1. Create store tests (scoring logic)
+@@ -227,1 +227,1 @@
+-### Phase 4: Final Cleanup (Priority 3)
++### Phase 4: Final Cleanup (Priority 3)
+
+@@ -232,1 +232,1 @@
+-1. Remove any remaining experimental code
++
+1. Remove any remaining experimental code
+@@ -241,1 +241,1 @@
+-### Phase 1 (COMPLETE â)
++### Phase 1 (COMPLETE â)
+
+@@ -242,1 +242,1 @@
+-- [x] Testing framework installed
++
+- [x] Testing framework installed
+@@ -249,1 +249,1 @@
+-### Phase 2 (IN PROGRESS)
++### Phase 2 (IN PROGRESS)
+
+@@ -250,1 +250,1 @@
+-- [ ] microsoft-aligned-questions integrated into constants.ts
++
+- [ ] microsoft-aligned-questions integrated into constants.ts
+@@ -256,1 +256,1 @@
+-### Overall Project (IN PROGRESS)
++### Overall Project (IN PROGRESS)
+
+@@ -257,1 +257,1 @@
+-- [x] Testing framework (Vitest)
++
+- [x] Testing framework (Vitest)
+@@ -268,1 +268,1 @@
+-### Run Tests
++### Run Tests
+
+@@ -280,1 +280,1 @@
+-### Run Dev Server
++### Run Dev Server
+
+@@ -285,1 +285,1 @@
+-### Build Production
++### Build Production
+
+@@ -290,1 +290,1 @@
+-### Type Check
++### Type Check
+
+@@ -299,1 +299,1 @@
+-### If Tests Fail
++### If Tests Fail
+
+@@ -300,1 +300,1 @@
+-1. Check Node.js version (should be 18+)
++
+1. Check Node.js version (should be 18+)
+@@ -305,1 +305,1 @@
+-### Next Action Items
++### Next Action Items
+
+@@ -306,1 +306,1 @@
+-1. **Complete Phase 2:** Migrate data to microsoft-aligned-questions
++
+1. **Complete Phase 2:** Migrate data to microsoft-aligned-questions
+@@ -315,1 +315,1 @@
+-### Before Refactoring
++### Before Refactoring
+
+@@ -316,1 +316,1 @@
+-- Test Files: 0
++
+- Test Files: 0
+@@ -322,1 +322,1 @@
+-### After Phase 1
++### After Phase 1
+
+@@ -323,1 +323,1 @@
+-- Test Files: 2 â
++
+- Test Files: 2 â
+@@ -329,1 +329,1 @@
+-### Target After Phase 2
++### Target After Phase 2
+
+@@ -330,1 +330,1 @@
+-- Test Files: 4+
++
+- Test Files: 4+
+@@ -340,1 +340,1 @@
+-### Technical Debt Addressed
++### Technical Debt Addressed
+
+@@ -341,1 +341,1 @@
+-- â **Zero testing** â Vitest framework with 118+ tests
++
+- â **Zero testing** â Vitest framework with 118+ tests
+@@ -346,1 +346,1 @@
+-### Quality Improvements
++### Quality Improvements
+
+@@ -347,1 +347,1 @@
+-- â Automated test suite prevents regressions
++
+- â Automated test suite prevents regressions
+@@ -352,1 +352,1 @@
+-### Documentation
++### Documentation
+
+@@ -353,1 +353,1 @@
+-- â Expert review conducted and documented
++
+- â Expert review conducted and documented
+diff --git a/app/page-complex.tsx b/app/page-complex.tsx
+--- a/app/page-complex.tsx
++++ b/app/page-complex.tsx
+@@ -131,1 +131,1 @@
+-      console.error("Export failed:", error)
++      
+@@ -459,1 +459,1 @@
+-                {displayStandards.map((standard: any) => (
++                {displayStandards.map((standard: unknown) => (
+diff --git a/lib/governance/integration/README.md b/lib/governance/integration/README.md
+--- a/lib/governance/integration/README.md
++++ b/lib/governance/integration/README.md
+@@ -9,1 +9,1 @@
+-#### `governance-workbook-questions.ts`
++#### `governance-workbook-questions.ts`
+
+@@ -13,1 +13,1 @@
+-- **Tenant Configuration:** Tenant Isolation, Admin Digest, Cross-Tenant Restrictions
++
+- **Tenant Configuration:** Tenant Isolation, Admin Digest, Cross-Tenant Restrictions
+@@ -18,1 +18,1 @@
+-- `workbookTenantQuestions: Question[]`
++
+- `workbookTenantQuestions: Question[]`
+@@ -25,1 +25,1 @@
+-#### `environmental-strategy-questions.ts`
++#### `environmental-strategy-questions.ts`
+
+@@ -29,1 +29,1 @@
+-- **Risk Assessment:** Compliance (data residency), Operational (rollback plans), Audit (deployment tracking)
++
+- **Risk Assessment:** Compliance (data residency), Operational (rollback plans), Audit (deployment tracking)
+@@ -33,1 +33,1 @@
+-- `strategyRiskQuestions: Question[]`
++
+- `strategyRiskQuestions: Question[]`
+@@ -39,1 +39,1 @@
+-#### `pl600-governance-scenarios.ts`
++#### `pl600-governance-scenarios.ts`
+
+@@ -43,1 +43,1 @@
+-- **Scenario 1:** Default Environment security at scale (5,000 users) - balancing security, cost, and productivity
++
+- **Scenario 1:** Default Environment security at scale (5,000 users) - balancing security, cost, and productivity
+@@ -48,1 +48,1 @@
+-- `governanceScenarios` - Array of complex scenario questions with detailed explanations
++
+- `governanceScenarios` - Array of complex scenario questions with detailed explanations
+@@ -108,1 +108,1 @@
+-### Governance Documentation
++### Governance Documentation
+
+@@ -120,1 +120,1 @@
+-### Assessment Documentation
++### Assessment Documentation
+
+@@ -121,1 +121,1 @@
+-- [Main Assessment Suite README](../../../README.md)
++
+- [Main Assessment Suite README](../../../README.md)
+@@ -128,1 +128,1 @@
+-### Governance Workbook Compliance (2026)
++### Governance Workbook Compliance (2026)
+
+@@ -134,1 +134,1 @@
+-### Environmental Strategy Alignment (2026)
++### Environmental Strategy Alignment (2026)
+
+@@ -144,1 +144,1 @@
+-### Tenant-Level Controls
++### Tenant-Level Controls
+
+@@ -145,1 +145,1 @@
+-- Tenant Isolation (Cross-Tenant Restrictions)
++
+- Tenant Isolation (Cross-Tenant Restrictions)
+@@ -149,1 +149,1 @@
+-### DLP Strategy
++### DLP Strategy
+
+@@ -150,1 +150,1 @@
+-- Block-by-Default connector policy
++
+- Block-by-Default connector policy
+@@ -154,1 +154,1 @@
+-### Environment Strategy
++### Environment Strategy
+
+@@ -155,1 +155,1 @@
+-- Default Environment securing and routing
++
+- Default Environment securing and routing
+@@ -160,1 +160,1 @@
+-### ALM & Solutions
++### ALM & Solutions
+
+@@ -161,1 +161,1 @@
+-- Managed vs Unmanaged solutions
++
+- Managed vs Unmanaged solutions
+@@ -166,1 +166,1 @@
+-### Risk Management
++### Risk Management
+
+@@ -167,1 +167,1 @@
+-- Compliance risks (data residency)
++
+- Compliance risks (data residency)
+@@ -176,1 +176,1 @@
+-- **ID:** Unique identifier
++
+- **ID:** Unique identifier
+diff --git a/docs/governance/Implementation_Workbook.md b/docs/governance/Implementation_Workbook.md
+--- a/docs/governance/Implementation_Workbook.md
++++ b/docs/governance/Implementation_Workbook.md
+@@ -6,1 +6,1 @@
+-> - [Environmental Strategy](./Power_Platform_Environmental_Strategy.md) - Full implementation brief
++>
+> - [Environmental Strategy](./Power_Platform_Environmental_Strategy.md) - Full implementation brief
+@@ -19,1 +19,1 @@
+-1. **Print or copy** this document for your organization
++
+1. **Print or copy** this document for your organization
+@@ -33,1 +33,1 @@
+-- Part 1.1 (Tenant Isolation) - Critical security setting
++
+- Part 1.1 (Tenant Isolation) - Critical security setting
+@@ -39,1 +39,1 @@
+-## Table of Contents
++## Table of Contents
+
+@@ -42,1 +42,1 @@
+-*   **Part 1:** Tenant Configuration
++* **Part 1:** Tenant Configuration
+@@ -43,1 +43,1 @@
+-*   **Part 2:** Data Policy Strategy (DLP)
++* **Part 2:** Data Policy Strategy (DLP)
+@@ -44,1 +44,1 @@
+-*   **Part 3:** Environment Strategy & Inventory
++* **Part 3:** Environment Strategy & Inventory
+@@ -45,1 +45,1 @@
+-*   **Part 4:** Solutions & ALM
++-   **Part 4:** Solutions & ALM
+@@ -46,1 +46,1 @@
+-*   **Part 5:** Monitoring & COE Starter Kit Strategy
++* **Part 5:** Monitoring & COE Starter Kit Strategy
+@@ -47,1 +47,1 @@
+-*   **Part 6:** Governance Operations
++-   **Part 6:** Governance Operations
+@@ -48,1 +48,1 @@
+-*   **Part 7:** Commercial Strategy & Licensing
++* **Part 7:** Commercial Strategy & Licensing
+@@ -49,1 +49,1 @@
+-*   **Part 8:** Disaster Recovery & Continuity
++-   **Part 8:** Disaster Recovery & Continuity
+@@ -53,1 +53,1 @@
+-## Part 1: Tenant Configuration
++## Part 1: Tenant Configuration
+
+@@ -56,1 +56,1 @@
+-### 1.1 Tenant Isolation
++### 1.1 Tenant Isolation
+
+@@ -60,1 +60,1 @@
+-*   **Restrict Cross-Tenant Connections:** [ ] On / [ ] Off
++* **Restrict Cross-Tenant Connections:** [ ] On / [ ] Off
+@@ -61,1 +61,1 @@
+-*   **Inbound Strategy:** [ ] Block All / [ ] Allow Specific / [ ] Open
++* **Inbound Strategy:** [ ] Block All / [ ] Allow Specific / [ ] Open
+@@ -62,1 +62,1 @@
+-*   **Outbound Strategy:** [ ] Block All / [ ] Allow Specific / [ ] Open
++-   **Outbound Strategy:** [ ] Block All / [ ] Allow Specific / [ ] Open
+@@ -63,1 +63,1 @@
+-*   **Exception Tenant IDs:**
++-   **Exception Tenant IDs:**
+@@ -65,1 +65,1 @@
+-*   **Rationale:**
++-   **Rationale:**
+@@ -67,1 +67,1 @@
+-*   **Last Reviewed:** `YYYY-MM-DD`
++-   **Last Reviewed:** `YYYY-MM-DD`
+@@ -69,1 +69,1 @@
+-### 1.2 Environment Creation Assignments
++### 1.2 Environment Creation Assignments
+
+@@ -73,1 +73,1 @@
+-*   **Production Environment Creation:** [ ] Specific Admins Only (Recommended) / [ ] Everyone
++
+*   **Production Environment Creation:** [ ] Specific Admins Only (Recommended) / [ ] Everyone
+@@ -74,1 +74,1 @@
+-*   **Trial Environment Creation:** [ ] Specific Admins Only (Recommended) / [ ] Everyone
++-   **Trial Environment Creation:** [ ] Specific Admins Only (Recommended) / [ ] Everyone
+@@ -75,1 +75,1 @@
+-*   **Developer Environment Creation:** [ ] Specific Admins Only / [ ] Everyone
++-   **Developer Environment Creation:** [ ] Specific Admins Only / [ ] Everyone
+@@ -79,1 +79,1 @@
+-### 1.3 Developer Environment Strategy
++### 1.3 Developer Environment Strategy
+
+@@ -81,1 +81,1 @@
+-*   **Environment Routing:** [ ] Enabled / [ ] Disabled
++-   **Environment Routing:** [ ] Enabled / [ ] Disabled
+@@ -82,1 +82,1 @@
+-    *   *Note: Requires Premium Licenses/Dataverse*
++    -   *Note: Requires Premium Licenses/Dataverse*
+diff --git a/DEPLOYMENT_SUMMARY.md b/DEPLOYMENT_SUMMARY.md
+--- a/DEPLOYMENT_SUMMARY.md
++++ b/DEPLOYMENT_SUMMARY.md
+@@ -12,1 +12,1 @@
+-### â Phase 1: Documentation (Commit 91e8d8e)
++### â Phase 1: Documentation (Commit 91e8d8e)
+
+@@ -13,1 +13,1 @@
+-- **8 governance documentation files** added to `/docs/governance/`
++
+- **8 governance documentation files** added to `/docs/governance/`
+@@ -18,1 +18,1 @@
+-### â Phase 2: Application Integration (Commit 22d325f)
++### â Phase 2: Application Integration (Commit 22d325f)
+
+@@ -19,1 +19,1 @@
+-- **Governance assessment standards** integrated into live application
++
+- **Governance assessment standards** integrated into live application
+@@ -29,1 +29,1 @@
+-### Governance Assessment Capabilities
++### Governance Assessment Capabilities
+
+@@ -30,1 +30,1 @@
+-- **2 new assessment standards** (Workbook Compliance + Environmental Strategy)
++
+- **2 new assessment standards** (Workbook Compliance + Environmental Strategy)
+@@ -35,1 +35,1 @@
+-### Professional Branding
++### Professional Branding
+
+@@ -36,1 +36,1 @@
+-- **Bytes Blue** primary color (HSL 210 100% 45%)
++
+- **Bytes Blue** primary color (HSL 210 100% 45%)
+@@ -42,1 +42,1 @@
+-### Locale-Aware User Experience
++### Locale-Aware User Experience
+
+@@ -43,1 +43,1 @@
+-- **Automatic timezone detection** (e.g., GMT, EST, PST)
++
+- **Automatic timezone detection** (e.g., GMT, EST, PST)
+@@ -55,1 +55,1 @@
+-#### Commit 1: 91e8d8e
++#### Commit 1: 91e8d8e
+
+@@ -63,1 +63,1 @@
+-#### Commit 2: 22d325f
++#### Commit 2: 22d325f
+
+@@ -71,1 +71,1 @@
+-### Total Changes
++### Total Changes
+
+@@ -72,1 +72,1 @@
+-- **19 files** created or modified
++
+- **19 files** created or modified
+@@ -93,1 +93,1 @@
+-- Ensure you're logged into GitHub with account "Ross851"
++
+- Ensure you're logged into GitHub with account "Ross851"
+@@ -95,1 +95,1 @@
+-- Generate token at: https://github.com/settings/tokens
++- Generate token at: <https://github.com/settings/tokens>
+@@ -100,1 +100,1 @@
+-https://github.com/Ross851/Power-Platform-Assessment-Suite/pulls
++<https://github.com/Ross851/Power-Platform-Assessment-Suite/pulls>
+@@ -189,1 +189,1 @@
+-1. Review all governance documentation files
++
+1. Review all governance documentation files
+@@ -196,1 +196,1 @@
+-1. Merge Pull Request to `main`
++
+1. Merge Pull Request to `main`
+@@ -266,1 +266,1 @@
+-#### Adding More Governance Questions
++#### Adding More Governance Questions
+
+@@ -267,1 +267,1 @@
+-1. Edit files in `/lib/governance/integration/`
++
+1. Edit files in `/lib/governance/integration/`
+@@ -271,1 +271,1 @@
+-#### Updating Branding Colors
++#### Updating Branding Colors
+
+@@ -272,1 +272,1 @@
+-1. Edit `app/globals.css`
++
+1. Edit `app/globals.css`
+@@ -276,1 +276,1 @@
+-#### Using Date Formatter
++#### Using Date Formatter
+
+@@ -299,1 +299,1 @@
+-### If Build Fails
++### If Build Fails
+
+@@ -300,1 +300,1 @@
+-1. Check TypeScript errors: `npm run type-check`
++
+1. Check TypeScript errors: `npm run type-check`
+@@ -304,1 +304,1 @@
+-### If Branding Looks Wrong
++### If Branding Looks Wrong
+
+@@ -305,1 +305,1 @@
+-1. Clear browser cache
++
+1. Clear browser cache
+@@ -309,1 +309,1 @@
+-### If Dates Look Wrong
++### If Dates Look Wrong
+
+@@ -310,1 +310,1 @@
+-1. Check browser locale: `navigator.language`
++
+1. Check browser locale: `navigator.language`
+@@ -318,1 +318,1 @@
+-### Documentation
++### Documentation
+
+@@ -319,1 +319,1 @@
+-- `docs/governance/README.md` - Documentation index
++
+- `docs/governance/README.md` - Documentation index
+@@ -323,1 +323,1 @@
+-### Code
++### Code
+
+@@ -324,1 +324,1 @@
+-- `lib/constants.ts` - Assessment standards (includes governance)
++
+- `lib/constants.ts` - Assessment standards (includes governance)
+@@ -329,1 +329,1 @@
+-### Commits
++### Commits
+
+@@ -330,1 +330,1 @@
+-- `91e8d8e` - Initial governance integration
++
+- `91e8d8e` - Initial governance integration
+@@ -337,1 +337,1 @@
+-### Immediate (Today)
++### Immediate (Today)
+
+@@ -338,1 +338,1 @@
+-1. â All code committed
++
+1. â All code committed
+@@ -343,1 +343,1 @@
+-### Short Term (This Week)
++### Short Term (This Week)
+
+@@ -344,1 +344,1 @@
+-- Visual review of branding
++
+- Visual review of branding
+@@ -349,1 +349,1 @@
+-### Long Term (Future)
++### Long Term (Future)
+
+@@ -350,1 +350,1 @@
+-- Add more governance questions based on feedback
++
+- Add more governance questions based on feedback
+@@ -360,1 +360,1 @@
+-- 19 files created/modified
++
+- 19 files created/modified
+@@ -369,1 +369,1 @@
+-- 0 TypeScript errors
++
+- 0 TypeScript errors
+@@ -376,1 +376,1 @@
+-- Governance coverage significantly enhanced
++
+- Governance coverage significantly enhanced
+diff --git a/docs/governance/Glossary.md b/docs/governance/Glossary.md
+--- a/docs/governance/Glossary.md
++++ b/docs/governance/Glossary.md
+@@ -6,1 +6,1 @@
+-> - [Environmental Strategy](./Power_Platform_Environmental_Strategy.md)
++>
+> - [Environmental Strategy](./Power_Platform_Environmental_Strategy.md)
+diff --git a/EXPERT_REVIEW_DEEP_DIVE.md b/EXPERT_REVIEW_DEEP_DIVE.md
+--- a/EXPERT_REVIEW_DEEP_DIVE.md
++++ b/EXPERT_REVIEW_DEEP_DIVE.md
+@@ -3,1 +3,1 @@
+-## ð Executive Summary
++## ð Executive Summary
+
+@@ -12,1 +12,1 @@
+-### 1. Architecture & Security (Critical)
++### 1. Architecture & Security (Critical)
+
+@@ -13,1 +13,1 @@
+-*   **Client-Side Only:** The `app/api` folder **does not exist**. This means the application has no backend capabilities.
++* **Client-Side Only:** The `app/api` folder **does not exist**. This means the application has no backend capabilities.
+@@ -14,1 +14,1 @@
+-*   **Data Vulnerability:** All assessment data lives in the user's browser cache (`localStorage` via Zustand). If a user clears cookies/cache, **all enterprise assessment data is permanently lost**.
++* **Data Vulnerability:** All assessment data lives in the user's browser cache (`localStorage` via Zustand). If a user clears cookies/cache, **all enterprise assessment data is permanently lost**.
+@@ -15,1 +15,1 @@
+-*   **External Integrations:** The `lib/google-drive.ts` file relies on a fragile `gapi` implementation with loose typing (`any`), likely exposing logic that should be server-side or rigorously typed.
++* **External Integrations:** The `lib/google-drive.ts` file relies on a fragile `gapi` implementation with loose typing (`any`), likely exposing logic that should be server-side or rigorously typed.
+@@ -17,1 +17,1 @@
+-### 2. Code Quality & Type Safety
++### 2. Code Quality & Type Safety
+
+@@ -18,1 +18,1 @@
+-*   **Widespread `any` Usage:** Despite `strict: true` in `tsconfig.json`, the code bypasses type safety frequently:
++* **Widespread `any` Usage:** Despite `strict: true` in `tsconfig.json`, the code bypasses type safety frequently:
+@@ -19,1 +19,1 @@
+-    *   `lib/types.ts`: `answer: any` (Core data model is untyped)
++    * `lib/types.ts`: `answer: any` (Core data model is untyped)
+@@ -20,1 +20,1 @@
+-    *   `lib/google-drive.ts`: `private static gapi: any = null` (External service is untyped)
++    * `lib/google-drive.ts`: `private static gapi: any = null` (External service is untyped)
+@@ -21,1 +21,1 @@
+-    *   `lib/performance.ts`: `(window as any).gtag` (Analytics untyped)
++  *   `lib/performance.ts`: `(window as any).gtag` (Analytics untyped)
+@@ -22,1 +22,1 @@
+-*   **Impact:** This makes refactoring dangerous. Changing the "Answer" structure could break the entire application without a single compiler error.
++* **Impact:** This makes refactoring dangerous. Changing the "Answer" structure could break the entire application without a single compiler error.
+@@ -24,1 +24,1 @@
+-### 3. Component Hierarchy
++### 3. Component Hierarchy
+
+@@ -25,1 +25,1 @@
+-*   **Over-reliance on `use client`:** The root `app/page.tsx` is a Client Component. This negates Next.js Server Components features (SEO, initial load speed), effectively treating Next.js as a basic React wrapper.
++* **Over-reliance on `use client`:** The root `app/page.tsx` is a Client Component. This negates Next.js Server Components features (SEO, initial load speed), effectively treating Next.js as a basic React wrapper.
+@@ -26,1 +26,1 @@
+-*   **Unpromoted "Better" Data:** The application logic is hardcoded to `lib/constants.ts` (older data), ignoring the superior `lib/microsoft-aligned-questions.ts` (Managed Environments, CoE data) identified in the previous scan.
++* **Unpromoted "Better" Data:** The application logic is hardcoded to `lib/constants.ts` (older data), ignoring the superior `lib/microsoft-aligned-questions.ts` (Managed Environments, CoE data) identified in the previous scan.
+@@ -28,1 +28,1 @@
+-### 4. Project Hygiene
++### 4. Project Hygiene
+
+@@ -29,1 +29,1 @@
+-*   **Development Artifacts in Production:** 
++
+*   **Development Artifacts in Production:** 
+@@ -30,1 +30,1 @@
+-    *   `app/google-drive-test/` exists in the source.
++  *   `app/google-drive-test/` exists in the source.
+@@ -31,1 +31,1 @@
+-    *   `mock-data/` folders are scattered.
++    * `mock-data/` folders are scattered.
+@@ -32,1 +32,1 @@
+-*   **No Test Harness:** Confirmed zero unit or integration tests (`vitest` / `jest` / `playwright` missing).
++* **No Test Harness:** Confirmed zero unit or integration tests (`vitest` / `jest` / `playwright` missing).
+@@ -38,1 +38,1 @@
+-### Phase 1: Stability (Immediate)
++### Phase 1: Stability (Immediate)
+
+@@ -39,1 +39,1 @@
+-1.  **Type Hardening:** Replace `answer: any` in `lib/types.ts` with a discriminated union (e.g., `type Answer = boolean | number | string`). This will break the build initially but catch bugs.
++
+1.  **Type Hardening:** Replace `answer: any` in `lib/types.ts` with a discriminated union (e.g., `type Answer = boolean | number | string`). This will break the build initially but catch bugs.
+@@ -40,1 +40,1 @@
+-2.  **Add Testing:** Install `vitest` to test the `calculateScoresAndRAG` function in the store. This is the "brain" of the app and is currently unprotected.
++2. **Add Testing:** Install `vitest` to test the `calculateScoresAndRAG` function in the store. This is the "brain" of the app and is currently unprotected.
+@@ -42,1 +42,1 @@
+-### Phase 2: Architecture (Short Term)
++### Phase 2: Architecture (Short Term)
+
+@@ -43,1 +43,1 @@
+-1.  **Server-Side Persistence:** Create a `/api/save` route. Even if just saving to a local JSON file (for now) or an Azure Blob Storage, it moves data safety away from the user's browser cache.
++
+1.  **Server-Side Persistence:** Create a `/api/save` route. Even if just saving to a local JSON file (for now) or an Azure Blob Storage, it moves data safety away from the user's browser cache.
+@@ -44,1 +44,1 @@
+-2.  **Data Migration:** Swap the import in `store/assessment-store.ts`:
++2. **Data Migration:** Swap the import in `store/assessment-store.ts`:
+@@ -45,1 +45,1 @@
+-    *   *From:* `import { ASSESSMENT_STANDARDS } from "@/lib/constants"`
++    * *From:* `import { ASSESSMENT_STANDARDS } from "@/lib/constants"`
+@@ -46,1 +46,1 @@
+-    *   *To:* `import { microsoftAlignedQuestions } from "@/lib/microsoft-aligned-questions"` (requires mapping/adapter pattern).
++    * *To:* `import { microsoftAlignedQuestions } from "@/lib/microsoft-aligned-questions"` (requires mapping/adapter pattern).
+@@ -48,1 +48,1 @@
+-### Phase 3: Cleanup
++### Phase 3: Cleanup
+
+@@ -49,1 +49,1 @@
+-1.  **Delete:** `app/google-drive-test` folder.
++1. **Delete:** `app/google-drive-test` folder.
+@@ -50,1 +50,1 @@
+-2.  **Standardize:** Create a `types/google.d.ts` to properly type `gapi` and `window.gtag` instead of using `as any`.
++2. **Standardize:** Create a `types/google.d.ts` to properly type `gapi` and `window.gtag` instead of using `as any`.
+@@ -52,1 +52,1 @@
+-## ð Revised Scorecard
++## ð Revised Scorecard
+
+diff --git a/app/google-drive-test/page.tsx b/app/google-drive-test/page.tsx
+--- a/app/google-drive-test/page.tsx
++++ b/app/google-drive-test/page.tsx
+@@ -35,1 +35,1 @@
+-              Test the Google Drive integration here. This won't affect your main app.
++              Test the Google Drive integration here. This won&apos;t affect your main app.
+diff --git a/EXPERT_REVIEW.md b/EXPERT_REVIEW.md
+--- a/EXPERT_REVIEW.md
++++ b/EXPERT_REVIEW.md
+@@ -3,1 +3,1 @@
+-## ð Executive Summary
++## ð Executive Summary
+
+@@ -12,1 +12,1 @@
+-### 1. Content Alignment Gap (Critical)
++### 1. Content Alignment Gap (Critical)
+
+@@ -13,1 +13,1 @@
+-*   **Observation:** The application's core logic (`store/assessment-store.ts`) retrieves assessment questions from `lib/constants.ts`.
++* **Observation:** The application's core logic (`store/assessment-store.ts`) retrieves assessment questions from `lib/constants.ts`.
+@@ -14,1 +14,1 @@
+-*   **Discrepancy:** A significantly more detailed file, `lib/microsoft-aligned-questions.ts`, exists and contains metadata like `aiSuggestion`, `bestPractice`, and `guidance` that directly aligns with modern Microsoft governance (e.g., Managed Environments, CoE Starter Kit).
++* **Discrepancy:** A significantly more detailed file, `lib/microsoft-aligned-questions.ts`, exists and contains metadata like `aiSuggestion`, `bestPractice`, and `guidance` that directly aligns with modern Microsoft governance (e.g., Managed Environments, CoE Starter Kit).
+@@ -15,1 +15,1 @@
+-*   **Impact:** The "Assessment Suite" is evaluating users against older or less specific criteria. The detailed "Microsoft Aligned" questions are currently only used in a specific "Enterprise Demo" page, not the main assessment loop.
++* **Impact:** The "Assessment Suite" is evaluating users against older or less specific criteria. The detailed "Microsoft Aligned" questions are currently only used in a specific "Enterprise Demo" page, not the main assessment loop.
+@@ -17,1 +17,1 @@
+-### 2. Testing & Quality Assurance (Critical)
++### 2. Testing & Quality Assurance (Critical)
+
+@@ -18,1 +18,1 @@
+-*   **Observation:** The `package.json` file contains **zero** test scripts. There is no evidence of Jest, Vitest, or Playwright configuration.
++* **Observation:** The `package.json` file contains **zero** test scripts. There is no evidence of Jest, Vitest, or Playwright configuration.
+@@ -19,1 +19,1 @@
+-*   **Impact:** Any changes to the logic (especially the complex scoring algorithms in the store) carry a high risk of regression. There is no automated way to verify that the assessment logic produces correct scores.
++* **Impact:** Any changes to the logic (especially the complex scoring algorithms in the store) carry a high risk of regression. There is no automated way to verify that the assessment logic produces correct scores.
+@@ -21,1 +21,1 @@
+-### 3. Architecture & Cleanup
++### 3. Architecture & Cleanup
+
+@@ -22,1 +22,1 @@
+-*   **Observation:** Presence of `google-drive-test/` folder in the production `app/` directory.
++
+*   **Observation:** Presence of `google-drive-test/` folder in the production `app/` directory.
+@@ -23,1 +23,1 @@
+-*   **Impact:** Indicates incomplete cleanup of experimental features. This should be removed from the production path.
++* **Impact:** Indicates incomplete cleanup of experimental features. This should be removed from the production path.
+@@ -24,1 +24,1 @@
+-*   **State Management:** Usage of `zustand` is a strong positive choice for client-side state, but reliance on `localStorage` for "Enterprise" data is fragile. If a user clears their cache, they lose their entire assessment.
++* **State Management:** Usage of `zustand` is a strong positive choice for client-side state, but reliance on `localStorage` for "Enterprise" data is fragile. If a user clears their cache, they lose their entire assessment.
+@@ -26,1 +26,1 @@
+-### 4. Microsoft Best Practice alignment (Verified via MCP)
++### 4. Microsoft Best Practice alignment (Verified via MCP)
+
+@@ -28,1 +28,1 @@
+-*   **Topic:** Managed Environments.
++
+*   **Topic:** Managed Environments.
+@@ -29,1 +29,1 @@
+-*   **Codebase Claim:** "Enable Managed Environments for Production... [to promote] premium security and governance."
++* **Codebase Claim:** "Enable Managed Environments for Production... [to promote] premium security and governance."
+@@ -30,1 +30,1 @@
+-*   **Microsoft Docs:** Confirmed. Microsoft strongly recommends Managed Environments for high-value apps to enforce policies like Solution Checker and improve tenant hygiene.
++* **Microsoft Docs:** Confirmed. Microsoft strongly recommends Managed Environments for high-value apps to enforce policies like Solution Checker and improve tenant hygiene.
+@@ -31,1 +31,1 @@
+-*   **Conclusion:** The *unused* content is accurate and high-quality. The *used* content needs to be updated to match it.
++* **Conclusion:** The *unused* content is accurate and high-quality. The *used* content needs to be updated to match it.
+@@ -37,1 +37,1 @@
+-### Immediate Actions (Phase 1)
++### Immediate Actions (Phase 1)
+
+@@ -38,1 +38,1 @@
+-1.  **Migrate Assessment Data:** precise mapping of `lib/microsoft-aligned-questions.ts` into the main `store/assessment-store.ts` logic. Replace the static `ASSESSMENT_STANDARDS` in `lib/constants.ts` with the richer data structure.
++1. **Migrate Assessment Data:** precise mapping of `lib/microsoft-aligned-questions.ts` into the main `store/assessment-store.ts` logic. Replace the static `ASSESSMENT_STANDARDS` in `lib/constants.ts` with the richer data structure.
+@@ -39,1 +39,1 @@
+-2.  **Add Testing Framework:** Install **Vitest** for unit testing the scoring logic.
++2. **Add Testing Framework:** Install **Vitest** for unit testing the scoring logic.
+@@ -43,1 +43,1 @@
+-3.  **Clean Project Structure:** Delete `app/google-drive-test/` and unused experimental files.
++3. **Clean Project Structure:** Delete `app/google-drive-test/` and unused experimental files.
+@@ -45,1 +45,1 @@
+-### Strategic Improvements (Phase 2)
++### Strategic Improvements (Phase 2)
+
+@@ -46,1 +46,1 @@
+-1.  **Data Persistence:** Move away from `localStorage`. Implement a simple API route to save assessments to a JSON file or a database (e.g., Cosmos DB or Dataverse itself) if this is to be used by teams.
++1. **Data Persistence:** Move away from `localStorage`. Implement a simple API route to save assessments to a JSON file or a database (e.g., Cosmos DB or Dataverse itself) if this is to be used by teams.
+@@ -47,1 +47,1 @@
+-2.  **Auth Integration:** If saving data server-side, implement Microsoft Entra ID (using `next-auth`) to secure the assessment data.
++2. **Auth Integration:** If saving data server-side, implement Microsoft Entra ID (using `next-auth`) to secure the assessment data.
+@@ -49,1 +49,1 @@
+-## ð Scorecard
++## ð Scorecard
+
+diff --git a/FINAL_AUDIT.md b/FINAL_AUDIT.md
+--- a/FINAL_AUDIT.md
++++ b/FINAL_AUDIT.md
+@@ -3,1 +3,1 @@
+-## ð¨ Critical Security & Compliance Audit
++## ð¨ Critical Security & Compliance Audit
+
+@@ -6,1 +6,1 @@
+-### 1. Security Architecture Vulnerabilities
++### 1. Security Architecture Vulnerabilities
+
+@@ -7,1 +7,1 @@
+-*   **Client-Side Secret Exposure:** The `lib/google-drive.ts` file uses `NEXT_PUBLIC_GOOGLE_API_KEY` and `NEXT_PUBLIC_GOOGLE_CLIENT_ID`. By definition, these keys are embedded in the browser bundle. If these keys are not strictly restricted by HTTP Referrer in the Google Cloud Console, they can be stolen and used by attackers to access the associated Google Cloud project quotas.
++
+*   **Client-Side Secret Exposure:** The `lib/google-drive.ts` file uses `NEXT_PUBLIC_GOOGLE_API_KEY` and `NEXT_PUBLIC_GOOGLE_CLIENT_ID`. By definition, these keys are embedded in the browser bundle. If these keys are not strictly restricted by HTTP Referrer in the Google Cloud Console, they can be stolen and used by attackers to access the associated Google Cloud project quotas.
+@@ -8,1 +8,1 @@
+-*   **No Authentication Layer:** The application lacks any native authentication (Entra ID / MSAL). It relies solely on a user "entering their details" into a dialog (`AssessorInfoDialog`), which is purely cosmetic. There is no verification of identity.
++* **No Authentication Layer:** The application lacks any native authentication (Entra ID / MSAL). It relies solely on a user "entering their details" into a dialog (`AssessorInfoDialog`), which is purely cosmetic. There is no verification of identity.
+@@ -9,1 +9,1 @@
+-*   **Data Leakage Risk:** Since all data is stored in `localStorage`, it is accessible to any script running on the same origin (XSS vulnerability). If a vulnerability allows injecting a script, an attacker can exfiltrate the entire assessment history.
++* **Data Leakage Risk:** Since all data is stored in `localStorage`, it is accessible to any script running on the same origin (XSS vulnerability). If a vulnerability allows injecting a script, an attacker can exfiltrate the entire assessment history.
+@@ -11,1 +11,1 @@
+-### 2. Legal & Governance Gaps
++### 2. Legal & Governance Gaps
+
+@@ -12,1 +12,1 @@
+-*   **Missing License:** The repository contains **no LICENSE file**. In a corporate environment, this creates immediate IP/legal ambiguity. You cannot legally deploy or modify this without a clear license.
++
+*   **Missing License:** The repository contains **no LICENSE file**. In a corporate environment, this creates immediate IP/legal ambiguity. You cannot legally deploy or modify this without a clear license.
+@@ -13,1 +13,1 @@
+-*   **Metadata Hardcoding:** The `app/layout.tsx` file hardcodes the `metadataBase` to `https://power-platform-assessment.vercel.app`. Implementing this in a corporate intranet or different domain will result in broken link previews and SEO issues.
++* **Metadata Hardcoding:** The `app/layout.tsx` file hardcodes the `metadataBase` to `https://power-platform-assessment.vercel.app`. Implementing this in a corporate intranet or different domain will result in broken link previews and SEO issues.
+@@ -15,1 +15,1 @@
+-### 3. Application Integrity
++### 3. Application Integrity
+
+@@ -16,1 +16,1 @@
+-*   **Phantom Code:** The project root `app/` contains multiple "ghost" files: `page-complex.tsx`, `page-redesigned.tsx`. These are not valid routes in modern Next.js (only `page.tsx` counts), but they bloat the build and confuse maintenance.
++
+*   **Phantom Code:** The project root `app/` contains multiple "ghost" files: `page-complex.tsx`, `page-redesigned.tsx`. These are not valid routes in modern Next.js (only `page.tsx` counts), but they bloat the build and confuse maintenance.
+@@ -17,1 +17,1 @@
+-*   **Hostile UX Patterns:** The usage of `ExtensionBlocker` in `layout.tsx` is an anti-pattern. Enterprise users often rely on password managers or accessibility tools (extensions) that this component attempts to interfere with.
++* **Hostile UX Patterns:** The usage of `ExtensionBlocker` in `layout.tsx` is an anti-pattern. Enterprise users often rely on password managers or accessibility tools (extensions) that this component attempts to interfere with.
+@@ -19,1 +19,1 @@
+-### 4. Technical Debt (The "Any" Problem)
++### 4. Technical Debt (The "Any" Problem)
+
+@@ -20,1 +20,1 @@
+-*   **Type System Failure:** A deeper scan reveals 20+ critical usages of `any`, including:
++
+*   **Type System Failure:** A deeper scan reveals 20+ critical usages of `any`, including:
+@@ -21,1 +21,1 @@
+-    *   `useThrottle<T extends (...args: any[]) => any>` in `performance.ts`
++  *   `useThrottle<T extends (...args: any[]) => any>` in `performance.ts`
+@@ -22,1 +22,1 @@
+-    *   `costs: {} as any` in `investment-strategy-framework.ts`
++  *   `costs: {} as any` in `investment-strategy-framework.ts`
+@@ -23,1 +23,1 @@
+-    *   `answer: any` in `types.ts`
++    * `answer: any` in `types.ts`
+@@ -24,1 +24,1 @@
+-    *   This effectively turns off TypeScript's safety features for the most complex parts of the application (Financial calculations and Performance metrics).
++    * This effectively turns off TypeScript's safety features for the most complex parts of the application (Financial calculations and Performance metrics).
+@@ -39,1 +39,1 @@
+-### Step 1: Legal & Cleanup (1 Hour)
++### Step 1: Legal & Cleanup (1 Hour)
+
+@@ -40,1 +40,1 @@
+-1.  Add a standard `LICENSE` file (MIT/Apache 2.0).
++
+1.  Add a standard `LICENSE` file (MIT/Apache 2.0).
+@@ -41,1 +41,1 @@
+-2.  Delete `app/page-complex.tsx`, `app/page-redesigned.tsx`, `app/google-drive-test/`.
++2. Delete `app/page-complex.tsx`, `app/page-redesigned.tsx`, `app/google-drive-test/`.
+@@ -42,1 +42,1 @@
+-3.  Remove `ExtensionBlocker` from `layout.tsx`.
++3. Remove `ExtensionBlocker` from `layout.tsx`.
+@@ -44,1 +44,1 @@
+-### Step 2: Architecture Fix (1 Day)
++### Step 2: Architecture Fix (1 Day)
+
+@@ -45,1 +45,1 @@
+-1.  **Kill the Client-Side Google Integration:** Remove `lib/google-drive.ts`. It is insecure by design. Replace with a standard "Download JSON" feature for now, or build a real backend integration.
++
+1.  **Kill the Client-Side Google Integration:** Remove `lib/google-drive.ts`. It is insecure by design. Replace with a standard "Download JSON" feature for now, or build a real backend integration.
+@@ -46,1 +46,1 @@
+-2.  **Strict Types:** run `tsc --noImplicitAny` and fix the 20+ errors.
++2. **Strict Types:** run `tsc --noImplicitAny` and fix the 20+ errors.
+@@ -48,1 +48,1 @@
+-### Step 3: Content Alignment (2 Hours)
++### Step 3: Content Alignment (2 Hours)
+
+@@ -49,1 +49,1 @@
+-1.  Wire up the `microsoft-aligned-questions.ts` to the main store. The current app is assessing users against outdated standards while the correct standards sit unused in the `lib` folder.
++1. Wire up the `microsoft-aligned-questions.ts` to the main store. The current app is assessing users against outdated standards while the correct standards sit unused in the `lib` folder.
+diff --git a/docs/governance/Top_Tips_and_Talking_Points.md b/docs/governance/Top_Tips_and_Talking_Points.md
+--- a/docs/governance/Top_Tips_and_Talking_Points.md
++++ b/docs/governance/Top_Tips_and_Talking_Points.md
+@@ -6,1 +6,1 @@
+-> - [Environmental Strategy](./Power_Platform_Environmental_Strategy.md) - Full implementation brief
++>
+> - [Environmental Strategy](./Power_Platform_Environmental_Strategy.md) - Full implementation brief
+@@ -13,1 +13,1 @@
+-## Executive Summary
++## Executive Summary
+
+@@ -18,1 +18,1 @@
+-## 1. Quick Wins & "Must Dos"
++## 1. Quick Wins & "Must Dos"
+
+@@ -21,1 +21,1 @@
+-### [CRITICAL] "Block by Default" Strategy
++### [CRITICAL] "Block by Default" Strategy
+
+@@ -22,1 +22,1 @@
+-*   **The Tip:** Change your Data Loss Prevention (DLP) policy to treat *new* connectors as **Blocked** by default.
++* **The Tip:** Change your Data Loss Prevention (DLP) policy to treat *new* connectors as **Blocked** by default.
+@@ -23,1 +23,1 @@
+-*   **Why:** Microsoft releases new connectors constantly. If your default policy is "Non-Business" (the standard setting), any new connector - even a risky one - is instantly available to all makers until an admin manually blocks it.
++-   **Why:** Microsoft releases new connectors constantly. If your default policy is "Non-Business" (the standard setting), any new connector - even a risky one - is instantly available to all makers until an admin manually blocks it.
+@@ -24,1 +24,1 @@
+-*   **How:** Admin Center > Data Policies > "Set default group" > Select **Blocked**.
++* **How:** Admin Center > Data Policies > "Set default group" > Select **Blocked**.
+@@ -26,1 +26,1 @@
+-### [ACTION] Secure the Environment Creation Process
++### [ACTION] Secure the Environment Creation Process
+
+@@ -27,1 +27,1 @@
+-*   **The Tip:** Restrict who can create specific environment types.
++
+*   **The Tip:** Restrict who can create specific environment types.
+@@ -28,1 +28,1 @@
+-*   **Talking Point:** "By default, any user can create a Developer, Trial, or even Production environment (depending on license). We must restrict this to Admins only."
++-   **Talking Point:** "By default, any user can create a Developer, Trial, or even Production environment (depending on license). We must restrict this to Admins only."
+@@ -29,1 +29,1 @@
+-*   **Action:**
++* **Action:**
+@@ -30,1 +30,1 @@
+-    *   **Production/Sandbox:** Restrict to specific Admin groups via Tenant Settings.
++  *   **Production/Sandbox:** Restrict to specific Admin groups via Tenant Settings.
+@@ -31,1 +31,1 @@
+-    *   **Trial:** Restrict to Admins to prevent "shadow trials" that expire and break apps.
++    * **Trial:** Restrict to Admins to prevent "shadow trials" that expire and break apps.
+@@ -32,1 +32,1 @@
+-    *   **Developer:** Restrict to Admins (or rely on the "Personal Productivity" routing strategy below).
++    * **Developer:** Restrict to Admins (or rely on the "Personal Productivity" routing strategy below).
+@@ -34,1 +34,1 @@
+-### [TIP] Weekly Digest Emails
++### [TIP] Weekly Digest Emails
+
+@@ -35,1 +35,1 @@
+-*   **The Tip:** Ensure the "Weekly Digest" setting is enabled for Admins.
++
+*   **The Tip:** Ensure the "Weekly Digest" setting is enabled for Admins.
+@@ -36,1 +36,1 @@
+-*   **Benefit:** Provides a zero-effort passive visibility report on what is happening in the tenant (active apps, new flows) delivered directly to your inbox.
++* **Benefit:** Provides a zero-effort passive visibility report on what is happening in the tenant (active apps, new flows) delivered directly to your inbox.
+@@ -42,1 +42,1 @@
+-### [STRATEGY] The "Personal Productivity" Container (Default Environment)
++### [STRATEGY] The "Personal Productivity" Container (Default Environment)
+
+@@ -43,1 +43,1 @@
+-*   **The Tip:** Do **NOT** enable "Managed Environments" on the Default Environment unless you have a comprehensive licensing strategy.
++* **The Tip:** Do **NOT** enable "Managed Environments" on the Default Environment unless you have a comprehensive licensing strategy.
+@@ -44,1 +44,1 @@
+-*   **The "Gotcha":**
++-   **The "Gotcha":**
+@@ -45,1 +45,1 @@
+-    *   Standard (E3/E5) users can build SharePoint apps in the Default Environment for free.
++    * Standard (E3/E5) users can build SharePoint apps in the Default Environment for free.
+@@ -46,1 +46,1 @@
+-    *   If you make it "Managed," **EVERY** user running those simple apps suddenly requires a Premium License.
++  *   If you make it "Managed," **EVERY** user running those simple apps suddenly requires a Premium License.
+@@ -47,1 +47,1 @@
+-    *   *Recommendation:* Keep it standard, but rename it "Personal Productivity" and use DLP policies to restrict it to O365 connectors only.
++    * *Recommendation:* Keep it standard, but rename it "Personal Productivity" and use DLP policies to restrict it to O365 connectors only.
+@@ -49,1 +49,1 @@
+-### [GAME CHANGER] Default Environment Routing
++### [GAME CHANGER] Default Environment Routing
+
+diff --git a/IMPLEMENTATION_TRACKING.md b/IMPLEMENTATION_TRACKING.md
+--- a/IMPLEMENTATION_TRACKING.md
++++ b/IMPLEMENTATION_TRACKING.md
+@@ -19,1 +19,1 @@
+-### Primary Goals
++### Primary Goals
+
+@@ -20,1 +20,1 @@
+-1. â Integrate 8 comprehensive governance documentation files
++
+1. â Integrate 8 comprehensive governance documentation files
+@@ -28,1 +28,1 @@
+-### Success Criteria
++### Success Criteria
+
+@@ -29,1 +29,1 @@
+-- All governance documentation accessible via `/docs/governance/`
++
+- All governance documentation accessible via `/docs/governance/`
+@@ -92,1 +92,1 @@
+-### Summary of Modifications
++### Summary of Modifications
+
+@@ -93,1 +93,1 @@
+-- **Lines Added:** ~2,900+
++
+- **Lines Added:** ~2,900+
+@@ -104,1 +104,1 @@
+-#### Light Mode (Primary Theme)
++#### Light Mode (Primary Theme)
+
+@@ -123,1 +123,1 @@
+-#### Dark Mode
++#### Dark Mode
+
+@@ -131,1 +131,1 @@
+-### Visual Impact
++### Visual Impact
+
+@@ -132,1 +132,1 @@
+-- **Primary actions** now use Bytes Blue (professional, corporate)
++
+- **Primary actions** now use Bytes Blue (professional, corporate)
+@@ -157,1 +157,1 @@
+-### Features
++### Features
+
+@@ -158,1 +158,1 @@
+-- â Automatic locale detection from browser
++
+- â Automatic locale detection from browser
+@@ -165,1 +165,1 @@
+-### Usage Example
++### Usage Example
+
+@@ -188,1 +188,1 @@
+-#### Question Categories
++#### Question Categories
+
+@@ -189,1 +189,1 @@
+-1. **Tenant Configuration** (2 questions)
++
+1. **Tenant Configuration** (2 questions)
+@@ -219,1 +219,1 @@
+-1. **Risk Assessment** (3 questions)
++
+1. **Risk Assessment** (3 questions)
+@@ -255,1 +255,1 @@
+-#### 1. Constants File (`lib/constants.ts`)
++#### 1. Constants File (`lib/constants.ts`)
+
+@@ -272,1 +272,1 @@
+-#### 2. Assessment Flow
++#### 2. Assessment Flow
+
+@@ -283,1 +283,1 @@
+-#### 3. Scoring Impact
++#### 3. Scoring Impact
+
+@@ -284,1 +284,1 @@
+-- **Total weight before:** ~100 (10 standards Ã ~10 weight each)
++
+- **Total weight before:** ~100 (10 standards Ã ~10 weight each)
+@@ -292,1 +292,1 @@
+-### Before Integration
++### Before Integration
+
+@@ -293,1 +293,1 @@
+-- **Total Files:** ~150
++
+- **Total Files:** ~150
+@@ -299,1 +299,1 @@
+-### After Integration
++### After Integration
+
+@@ -300,1 +300,1 @@
+-- **Total Files:** ~168 (+18)
++
+- **Total Files:** ~168 (+18)
+@@ -306,1 +306,1 @@
+-### Growth Metrics
++### Growth Metrics
+
+@@ -307,1 +307,1 @@
+-- **Files:** +12% growth
++
+- **Files:** +12% growth
+@@ -316,1 +316,1 @@
+-### Unit Testing
++### Unit Testing
+
+@@ -317,1 +317,1 @@
+-- [ ] `date-formatter.ts` utility functions
++
+- [ ] `date-formatter.ts` utility functions
+@@ -323,1 +323,1 @@
+-### Integration Testing
++### Integration Testing
+
+@@ -324,1 +324,1 @@
+-- [ ] Governance questions appear in assessment UI
++
+- [ ] Governance questions appear in assessment UI
+@@ -330,1 +330,1 @@
+-### Visual Testing
++### Visual Testing
+
+@@ -331,1 +331,1 @@
+-- [ ] Bytes blue/teal colors applied throughout app
++
+- [ ] Bytes blue/teal colors applied throughout app
+@@ -338,1 +338,1 @@
+-### Functional Testing
++### Functional Testing
+
+@@ -339,1 +339,1 @@
+-- [ ] Date/time displays in user's locale format
++
+- [ ] Date/time displays in user's locale format
+@@ -345,1 +345,1 @@
+-### Browser Compatibility
++### Browser Compatibility
+
+@@ -346,1 +346,1 @@
+-- [ ] Chrome/Edge (latest)
++
+- [ ] Chrome/Edge (latest)
+@@ -351,1 +351,1 @@
+-### Build & Deployment
++### Build & Deployment
+
+@@ -352,1 +352,1 @@
+-- [ ] TypeScript compilation succeeds
++
+- [ ] TypeScript compilation succeeds
+@@ -362,1 +362,1 @@
+-### Commit 1: Initial Governance Integration
++### Commit 1: Initial Governance Integration
+
+@@ -368,1 +368,1 @@
+-- Added 8 governance documentation files to `/docs/governance/`
++
+- Added 8 governance documentation files to `/docs/governance/`
+@@ -377,1 +377,1 @@
+-### Commit 2: Application Integration & Branding (Pending)
++### Commit 2: Application Integration & Branding (Pending)
+
+@@ -382,1 +382,1 @@
+-- Integrated governance modules into `lib/constants.ts`
++
+- Integrated governance modules into `lib/constants.ts`
+@@ -393,1 +393,1 @@
+-### Phase 1: Code Review â
++### Phase 1: Code Review â
+
+@@ -394,1 +394,1 @@
+-- [x] Review all governance documentation
++
+- [x] Review all governance documentation
+@@ -399,1 +399,1 @@
+-### Phase 2: Local Testing (In Progress)
++### Phase 2: Local Testing (In Progress)
+
+@@ -400,1 +400,1 @@
+-- [ ] Run `npm run build` to verify compilation
++
+- [ ] Run `npm run build` to verify compilation
+@@ -406,1 +406,1 @@
+-### Phase 3: Git Operations
++### Phase 3: Git Operations
+
+@@ -407,1 +407,1 @@
+-- [ ] Commit all changes with comprehensive message
++
+- [ ] Commit all changes with comprehensive message
+diff --git a/docs/governance/Junior_Developer_Guide.md b/docs/governance/Junior_Developer_Guide.md
+--- a/docs/governance/Junior_Developer_Guide.md
++++ b/docs/governance/Junior_Developer_Guide.md
+@@ -6,1 +6,1 @@
+-> - [Environmental Strategy](./Power_Platform_Environmental_Strategy.md) - Full governance strategy (for IT)
++>
+> - [Environmental Strategy](./Power_Platform_Environmental_Strategy.md) - Full governance strategy (for IT)
+@@ -12,1 +12,1 @@
+-## Welcome to Professional Power Platform Development
++## Welcome to Professional Power Platform Development
+
+@@ -19,1 +19,1 @@
+-## 1. Why "Personal" Environments? (Stop Stepping on Toes)
++## 1. Why "Personal" Environments? (Stop Stepping on Toes)
+
+@@ -22,1 +22,1 @@
+-*   **Collision:** You edit a Flow at the same time as someone else, and whoever saves last wins.
++* **Collision:** You edit a Flow at the same time as someone else, and whoever saves last wins.
+@@ -23,1 +23,1 @@
+-*   **Pollution:** The environment is full of "Test App 1", "Dave's Experiment", and broken connections. It's hard to find the real work.
++-   **Pollution:** The environment is full of "Test App 1", "Dave's Experiment", and broken connections. It's hard to find the real work.
+@@ -24,1 +24,1 @@
+-*   **Fear:** You're afraid to delete anything because you don't know if it breaks someone else's app.
++-   **Fear:** You're afraid to delete anything because you don't know if it breaks someone else's app.
+@@ -27,1 +27,1 @@
+-*   **Why:** It is your private sandbox. You can build, break, and delete things without affecting anyone else.
++* **Why:** It is your private sandbox. You can build, break, and delete things without affecting anyone else.
+@@ -28,1 +28,1 @@
+-*   **The Rule:** If it's in your Personal Environment, it doesn't exist to the business yet. To "release" it, you must commit it to source control.
++-   **The Rule:** If it's in your Personal Environment, it doesn't exist to the business yet. To "release" it, you must commit it to source control.
+@@ -32,1 +32,1 @@
+-## 2. Managed vs. Unmanaged Solutions (The "Box" Analogy)
++## 2. Managed vs. Unmanaged Solutions (The "Box" Analogy)
+
+@@ -35,1 +35,1 @@
+-### Unmanaged Solution (Development)
++### Unmanaged Solution (Development)
+
+@@ -36,1 +36,1 @@
+-*   **The Concept:** Think of this as a **"Reference List"** or a basket with holes in it.
++
+*   **The Concept:** Think of this as a **"Reference List"** or a basket with holes in it.
+@@ -37,1 +37,1 @@
+-*   **The Behavior:** It doesn't actually "hold" the apps and tables; it just points to them.
++-   **The Behavior:** It doesn't actually "hold" the apps and tables; it just points to them.
+@@ -38,1 +38,1 @@
+-*   **The Risk:** If you delete an Unmanaged Solution, you are just deleting the list. The actual apps and tables stay behind in the environment, creating a mess.
++-   **The Risk:** If you delete an Unmanaged Solution, you are just deleting the list. The actual apps and tables stay behind in the environment, creating a mess.
+@@ -40,1 +40,1 @@
+-### Managed Solution (Production)
++### Managed Solution (Production)
+
+@@ -41,1 +41,1 @@
+-*   **The Concept:** Think of this as a **"Sealed Box"** (or a glued-together Lego model).
++
+*   **The Concept:** Think of this as a **"Sealed Box"** (or a glued-together Lego model).
+@@ -42,1 +42,1 @@
+-*   **The Behavior:** It physically contains all the components.
++-   **The Behavior:** It physically contains all the components.
+@@ -43,1 +43,1 @@
+-*   **The Power:** If you delete a Managed Solution, it takes **everything** with it. Apps, tables, flows - all gone cleanly.
++* **The Power:** If you delete a Managed Solution, it takes **everything** with it. Apps, tables, flows - all gone cleanly.
+@@ -44,1 +44,1 @@
+-*   **Why we use it:** It prevents "Environment Rot" (the slow accumulation of junk) and ensures that Production is always clean.
++* **Why we use it:** It prevents "Environment Rot" (the slow accumulation of junk) and ensures that Production is always clean.
+@@ -50,1 +50,1 @@
+-## 3. ALM (Application Lifecycle Management) vs. "Export/Import"
++## 3. ALM (Application Lifecycle Management) vs. "Export/Import"
+
+@@ -53,1 +53,1 @@
+-*   **Human Error:** You might import the wrong version.
++* **Human Error:** You might import the wrong version.
+@@ -54,1 +54,1 @@
+-*   **No History:** If the new version breaks, you have no easy way to "Undo" to yesterday's version.
++* **No History:** If the new version breaks, you have no easy way to "Undo" to yesterday's version.
+@@ -55,1 +55,1 @@
+-*   **"It worked on my machine":** You might forget to include a connection reference or an environment variable.
++* **"It worked on my machine":** You might forget to include a connection reference or an environment variable.
+@@ -58,1 +58,1 @@
+-*   **Source Control (Git/Azure DevOps) is King.** The "Truth" of your app lives in the code repository, not in the environment.
++* **Source Control (Git/Azure DevOps) is King.** The "Truth" of your app lives in the code repository, not in the environment.
+@@ -59,1 +59,1 @@
+-*   **Automation:** When you commit your work, a robot (the Pipeline) builds it, checks it for errors, and deploys it.
++-   **Automation:** When you commit your work, a robot (the Pipeline) builds it, checks it for errors, and deploys it.
+@@ -60,1 +60,1 @@
+-*   **Safety:** If the deployment fails, the robot tells you why. If the new version is buggy, we can "rollback" to the previous version instantly using the history in Git.
++-   **Safety:** If the deployment fails, the robot tells you why. If the new version is buggy, we can "rollback" to the previous version instantly using the history in Git.
+@@ -64,1 +64,1 @@
+-## 4. "Hardcoding" is the Enemy
++## 4. "Hardcoding" is the Enemy

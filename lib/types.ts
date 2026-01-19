@@ -104,9 +104,9 @@ export interface AssessmentStandard {
 export interface AnswerPayload {
   standardSlug: string
   questionId: string
-  answer: any
+  answer: unknown
   evidenceNotes?: string
-  documentData?: any // For document review type
+  documentData?: unknown // For document review type
   riskOwner?: string // New
 }
 

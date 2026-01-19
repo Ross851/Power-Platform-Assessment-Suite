@@ -45,12 +45,8 @@ export function GovernanceDashboard() {
   const [environments, setEnvironments] = useState<EnvironmentContext[]>([])
   const [tenantControls, setTenantControls] = useState<GovernanceControl[]>([])
   const [effectiveControls, setEffectiveControls] = useState<GovernanceControl[]>([])
-  const [complianceData, setComplianceData] = useState<any>(null)
-  const [summary, setSummary] = useState<any>(null)
-
-  useEffect(() => {
-    loadGovernanceData()
-  }, [selectedEnvironment])
+  const [complianceData, setComplianceData] = useState<unknown>(null)
+  const [summary, setSummary] = useState<unknown>(null)
 
   const loadGovernanceData = () => {
     const envs = governanceControlsManager.getEnvironments()
@@ -70,6 +66,10 @@ export function GovernanceDashboard() {
       setEffectiveControls([])
     }
   }
+
+  useEffect(() => {
+    loadGovernanceData()
+  }, [loadGovernanceData, selectedEnvironment])
 
   const getControlIcon = (type: GovernanceControl['type']) => {
     switch (type) {

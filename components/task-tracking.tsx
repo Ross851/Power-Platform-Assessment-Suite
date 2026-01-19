@@ -27,8 +27,7 @@ import {
   MessageSquare,
   User,
   ChevronDown,
-  Plus,
-  X
+  Plus
 } from 'lucide-react'
 import { 
   TaskTracking, 
