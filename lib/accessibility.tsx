@@ -414,11 +414,6 @@ export function useDefaultKeyboardShortcuts() {
   return shortcuts;
 }
 
-// Utility function for screen reader only text
-export function srOnly(text: string) {
-  return <span className="sr-only">{text}</span>;
-}
-
 // Export all types
 export type {
   KeyboardShortcut,
