@@ -123,6 +123,32 @@ To customize the assessment:
 2. Update `lib/types.ts` for new question types
 3. Add corresponding input components in `components/question-types/`
 
+## 📚 Governance Documentation
+
+This repository includes comprehensive Power Platform governance documentation (January 2026) in the `/docs/governance/` directory:
+
+### Strategic Documentation
+- **[Environmental Strategy](docs/governance/Environmental_Strategy.md)** - Three-container architecture and implementation approach
+- **[Implementation Workbook](docs/governance/Implementation_Workbook.md)** - 8-part actionable governance workbook
+- **[Workshop Script](docs/governance/Workshop_Script.md)** - Interactive discovery workshop guide (~2.5 hours)
+
+### Quick Reference Resources
+- **[Quick Reference Card](docs/governance/Quick_Reference_Card.md)** - Single-page desk reference
+- **[Glossary](docs/governance/Glossary.md)** - Comprehensive governance terminology
+- **[Top Tips and Talking Points](docs/governance/Top_Tips_and_Talking_Points.md)** - Strategic guidance and quick wins
+
+### Practical Guides
+- **[Junior Developer Guide](docs/governance/Junior_Developer_Guide.md)** - Maker onboarding resource
+- **[Justification and Citations](docs/governance/Justification_and_Citations.md)** - Evidence-based strategies with Microsoft citations
+
+### Assessment Integration
+The governance deliverables integrate with the assessment suite through TypeScript modules in `/lib/governance/integration/`:
+- Governance Workbook assessment questions
+- Environmental Strategy risk assessment questions
+- PL-600 exam scenario questions
+
+See the [Governance Documentation Index](docs/governance/README.md) for detailed navigation and recommended reading paths.
+
 ## 📊 Usage
 
 1. **Create a Project** - Start by creating a new assessment project
@@ -130,6 +156,7 @@ To customize the assessment:
 3. **Add Evidence** - Document observations and evidence for each answer
 4. **Review RAG Status** - Monitor Red/Amber/Green status indicators
 5. **Export Results** - Generate reports in Excel, JSON, or Word format
+6. **Reference Governance Docs** - Use the comprehensive governance guides for implementation guidance
 
 ## 🤝 Contributing
 
