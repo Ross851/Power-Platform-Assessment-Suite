@@ -90,7 +90,11 @@ export default function AssessmentStandardPage() {
     router.push("/")
   }
 
-  if (!isClient || !activeProjectName) {
+  if (!isClient) {
+    return null
+  }
+
+  if (!activeProjectName) {
     return (
       <div className="container mx-auto p-8">
         <Alert>

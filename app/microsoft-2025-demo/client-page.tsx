@@ -77,7 +77,7 @@ export default function Microsoft2025DemoClient() {
                 </Button>
               </Link>
               <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-                Microsoft 2025 Assessment Demo
+                Microsoft 2026 Assessment Demo
               </h1>
             </div>
             <div className="flex gap-2">
@@ -108,7 +108,7 @@ export default function Microsoft2025DemoClient() {
                 </div>
               </div>
               <div className="flex-1">
-                <h2 className="text-xl font-semibold mb-2">Welcome to the Microsoft 2025 Power Platform Assessment</h2>
+                <h2 className="text-xl font-semibold mb-2">Welcome to the Microsoft 2026 Power Platform Assessment</h2>
                 <p className="text-gray-600 dark:text-gray-400 mb-4">
                   This assessment framework is based on the latest Microsoft Power Platform guidance for 2025, 
                   incorporating the Well-Architected Framework, Security Hub scoring, and enterprise governance standards.

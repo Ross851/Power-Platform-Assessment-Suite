@@ -181,7 +181,7 @@ export function Microsoft2025Dashboard({ responses, onResponseChange }: Microsof
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold mb-2">
-              Microsoft 2025 Power Platform Assessment
+              Microsoft 2026 Power Platform Assessment
             </h1>
             <p className="opacity-90">
               Based on latest Microsoft Well-Architected Framework and Security Standards
@@ -479,7 +479,7 @@ export function Microsoft2025Dashboard({ responses, onResponseChange }: Microsof
             <h3 className="text-lg font-semibold mb-4">Executive Summary</h3>
             <div className="prose max-w-none">
               <p>
-                Based on the Microsoft 2025 Power Platform Assessment Framework, your organization has achieved a 
+                Based on the Microsoft 2026 Power Platform Assessment Framework, your organization has achieved a 
                 <strong> {maturityLevel?.name} (Level {maturityLevel?.level})</strong> maturity level with an overall score 
                 of <strong>{maturityLevel?.score}%</strong>.
               </p>

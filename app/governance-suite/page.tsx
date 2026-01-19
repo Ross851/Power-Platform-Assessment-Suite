@@ -94,7 +94,7 @@ export default function GovernanceSuitePage() {
                       World-class enterprise governance platform built on Microsoft best practices and Flowbite design ecosystem
                     </p>
                     <div className="flex gap-2">
-                      <Badge className="bg-white/20 text-white">Microsoft 2025 Framework</Badge>
+                      <Badge className="bg-white/20 text-white">Microsoft 2026 Framework</Badge>
                       <Badge className="bg-white/20 text-white">Enterprise Ready</Badge>
                       <Badge className="bg-white/20 text-white">Multi-Region</Badge>
                     </div>
@@ -317,7 +317,7 @@ export default function GovernanceSuitePage() {
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
                     <div>
                       <h4 className="font-medium mb-2">Framework Version</h4>
-                      <p className="text-muted-foreground">Microsoft 2025 Assessment Framework v2.1</p>
+                      <p className="text-muted-foreground">Microsoft 2026 Assessment Framework v3.0</p>
                       <p className="text-muted-foreground">Power Platform Governance Suite v1.0</p>
                     </div>
                     <div>

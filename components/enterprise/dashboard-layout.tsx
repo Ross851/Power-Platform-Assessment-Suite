@@ -28,7 +28,9 @@ import {
   HiQuestionMarkCircle,
   HiBookOpen,
   HiExclamation,
-  HiCheckCircle
+  HiCheckCircle,
+  HiCube,
+  HiLightningBolt
 } from 'react-icons/hi'
 import { PowerPlatformIcons } from '@/lib/icon-system'
 import { cn } from '@/lib/utils'
@@ -55,10 +57,10 @@ export function EnterpriseDashboardLayout({ children, currentPath = '/' }: Dashb
     {
       group: 'Power Platform',
       items: [
-        { name: 'Power Apps', href: '/power-apps', icon: PowerPlatformIcons.powerApps.main },
-        { name: 'Power Automate', href: '/power-automate', icon: PowerPlatformIcons.powerAutomate.main },
-        { name: 'Power Pages', href: '/power-pages', icon: PowerPlatformIcons.powerPages.main },
-        { name: 'Power BI', href: '/power-bi', icon: PowerPlatformIcons.powerBI.main }
+        { name: 'Power Apps', href: '/power-apps', icon: HiCube },
+        { name: 'Power Automate', href: '/power-automate', icon: HiLightningBolt },
+        { name: 'Power Pages', href: '/power-pages', icon: HiGlobe },
+        { name: 'Power BI', href: '/power-bi', icon: HiChartBar }
       ]
     },
     {
@@ -248,27 +250,30 @@ export function EnterpriseDashboardLayout({ children, currentPath = '/' }: Dashb
                   <span className="block text-xs text-gray-500">You have {notifications.length} unread messages</span>
                 </Dropdown.Header>
                 
-                {notifications.map((notification) => (
-                  <Dropdown.Item key={notification.id} className="flex items-start space-x-3 p-3">
-                    <notification.icon className={cn(
-                      "w-5 h-5 mt-0.5",
-                      notification.type === 'success' && "text-green-500",
-                      notification.type === 'warning' && "text-yellow-500",
-                      notification.type === 'info' && "text-blue-500"
-                    )} />
-                    <div className="flex-1">
-                      <p className="text-sm font-medium text-gray-900 dark:text-white">
-                        {notification.title}
-                      </p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">
-                        {notification.message}
-                      </p>
-                      <p className="text-xs text-gray-400 mt-1">
-                        {notification.time}
-                      </p>
-                    </div>
-                  </Dropdown.Item>
-                ))}
+                {notifications.map((notification) => {
+                  const NotificationIcon = notification.icon
+                  return (
+                    <Dropdown.Item key={notification.id} className="flex items-start space-x-3 p-3">
+                      <NotificationIcon className={cn(
+                        "w-5 h-5 mt-0.5",
+                        notification.type === 'success' && "text-green-500",
+                        notification.type === 'warning' && "text-yellow-500",
+                        notification.type === 'info' && "text-blue-500"
+                      )} />
+                      <div className="flex-1">
+                        <p className="text-sm font-medium text-gray-900 dark:text-white">
+                          {notification.title}
+                        </p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                          {notification.message}
+                        </p>
+                        <p className="text-xs text-gray-400 mt-1">
+                          {notification.time}
+                        </p>
+                      </div>
+                    </Dropdown.Item>
+                  )
+                })}
                 
                 <Dropdown.Divider />
                 <Dropdown.Item className="text-center text-sm">

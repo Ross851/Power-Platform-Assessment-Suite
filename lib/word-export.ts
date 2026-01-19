@@ -9,19 +9,76 @@ import {
   TableCell,
   WidthType,
   BorderStyle,
+  AlignmentType,
+  Footer,
+  Header,
 } from "docx"
 import { saveAs } from "file-saver"
 import type { Project, Question } from "./types"
 import { format } from "date-fns"
 
+// --- Bytes Software Services Branding ---
+const BYTES_BLUE = "003087" // Bytes brand blue
+const BYTES_ACCENT = "00A3E0" // Bytes accent color
+const BYTES_GREY = "6D6E71" // Bytes grey
+
 // --- Helper Functions for Styling ---
+const createBytesHeader = () =>
+  new Header({
+    children: [
+      new Paragraph({
+        children: [
+          new TextRun({
+            text: "BYTES SOFTWARE SERVICES LIMITED",
+            bold: true,
+            color: BYTES_BLUE,
+            size: 20,
+          }),
+        ],
+        alignment: AlignmentType.RIGHT,
+        spacing: { after: 200 },
+      }),
+      new Paragraph({
+        children: [
+          new TextRun({
+            text: "Power Platform Assessment Suite",
+            color: BYTES_GREY,
+            size: 18,
+          }),
+        ],
+        alignment: AlignmentType.RIGHT,
+      }),
+    ],
+  })
+
+const createBytesFooter = () =>
+  new Footer({
+    children: [
+      new Paragraph({
+        children: [
+          new TextRun({
+            text: "© 2026 Bytes Software Services Limited | Confidential",
+            size: 16,
+            color: BYTES_GREY,
+          }),
+        ],
+        alignment: AlignmentType.CENTER,
+        spacing: { before: 200 },
+      }),
+    ],
+  })
+
 const createHeading = (text: string, level = HeadingLevel.HEADING_1) =>
-  new Paragraph({ heading: level, children: [new TextRun({ text, bold: true })] })
+  new Paragraph({ 
+    heading: level, 
+    children: [new TextRun({ text, bold: true, color: BYTES_BLUE, size: level === HeadingLevel.HEADING_1 ? 32 : 28 })] 
+  })
 
 const createSubHeading = (text: string) =>
   new Paragraph({
     heading: HeadingLevel.HEADING_2,
-    children: [new TextRun({ text, bold: true })],
+    children: [new TextRun({ text, bold: true, color: BYTES_ACCENT, size: 24 })],
+    spacing: { before: 300, after: 200 },
   })
 
 const createParagraph = (text: string) => new Paragraph({ text })
@@ -39,10 +96,10 @@ const createStyledTable = (rows: TableRow[]) =>
     rows,
     width: { size: 100, type: WidthType.PERCENTAGE },
     borders: {
-      top: { style: BorderStyle.SINGLE, size: 1, color: "D3D3D3" },
-      bottom: { style: BorderStyle.SINGLE, size: 1, color: "D3D3D3" },
-      left: { style: BorderStyle.SINGLE, size: 1, color: "D3D3D3" },
-      right: { style: BorderStyle.SINGLE, size: 1, color: "D3D3D3" },
+      top: { style: BorderStyle.SINGLE, size: 2, color: BYTES_BLUE },
+      bottom: { style: BorderStyle.SINGLE, size: 2, color: BYTES_BLUE },
+      left: { style: BorderStyle.SINGLE, size: 1, color: BYTES_GREY },
+      right: { style: BorderStyle.SINGLE, size: 1, color: BYTES_GREY },
       insideHorizontal: { style: BorderStyle.SINGLE, size: 1, color: "D3D3D3" },
       insideVertical: { style: BorderStyle.SINGLE, size: 1, color: "D3D3D3" },
     },
@@ -55,6 +112,12 @@ export const exportToClientWord = async (project: Project) => {
   const doc = new Document({
     sections: [
       {
+        headers: {
+          default: createBytesHeader(),
+        },
+        footers: {
+          default: createBytesFooter(),
+        },
         children: [
           createHeading(`Power Platform Assessment: Executive Summary`),
           createSubHeading(project.name),
@@ -166,6 +229,12 @@ export const exportToTechnicalWord = async (project: Project) => {
   const doc = new Document({
     sections: [
       {
+        headers: {
+          default: createBytesHeader(),
+        },
+        footers: {
+          default: createBytesFooter(),
+        },
         children: [
           createHeading("Power Platform Assessment: Technical Implementation Guide"),
           createSubHeading(project.name),
@@ -203,17 +272,39 @@ export const exportToTechnicalWord = async (project: Project) => {
             ]),
             new Paragraph({ text: "" }),
             new Paragraph({ children: [new TextRun({ text: "Best Practice:", bold: true })] }),
-            createParagraph(gap.bestPractice?.description || "N/A"),
+            createParagraph(
+              typeof gap.bestPractice === "string" 
+                ? gap.bestPractice 
+                : gap.bestPractice?.description || "N/A"
+            ),
             new Paragraph({ text: "" }),
+            
+            // New Content: AI Suggestion
+            ...(gap.aiSuggestion ? [
+              new Paragraph({ children: [new TextRun({ text: "AI Insight:", bold: true, color: "2c5282" })] }), // Dark blue for AI
+              createParagraph(gap.aiSuggestion),
+              new Paragraph({ text: "" }),
+            ] : []),
+
+            // New Content: Guidance
+            ...(gap.guidance ? [
+              new Paragraph({ children: [new TextRun({ text: "Microsoft Guidance:", bold: true })] }),
+              createParagraph(gap.guidance),
+              new Paragraph({ text: "" }),
+            ] : []),
+
             new Paragraph({ children: [new TextRun({ text: "Implementation Steps:", bold: true })] }),
-            ...(gap.bestPractice?.suggestedActions?.map((action) => createBullet(action)) || [
-              createParagraph("No specific actions suggested. Review best practice for guidance."),
-            ]),
+            ...(typeof gap.bestPractice !== "string" && gap.bestPractice?.suggestedActions 
+              ? gap.bestPractice.suggestedActions.map((action) => createBullet(action)) 
+              : [createParagraph("Refer to best practice guidance above.")]
+            ),
             new Paragraph({
               children: [
                 new TextRun({ text: "Reference: ", bold: true }),
                 new TextRun({
-                  text: gap.bestPractice?.link || "No link available",
+                  text: typeof gap.bestPractice !== "string" && gap.bestPractice?.link 
+                    ? gap.bestPractice.link 
+                    : "No specific link available",
                   style: "Hyperlink",
                 }),
               ],

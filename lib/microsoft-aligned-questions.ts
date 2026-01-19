@@ -500,6 +500,298 @@ export const microsoftAlignedQuestions = {
       guidance: "Establish baselines for response time, throughput, and resource utilization.",
       tags: ["performance", "monitoring", "baselines"]
     }
+  ],
+
+  // NEW: Governance Workbook Questions (Jan 2026)
+  governanceWorkbook: [
+    {
+      id: "gov-workbook-t1",
+      text: "Is 'Tenant Isolation' (Cross-Tenant Restrictions) configured to block inbound/outbound connections to unauthorized tenants?",
+      type: "boolean",
+      weight: 5,
+      importance: 5,
+      category: "Security",
+      guidance: "Tenant Isolation prevents data exfiltration to external tenants through cross-tenant flows and connections.",
+      bestPractice: "Configure Tenant Isolation to block all cross-tenant data sharing by default. Create explicit allow-lists only for trusted partner organizations.",
+      aiSuggestion: "Cross-tenant data flows are a primary attack vector. Without tenant isolation, users can create flows that copy sensitive data to personal tenants.",
+      tags: ["security", "tenant-isolation", "data-protection"],
+      required: true
+    },
+    {
+      id: "gov-workbook-t2",
+      text: "Is the weekly 'Admin Digest' email enabled for global admins?",
+      type: "boolean",
+      weight: 2,
+      importance: 3,
+      category: "Monitoring",
+      guidance: "Weekly Digest provides zero-effort passive visibility into platform activity.",
+      bestPractice: "Enable the weekly digest for all Power Platform administrators and security team members.",
+      tags: ["monitoring", "governance"]
+    },
+    {
+      id: "gov-workbook-dlp1",
+      text: "Is the Default DLP Policy configured to 'Block' new connectors by default?",
+      type: "boolean",
+      weight: 5,
+      importance: 5,
+      category: "DLP Strategy",
+      guidance: "Change the default DLP policy so new connectors are Blocked rather than allowed, preventing zero-day connector risks.",
+      bestPractice: "Set the default group for new connectors to 'Blocked'. This forces security review before any new connector becomes available.",
+      aiSuggestion: "Microsoft releases new connectors weekly. With an 'Open' default policy, risky connectors become instantly available before IT can review them.",
+      tags: ["dlp", "security", "connectors"],
+      required: true
+    },
+    {
+      id: "gov-workbook-env1",
+      text: "Has the Default Environment been renamed to signal 'Personal Productivity' use only?",
+      type: "boolean",
+      weight: 3,
+      importance: 4,
+      category: "Environment Strategy",
+      guidance: "Rename the Default Environment to clearly signal its intent for personal productivity only.",
+      bestPractice: "Rename to 'Personal Productivity' or 'Individual Use Only' to prevent confusion with production environments.",
+      tags: ["environment-management", "governance"]
+    },
+    {
+      id: "gov-workbook-env2",
+      text: "Is 'Managed Environments' DISABLED on the Default Environment (unless specifically licensed)?",
+      type: "boolean",
+      weight: 5,
+      importance: 5,
+      category: "Licensing Risk",
+      guidance: "Enabling Managed Environments on Default requires premium licenses for EVERY user running any app.",
+      bestPractice: "Never enable Managed Environments on Default unless you have confirmed licensing coverage for all users.",
+      aiSuggestion: "This can trigger massive unexpected costs. Since Default is accessible to all users, everyone becomes subject to premium licensing requirements.",
+      tags: ["licensing", "cost-management", "risk"],
+      required: true
+    },
+    {
+      id: "gov-workbook-env3",
+      text: "Is 'Default Environment Routing' enabled to direct makers to personal developer environments?",
+      type: "boolean",
+      weight: 4,
+      importance: 5,
+      category: "Environment Strategy",
+      guidance: "Enable routing to prevent clutter in Default and give makers safe sandboxes.",
+      bestPractice: "Automatically create personal developer environments for each maker, preventing the 'noisy neighbor' problem.",
+      aiSuggestion: "Without routing, all makers share Default's API quotas. One user's runaway flow can throttle the entire organization.",
+      tags: ["environment-management", "governance", "alm"],
+      required: true
+    }
+  ],
+
+  // NEW: Environmental Strategy Questions (Jan 2026)
+  environmentalStrategy: [
+    {
+      id: "strat-risk-1",
+      text: "Can you prove data residency compliance with environment-level geographic controls?",
+      type: "boolean",
+      weight: 5,
+      importance: 5,
+      category: "Compliance Risk",
+      guidance: "Without geographic isolation, you cannot guarantee data remains within required borders (UK/EU/US).",
+      bestPractice: "Create region-specific environments with documented data residency guarantees. Implement DLP to prevent cross-region flows.",
+      aiSuggestion: "GDPR and data sovereignty laws mandate specific geographies. Without environment-level controls, you risk compliance violations and fines.",
+      tags: ["compliance", "data-residency", "gdpr"],
+      required: true
+    },
+    {
+      id: "strat-risk-2",
+      text: "Can you roll back a failed solution deployment without manual intervention?",
+      type: "boolean",
+      weight: 4,
+      importance: 5,
+      category: "ALM Risk",
+      guidance: "Without rollback capability, failed deployments cause extended outages requiring manual remediation.",
+      bestPractice: "Implement automated rollback using Azure DevOps pipelines with solution versioning.",
+      aiSuggestion: "Manual rollback takes hours and introduces human error. Automated rollback restores service in minutes.",
+      tags: ["alm", "devops", "disaster-recovery"]
+    },
+    {
+      id: "strat-risk-3",
+      text: "Do you have automated audit trails proving who deployed what and when?",
+      type: "boolean",
+      weight: 4,
+      importance: 5,
+      category: "Audit Risk",
+      guidance: "Manual deployments leave no audit trail, making compliance audits fail and incident investigations impossible.",
+      bestPractice: "Use Azure DevOps with automated deployment logs linked to work items and approval gates.",
+      aiSuggestion: "During audits, 'we think John deployed it last month' is not acceptable. Automated pipelines provide immutable audit logs.",
+      tags: ["compliance", "audit", "governance"]
+    },
+    {
+      id: "strat-risk-4",
+      text: "Is there a documented inventory of which environments contain which applications?",
+      type: "boolean",
+      weight: 3,
+      importance: 4,
+      category: "Inventory Risk",
+      guidance: "Without inventory, you cannot determine blast radius of environment changes or plan capacity.",
+      bestPractice: "Use CoE Starter Kit or native inventory to maintain real-time environment-to-app mappings.",
+      aiSuggestion: "When an environment goes down, 'which apps are affected?' should take seconds to answer, not hours of investigation.",
+      tags: ["inventory", "governance", "documentation"]
+    },
+    {
+      id: "strat-risk-5",
+      text: "Are applications classified by criticality (Tier 1/2/3) with appropriate SLAs?",
+      type: "boolean",
+      weight: 4,
+      importance: 5,
+      category: "Criticality Risk",
+      guidance: "Without criticality classification, all apps are treated equally, leading to resource misallocation.",
+      bestPractice: "Classify apps as Tier 1 (mission-critical, 99.9% SLA), Tier 2 (important, 99% SLA), Tier 3 (nice-to-have, best effort).",
+      aiSuggestion: "Treat a CEO dashboard and a personal expense tracker differently. Critical apps deserve premium resources and rapid response.",
+      tags: ["classification", "sla", "governance"]
+    }
+  ],
+
+  // NEW: CoE Starter Kit Questions (Jan 2026)
+  coeStarterKit: [
+    {
+      id: "coe-install-1",
+      text: "Is the CoE Starter Kit installed in a dedicated environment with service principal authentication?",
+      type: "boolean",
+      weight: 5,
+      importance: 5,
+      category: "CoE Operations",
+      guidance: "CoE Kit must be in a dedicated environment using licensed Service Account with direct admin roles (not PIM/Group).",
+      bestPractice: "Create 'COE-Governance' environment. Use service principal with Power Platform Admin role assigned directly (not via group).",
+      aiSuggestion: "Installations fail when admin roles are assigned via PIM or groups. The installer needs direct, permanent role assignment.",
+      whereToCheck: {
+        location: "Power Platform Admin Center → Environments",
+        steps: [
+          "1. Navigate to https://admin.powerplatform.microsoft.com",
+          "2. Select 'Environments' from left navigation",
+          "3. Look for environment named 'COE' or 'Governance'",
+          "4. Verify it's a standalone environment (not Default)",
+          "5. Open the environment details",
+          "6. Check it contains only CoE solutions (no other apps)",
+          "7. Go to Entra ID (https://portal.azure.com)",
+          "8. Navigate to Enterprise Applications",
+          "9. Search for your CoE service principal",
+          "10. Verify Power Platform Admin role is directly assigned"
+        ],
+        expectedResult: "Dedicated CoE environment exists containing only CoE solutions. Service principal has direct admin role assignment."
+      },
+      tags: ["coe", "installation", "governance"],
+      required: true
+    },
+    {
+      id: "coe-inventory-1",
+      text: "Are CoE inventory sync flows running daily without errors?",
+      type: "scale",
+      weight: 4,
+      importance: 5,
+      category: "CoE Operations",
+      guidance: "Daily sync ensures governance data is current. Failed syncs mean stale data and broken compliance workflows.",
+      bestPractice: "Monitor 'Admin | Sync Template' flows daily. Set up alerts for failures. Investigate any gaps in sync history.",
+      aiSuggestion: "Stale inventory data means you're governing yesterday's environment. Compliance decisions based on outdated data are worthless.",
+      tags: ["coe", "monitoring", "inventory"]
+    },
+    {
+      id: "coe-hybrid-1",
+      text: "Are you using a hybrid inventory strategy (Native for counts, CoE for actions)?",
+      type: "boolean",
+      weight: 3,
+      importance: 4,
+      category: "CoE Operations",
+      guidance: "Native inventory is faster for usage stats. CoE Kit provides governance actions (quarantine, email, archive).",
+      bestPractice: "Use Native Admin Center Inventory for viewing counts and usage. Use CoE for automated compliance and archiving workflows.",
+      aiSuggestion: "CoE Kit is often inaccurate for Model-Driven App usage. Native Inventory excels here. Use each tool for its strengths.",
+      tags: ["coe", "inventory", "hybrid-strategy"]
+    }
+  ],
+
+  // NEW: Copilot & AI Governance Questions (Jan 2026)
+  copilotAiGovernance: [
+    {
+      id: "copilot-gov-1",
+      text: "Are Copilot features disabled in environments containing sensitive or regulated data?",
+      type: "boolean",
+      weight: 5,
+      importance: 5,
+      category: "Copilot & AI Governance",
+      guidance: "Many preview Copilot features are hosted on US infrastructure. Enabling these may violate data residency requirements.",
+      bestPractice: "Create Environment Group 'Copilot-Restricted' for production/sensitive environments. Disable all AI/Copilot preview features.",
+      aiSuggestion: "Organizations globally enabled Copilot in preview, then discovered customer data was processed in US data centers, violating GDPR.",
+      whereToCheck: {
+        location: "Power Platform Admin Center → Environments",
+        steps: [
+          "1. Navigate to https://admin.powerplatform.microsoft.com",
+          "2. Select an environment with sensitive data",
+          "3. Go to Settings → Product → Features",
+          "4. Scroll to 'Copilot' and 'AI' sections",
+          "5. Verify all preview AI features are OFF",
+          "6. Repeat for all production environments"
+        ],
+        expectedResult: "All Copilot and AI preview features disabled in production/sensitive environments."
+      },
+      tags: ["copilot", "ai", "data-residency", "compliance", "gdpr"],
+      required: true
+    },
+    {
+      id: "copilot-gov-2",
+      text: "Is AI Builder credit allocation controlled to prevent budget exhaustion?",
+      type: "scale",
+      weight: 4,
+      importance: 5,
+      category: "Copilot & AI Governance",
+      guidance: "AI Builder credits reset monthly. 'Unassigned Usage' creates a credit race where one user can exhaust the entire allocation.",
+      bestPractice: "Disable 'Unassigned Usage'. Allocate credits per environment: Production gets 10K, POC gets 500. Monitor monthly burn rate.",
+      aiSuggestion: "The 'Credit Race' is real. A weekend experiment can consume the quarter's AI budget, breaking production invoice processing apps.",
+      whereToCheck: {
+        location: "Power Platform Admin Center → Analytics → AI Builder",
+        steps: [
+          "1. Navigate to https://admin.powerplatform.microsoft.com",
+          "2. Select 'Analytics' → 'AI Builder'",
+          "3. Check 'Credit usage by environment' report",
+          "4. Verify credits are per-environment, not unassigned",
+          "5. Go to Settings → Tenant Settings → AI Builder",
+          "6. Confirm 'Unassigned usage' is disabled"
+        ],
+        expectedResult: "AI Builder credits allocated per environment. 'Unassigned usage' disabled. Monthly burn rate monitored."
+      },
+      tags: ["ai-builder", "cost-control", "governance"]
+    },
+    {
+      id: "copilot-gov-3",
+      text: "Are Environment Groups used to enforce AI/Copilot restrictions at scale?",
+      type: "boolean",
+      weight: 4,
+      importance: 5,
+      category: "Copilot & AI Governance",
+      guidance: "Manual AI toggles don't scale. Disabling Copilot across 500 environments manually is chaos. Use Environment Groups for central enforcement.",
+      bestPractice: "Create groups: 'Production-AI-Restricted' (Copilot OFF), 'Sandbox-AI-Enabled' (Copilot ON). Auto-assign via naming conventions.",
+      aiSuggestion: "Manual toggles lead to 'governance drift.' An admin enables Copilot for testing, forgets to disable it. Environment Groups enforce policy centrally.",
+      tags: ["environment-groups", "ai-governance", "automation", "scale"],
+      required: true
+    },
+    {
+      id: "copilot-gov-4",
+      text: "Do you monitor Copilot feature releases for data residency changes?",
+      type: "scale",
+      weight: 4,
+      importance: 5,
+      category: "Copilot & AI Governance",
+      guidance: "Microsoft rapidly releases Copilot features. Preview features may change data processing locations at GA launch.",
+      bestPractice: "Subscribe to Microsoft 365 Message Center. Assign owner to review AI announcements weekly. Maintain 'Copilot Change Log'.",
+      aiSuggestion: "Organizations were surprised when 'UK preview' Copilot features shifted to US data centers at GA. Monitoring prevents compliance violations.",
+      whereToCheck: {
+        location: "Microsoft 365 Message Center",
+        steps: [
+          "1. Navigate to https://admin.microsoft.com",
+          "2. Go to Health → Message center",
+          "3. Filter by 'Power Platform' and 'Copilot'",
+          "4. Review last 90 days of announcements",
+          "5. For each feature, check data residency details",
+          "6. Visit https://learn.microsoft.com/power-platform/release-plan/",
+          "7. Search for 'Copilot' in current release wave",
+          "8. Review geographic availability per feature"
+        ],
+        expectedResult: "Designated owner monitors releases weekly. 'Copilot Change Log' tracks features with data residency notes."
+      },
+      tags: ["copilot", "monitoring", "data-residency", "compliance"]
+    }
   ]
 }
 
@@ -513,7 +805,11 @@ export function getAllMicrosoftAlignedQuestions(): Question[] {
     ...microsoftAlignedQuestions.adoptionMaturity,
     ...microsoftAlignedQuestions.advancedCapabilities,
     ...microsoftAlignedQuestions.dataProtection,
-    ...microsoftAlignedQuestions.operationalExcellence
+    ...microsoftAlignedQuestions.operationalExcellence,
+    ...microsoftAlignedQuestions.governanceWorkbook,
+    ...microsoftAlignedQuestions.environmentalStrategy,
+    ...microsoftAlignedQuestions.coeStarterKit,
+    ...microsoftAlignedQuestions.copilotAiGovernance
   ]
 }
 

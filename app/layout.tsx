@@ -32,12 +32,12 @@ export const metadata: Metadata = {
   // metadataBase: new URL(process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"),
   metadataBase: process.env.NEXT_PUBLIC_BASE_URL
     ? new URL(process.env.NEXT_PUBLIC_BASE_URL)
-    : undefined, // Will use default behavior in development
+    : undefined, // Will use default behaviour in development
   openGraph: {
     title: "Power Platform Assessment Suite",
     description: "Evaluate your organisation's Power Platform maturity against Microsoft best practices",
     type: "website",
-    locale: "en_US",
+    locale: "en_GB",
   },
   twitter: {
     card: "summary_large_image",
@@ -71,7 +71,7 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en-GB" suppressHydrationWarning>
       <body className={inter.className}>
         <Providers>
           <ClientLayout>

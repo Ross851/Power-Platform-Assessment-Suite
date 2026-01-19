@@ -14,17 +14,17 @@ import { HelpCircle } from 'lucide-react'
 const faqs = [
   {
     question: "What's the main difference between the two assessment types?",
-    answer: "The Microsoft 2025 Framework focuses on strategic planning and enterprise transformation for the next 1-3 years, while Standard Assessments evaluate your current operational health and immediate governance needs.",
+    answer: "The Microsoft 2026 Framework focuses on strategic planning and enterprise transformation for the next 1-3 years, while Standard Assessments evaluate your current operational health and immediate governance needs.",
     category: "general"
   },
   {
     question: "Can I use both assessments?",
-    answer: "Absolutely! Many organizations benefit from using both. Start with Standard Assessments to establish your current baseline, then use the Microsoft 2025 Framework to plan your transformation journey.",
+    answer: "Absolutely! Many organizations benefit from using both. Start with Standard Assessments to establish your current baseline, then use the Microsoft 2026 Framework to plan your transformation journey.",
     category: "general"
   },
   {
     question: "Which assessment should executives use?",
-    answer: "Executives and board members should primarily use the Microsoft 2025 Framework as it provides strategic insights, ROI metrics, and transformation roadmaps suitable for high-level decision making.",
+    answer: "Executives and board members should primarily use the Microsoft 2026 Framework as it provides strategic insights, ROI metrics, and transformation roadmaps suitable for high-level decision making.",
     category: "roles"
   },
   {
@@ -34,17 +34,17 @@ const faqs = [
   },
   {
     question: "How long does each assessment take?",
-    answer: "The Microsoft 2025 Framework takes about 30-45 minutes with 30+ strategic questions. Standard Assessments are more comprehensive with 60+ questions across 8 categories, typically taking 1-2 hours total.",
+    answer: "The Microsoft 2026 Framework takes about 30-45 minutes with 30+ strategic questions. Standard Assessments are more comprehensive with 60+ questions across 8 categories, typically taking 1-2 hours total.",
     category: "practical"
   },
   {
     question: "What kind of report do I get from each assessment?",
-    answer: "Microsoft 2025 Framework generates executive dashboards with maturity scores and strategic roadmaps. Standard Assessments provide detailed technical reports with specific remediation steps and compliance checklists.",
+    answer: "Microsoft 2026 Framework generates executive dashboards with maturity scores and strategic roadmaps. Standard Assessments provide detailed technical reports with specific remediation steps and compliance checklists.",
     category: "practical"
   },
   {
-    question: "Do I need technical knowledge for the Microsoft 2025 Framework?",
-    answer: "No, the Microsoft 2025 Framework is designed for business leaders and focuses on strategic outcomes rather than technical details. Questions are framed around business impact and organizational readiness.",
+    question: "Do I need technical knowledge for the Microsoft 2026 Framework?",
+    answer: "No, the Microsoft 2026 Framework is designed for business leaders and focuses on strategic outcomes rather than technical details. Questions are framed around business impact and organizational readiness.",
     category: "requirements"
   },
   {
@@ -54,12 +54,12 @@ const faqs = [
   },
   {
     question: "How often should I repeat assessments?",
-    answer: "Standard Assessments should be conducted quarterly or after major changes. The Microsoft 2025 Framework is typically reviewed annually or during strategic planning cycles.",
+    answer: "Standard Assessments should be conducted quarterly or after major changes. The Microsoft 2026 Framework is typically reviewed annually or during strategic planning cycles.",
     category: "timing"
   },
   {
     question: "Which assessment helps with compliance?",
-    answer: "Both help with compliance but differently. Standard Assessments check current compliance status with detailed controls. Microsoft 2025 Framework ensures your strategy aligns with future Microsoft compliance requirements.",
+    answer: "Both help with compliance but differently. Standard Assessments check current compliance status with detailed controls. Microsoft 2026 Framework ensures your strategy aligns with future Microsoft compliance requirements.",
     category: "compliance"
   }
 ]

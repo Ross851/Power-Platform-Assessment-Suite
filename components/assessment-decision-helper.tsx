@@ -123,8 +123,8 @@ export function AssessmentDecisionHelper() {
     if (strategicPercentage >= 60) {
       return {
         type: 'strategic',
-        title: 'Microsoft 2025 Framework',
-        description: 'Based on your responses, the Microsoft 2025 Framework is ideal for your strategic planning needs.',
+        title: 'Microsoft 2026 Framework',
+        description: 'Based on your responses, the Microsoft 2026 Framework is ideal for your strategic planning needs.',
         icon: Sparkles,
         color: 'purple',
         link: '/microsoft-2025-demo'
@@ -142,7 +142,7 @@ export function AssessmentDecisionHelper() {
       return {
         type: 'both',
         title: 'Both Assessments Recommended',
-        description: 'Your needs span both strategic and operational areas. Consider starting with Standard Assessments for baseline, then use Microsoft 2025 for planning.',
+        description: 'Your needs span both strategic and operational areas. Consider starting with Standard Assessments for baseline, then use Microsoft 2026 for planning.',
         icon: Target,
         color: 'green',
         link: null

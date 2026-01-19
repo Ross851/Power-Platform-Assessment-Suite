@@ -1,4 +1,4 @@
-// Microsoft Power Platform 2025 Assessment Framework
+// Microsoft Power Platform 2026 Assessment Framework
 // Based on latest Microsoft documentation and best practices
 
 import type { Question } from '@/types/assessment'
