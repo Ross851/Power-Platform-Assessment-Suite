@@ -649,7 +649,7 @@ export default function Microsoft2025BeautifulPage() {
                   Back to Home
                 </Button>
               </Link>
-              <h1 className="text-2xl font-bold">Microsoft 2025 Assessment Demo</h1>
+              <h1 className="text-2xl font-bold">Microsoft 2026 Assessment Demo</h1>
             </div>
             <div className="flex gap-2">
               <ThemeToggle />
@@ -675,7 +675,7 @@ export default function Microsoft2025BeautifulPage() {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-2xl font-bold mb-2">
-                Microsoft 2025 Power Platform Assessment
+                Microsoft 2026 Power Platform Assessment
               </h1>
               <p className="opacity-90">
                 Based on latest Microsoft Well-Architected Framework and Security Standards

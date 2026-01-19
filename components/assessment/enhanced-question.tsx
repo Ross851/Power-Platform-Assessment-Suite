@@ -24,7 +24,6 @@ import {
   HiXCircle,
   HiLightBulb,
   HiSparkles,
-  HiClock,
   HiChartBar,
   HiShieldCheck,
   HiLockClosed,

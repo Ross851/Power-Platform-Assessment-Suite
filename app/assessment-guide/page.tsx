@@ -308,7 +308,7 @@ export default function AssessmentGuidePage() {
                 <div>
                   <h3 className="font-semibold mb-2">Assessment Scope</h3>
                   <p className="text-sm text-muted-foreground">
-                    This assessment follows Microsoft's Power Platform best practices and the 
+                    This assessment follows Microsoft&apos;s Power Platform best practices and the 
                     Center of Excellence (CoE) framework. For enterprise organizations, expect to:
                   </p>
                   <ul className="mt-2 space-y-1 text-sm">

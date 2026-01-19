@@ -31,6 +31,10 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 
+import { exportToTechnicalWord, exportToClientWord } from "@/lib/word-export"
+import { exportBaselineJustificationDocument } from "@/lib/baseline-justification-export"
+import { Download, FileBarChart, FileCheck } from "lucide-react"
+
 export default function SimplifiedHomepage() {
   const {
     projects,
@@ -49,6 +53,39 @@ export default function SimplifiedHomepage() {
   const activeProject = getActiveProject()
   const metadata = getAssessmentMetadata()
   const progress = getOverallProgress()
+
+  const handleExport = async () => {
+    if (activeProject) {
+      try {
+        await exportToTechnicalWord(activeProject)
+      } catch (error) {
+        console.error("Export failed:", error)
+        alert("Failed to generate report. Please try again.")
+      }
+    }
+  }
+
+  const handleBaselineExport = async () => {
+    if (activeProject) {
+      try {
+        await exportBaselineJustificationDocument(activeProject)
+      } catch (error) {
+        console.error("Baseline export failed:", error)
+        alert("Failed to generate baseline report. Please try again.")
+      }
+    }
+  }
+
+  const handleExecutiveExport = async () => {
+    if (activeProject) {
+      try {
+        await exportToClientWord(activeProject)
+      } catch (error) {
+        console.error("Executive export failed:", error)
+        alert("Failed to generate executive report. Please try again.")
+      }
+    }
+  }
 
   // Determine current state
   const hasProject = !!activeProject
@@ -280,20 +317,58 @@ export default function SimplifiedHomepage() {
           {/* Assessment Type Choice - Only show when needed */}
           {hasAssessor && !hasStarted && (
             <div id="assessment-choice" className="grid md:grid-cols-2 gap-4">
-              <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => window.location.href = '/microsoft-2025-demo'}>
-                <CardContent className="p-6 text-center">
-                  <Sparkles className="h-8 w-8 mx-auto mb-3 text-purple-600" />
-                  <h3 className="font-semibold mb-1">Strategic Assessment</h3>
-                  <p className="text-sm text-muted-foreground">For executives • 30 mins</p>
+              <Card 
+                className="cursor-pointer hover:shadow-md transition-shadow group" 
+                onClick={() => window.location.href = '/microsoft-2025-demo'}
+                title="High-level governance and strategy assessment focusing on executive decision-making, policy frameworks, and strategic alignment with Microsoft best practices."
+              >
+                <CardContent className="p-6 text-center space-y-3">
+                  <Sparkles className="h-8 w-8 mx-auto text-purple-600" />
+                  <h3 className="font-semibold">Strategic Assessment</h3>
+                  <p className="text-sm text-muted-foreground">High-level governance strategy and executive-focused maturity evaluation</p>
+                  <p className="text-xs text-muted-foreground italic opacity-0 group-hover:opacity-100 transition-opacity">
+                    Ideal for C-suite and leadership teams to evaluate governance frameworks and strategic alignment
+                  </p>
                 </CardContent>
               </Card>
-              <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => window.location.href = '/assessment/documentation-rulebooks'}>
-                <CardContent className="p-6 text-center">
-                  <CheckCircle2 className="h-8 w-8 mx-auto mb-3 text-blue-600" />
-                  <h3 className="font-semibold mb-1">Operational Assessment</h3>
-                  <p className="text-sm text-muted-foreground">For IT teams • 60+ mins</p>
+              <Card 
+                className="cursor-pointer hover:shadow-md transition-shadow group" 
+                onClick={() => window.location.href = '/assessment/documentation-rulebooks'}
+                title="Comprehensive technical assessment covering 58 questions across security, compliance, CoE implementation, Copilot governance, and operational maturity aligned with Microsoft best practices."
+              >
+                <CardContent className="p-6 text-center space-y-3">
+                  <CheckCircle2 className="h-8 w-8 mx-auto text-blue-600" />
+                  <h3 className="font-semibold">Operational Assessment</h3>
+                  <p className="text-sm text-muted-foreground">Detailed technical evaluation across all Microsoft-aligned governance pillars</p>
+                  <p className="text-xs text-muted-foreground italic opacity-0 group-hover:opacity-100 transition-opacity">
+                    Comprehensive deep-dive for IT teams, architects, and Power Platform administrators
+                  </p>
                 </CardContent>
               </Card>
+            </div>
+          )}
+
+          {/* Export Options - Show if project exists */}
+          {hasProject && (
+            <div id="export" className="pt-8 border-t">
+               <h3 className="text-lg font-semibold mb-4 text-center">Export Reports</h3>
+               <div className="grid md:grid-cols-3 gap-4">
+                 <Button onClick={handleBaselineExport} variant="outline" className="h-auto py-4 flex flex-col gap-2">
+                    <FileBarChart className="h-6 w-6 text-blue-600" />
+                    <span className="font-semibold">Baseline & Justification</span>
+                    <span className="text-xs text-muted-foreground text-center">Maturity scores with full justification for each rating</span>
+                 </Button>
+                 <Button onClick={handleExecutiveExport} variant="outline" className="h-auto py-4 flex flex-col gap-2">
+                    <FileCheck className="h-6 w-6 text-green-600" />
+                    <span className="font-semibold">Executive Summary</span>
+                    <span className="text-xs text-muted-foreground text-center">C-suite overview with strategic recommendations</span>
+                 </Button>
+                 <Button onClick={handleExport} variant="outline" className="h-auto py-4 flex flex-col gap-2">
+                    <Download className="h-6 w-6 text-purple-600" />
+                    <span className="font-semibold">Technical Guide</span>
+                    <span className="text-xs text-muted-foreground text-center">Detailed findings with Microsoft Best Practices</span>
+                 </Button>
+               </div>
             </div>
           )}
 

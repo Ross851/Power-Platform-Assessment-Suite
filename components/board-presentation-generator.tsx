@@ -291,7 +291,7 @@ function StrategicOverviewSlide({ content }: { content: any }) {
   )
 }
 
-function FinancialSlide({ content }: { content: any }) {
+function FinancialSlide({ content }: { content: unknown }) {
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-2 gap-6">
@@ -342,7 +342,7 @@ function FinancialSlide({ content }: { content: any }) {
       <div>
         <h4 className="font-semibold mb-3">Value Drivers</h4>
         <div className="space-y-2">
-          {content.valueDrivers?.map((driver: any, index: number) => (
+          {content.valueDrivers?.map((driver: unknown, index: number) => (
             <div key={index} className="flex items-center justify-between p-3 rounded-lg bg-muted">
               <span className="text-sm">{driver.name}</span>
               <span className="font-semibold">{formatCurrency(driver.value)}</span>
@@ -354,7 +354,7 @@ function FinancialSlide({ content }: { content: any }) {
   )
 }
 
-function RiskSlide({ content }: { content: any }) {
+function RiskSlide({ content }: { content: unknown }) {
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-2 gap-6">
@@ -412,7 +412,7 @@ function RiskSlide({ content }: { content: any }) {
   )
 }
 
-function RoadmapSlide({ content }: { content: any }) {
+function RoadmapSlide({ content }: { content: unknown }) {
   return (
     <div className="space-y-6">
       <div className="space-y-4">
@@ -461,7 +461,7 @@ function RoadmapSlide({ content }: { content: any }) {
   )
 }
 
-function RecommendationSlide({ content }: { content: any }) {
+function RecommendationSlide({ content }: { content: unknown }) {
   return (
     <div className="space-y-6">
       <div className="p-6 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">

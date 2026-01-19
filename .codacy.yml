@@ -1,0 +1,54 @@
+---
+engines:
+  eslint:
+    enabled: true
+    exclude_paths:
+      - "**/node_modules/**"
+      - "**/.next/**"
+      - "**/dist/**"
+  stylelint:
+    enabled: true
+    exclude_paths:
+      - "**/node_modules/**"
+    # Ignore @tailwind directives - these are intentional
+    configuration:
+      rules:
+        at-rule-no-unknown:
+          - true
+          - ignoreAtRules:
+            - tailwind
+            - layer
+            - apply
+            - config
+        function-no-unknown:
+          - true
+          - ignoreFunctions:
+            - theme
+            - screen
+        # SCSS rules that don't apply to plain CSS
+        scss/at-rule-no-unknown: null
+        scss/function-no-unknown: null
+        scss/property-no-unknown: null
+        scss/dimension-no-non-numeric-values: null
+        scss/dollar-variable-no-missing-interpolation: null
+        scss/no-global-function-names: null
+        scss/function-disallowed-list: null
+        scss/declaration-property-value-no-unknown: null
+
+exclude_paths:
+  - "**/node_modules/**"
+  - "**/.next/**"
+  - "**/dist/**"
+  - "**/build/**"
+  - "**/*.min.js"
+  - "**/*.min.css"
+  - "**/coverage/**"
+  - "**/*.docx"
+  - "**/*.xlsx"
+
+# Ignore specific patterns
+exclude_patterns:
+  - "**/*.test.ts"
+  - "**/*.test.tsx"
+  - "**/*.spec.ts"
+  - "**/*.spec.tsx"

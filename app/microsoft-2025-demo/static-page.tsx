@@ -91,7 +91,7 @@ export default function Microsoft2025StaticPage() {
                   Back
                 </Button>
               </Link>
-              <h1 className="text-2xl font-bold">Microsoft 2025 Assessment</h1>
+              <h1 className="text-2xl font-bold">Microsoft 2026 Assessment</h1>
             </div>
             <Button onClick={loadDemoData} variant="outline" size="sm">
               <Rocket className="mr-2 h-4 w-4" />

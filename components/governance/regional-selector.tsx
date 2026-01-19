@@ -26,7 +26,6 @@ import {
   FileText,
   Lock,
   Calendar,
-  TrendingUp,
   Settings
 } from 'lucide-react'
 import { regionalConfigManager, type RegionalCompliance, type RegionalSettings, type RegionalCosts } from '@/lib/governance/regional-config'

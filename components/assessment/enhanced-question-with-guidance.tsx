@@ -26,7 +26,6 @@ import {
   HiXCircle,
   HiLightBulb,
   HiSparkles,
-  HiClock,
   HiChartBar,
   HiShieldCheck,
   HiLockClosed,
@@ -65,15 +64,16 @@ export function EnhancedQuestionWithGuidance({
   showBestPractice = true,
   readonly = false
 }: EnhancedQuestionWithGuidanceProps) {
-  // Safety check for question object
-  if (!question || !question.id) {
-    return null
-  }
   const [showNoteInput, setShowNoteInput] = useState(false)
   const [note, setNote] = useState('')
   const [expandedGuidance, setExpandedGuidance] = useState(false)
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([])
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  // Safety check for question object
+  if (!question || !question.id) {
+    return null
+  }
 
   const getStatusIcon = (val: any) => {
     if (!val || val === 0) return null

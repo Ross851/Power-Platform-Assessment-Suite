@@ -3,7 +3,6 @@
 import React, { useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { 
   Sparkles, 
@@ -146,7 +145,7 @@ export function AssessmentQuickStart() {
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="microsoft2025" className="flex items-center gap-2">
               <Sparkles className="h-4 w-4" />
-              Microsoft 2025
+              Microsoft 2026
             </TabsTrigger>
             <TabsTrigger value="standard" className="flex items-center gap-2">
               <ClipboardCheck className="h-4 w-4" />
@@ -179,7 +178,7 @@ export function AssessmentQuickStart() {
               <div>
                 <p className="font-medium text-purple-900 dark:text-purple-100">Ready to begin?</p>
                 <p className="text-sm text-purple-700 dark:text-purple-300">
-                  Launch the Microsoft 2025 Framework assessment
+                  Launch the Microsoft 2026 Framework assessment
                 </p>
               </div>
               <Link href="/microsoft-2025-demo">

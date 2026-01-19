@@ -1,14 +1,15 @@
 import { create } from "zustand"
 import { persist, type StateStorage } from "zustand/middleware"
 import type { AssessmentStandard, AnswerPayload, RAGStatus, GeneralDocument, Project, AssessmentMetadata } from "@/lib/types" // Added Project
-import { ASSESSMENT_STANDARDS } from "@/lib/constants"
+import { getMicrosoftAlignedStandards } from "@/lib/assessment-adapter" // UPDATED IMPORT
 import { safeLocalStorage } from "@/lib/safe-storage"
 import { safeJsonParse, safeJsonStringify } from "@/lib/safe-json"
 import type { AuditTrail, AuditEntry } from "@/lib/audit-trail"
 
 // Helper function to create a fresh set of standards for a new project
+// UPDATED: Use the Microsoft Aligned Standards
 const createInitialProjectStandards = (): AssessmentStandard[] =>
-  ASSESSMENT_STANDARDS.map((standard) => ({
+  getMicrosoftAlignedStandards().map((standard) => ({
     ...standard,
     questions: standard.questions.map((q) => ({
       ...q,
@@ -140,8 +141,8 @@ const customStorage: StateStorage = {
         return
       }
       
-      // Ensure value is a string
-      const stringValue = typeof value === 'string' ? value : String(value)
+      // Ensure value is a string - if not, stringify it properly
+      const stringValue = typeof value === 'string' ? value : safeJsonStringify(value)
       
       // Extra validation
       if (!stringValue || stringValue === 'undefined' || stringValue === 'null') {
@@ -642,6 +643,67 @@ export const useAssessmentStore = create<AssessmentState>()(
     {
       name: "power-platform-assessment-storage-v2", // Changed name to avoid conflicts with old structure
       storage: customStorage,
+      version: 2, // Increment version to trigger migration
     },
   ),
 )
+
+// Migration function to add new questions to existing projects
+const migrateExistingProjects = () => {
+  const state = useAssessmentStore.getState()
+  
+  // Check if migration already ran for this version
+  const migrationKey = 'ppa-migration-v2'
+  const migrationRan = safeLocalStorage.getItem(migrationKey)
+  
+  if (migrationRan === 'true') {
+    return // Migration already completed
+  }
+  
+  const currentStandards = getMicrosoftAlignedStandards()
+  let needsUpdate = false
+
+  const updatedProjects = state.projects.map(project => {
+    const projectStandardSlugs = new Set(project.standards.map(s => s.slug))
+    const newStandards = currentStandards.filter(s => !projectStandardSlugs.has(s.slug))
+    
+    if (newStandards.length > 0) {
+      needsUpdate = true
+      const additionalStandards = newStandards.map(standard => ({
+        ...standard,
+        questions: standard.questions.map(q => ({
+          ...q,
+          answer: undefined,
+          score: 0,
+          riskLevel: undefined,
+          ragStatus: "grey" as RAGStatus,
+          evidenceNotes: "",
+          document: q.type === "document-review" ? { file: null, fileName: "", annotations: [] } : undefined,
+        })),
+        completion: 0,
+        maturityScore: 0,
+        ragStatus: "grey" as RAGStatus,
+      }))
+      
+      return {
+        ...project,
+        standards: [...project.standards, ...additionalStandards],
+        lastModifiedAt: new Date()
+      }
+    }
+    
+    return project
+  })
+
+  if (needsUpdate) {
+    useAssessmentStore.setState({ projects: updatedProjects })
+  }
+  
+  // Mark migration as complete
+  safeLocalStorage.setItem(migrationKey, 'true')
+}
+
+// Run migration once on store initialization
+if (typeof window !== 'undefined') {
+  setTimeout(() => migrateExistingProjects(), 50)
+}

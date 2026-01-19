@@ -1,4 +1,6 @@
 import type { AssessmentStandard, QuestionType } from "./types"
+import { workbookAssessmentStandard } from "./governance/integration/governance-workbook-questions"
+import { strategyAssessmentStandard } from "./governance/integration/environmental-strategy-questions"
 
 export const ASSESSMENT_STANDARDS: AssessmentStandard[] = [
   {
@@ -1056,6 +1058,9 @@ export const ASSESSMENT_STANDARDS: AssessmentStandard[] = [
       },
     ],
   },
+  // Governance assessment standards (January 2026)
+  workbookAssessmentStandard,
+  strategyAssessmentStandard,
 ]
 
 export const QUESTION_TYPES: QuestionType[] = [

@@ -1,4 +1,4 @@
-// Microsoft Power Platform 2025 Assessment Framework - Enhanced with Best Practices
+// Microsoft Power Platform 2026 Assessment Framework - Enhanced with Best Practices
 // Based on latest Microsoft documentation and best practices with tenant location guidance
 
 import type { Question } from '@/types/assessment'

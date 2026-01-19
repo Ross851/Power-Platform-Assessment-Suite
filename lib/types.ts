@@ -54,14 +54,21 @@ export interface Question {
   text: string
   type: QuestionType
   weight: number // For scoring
+  importance?: number // Importance level (1-5) for prioritization
   category: string // For grouping or detailed analysis
+  description?: string // Brief description of what this question assesses
   guidance?: string // New field for hints and guidance (UK English)
-  bestPractice?: BestPractice // New field for best practice guidance
+  bestPractice?: BestPractice | string // Best practice guidance (object or string)
   notApplicableGuidance?: string // New: specific guidance when feature isn't used yet
   options?: string[] // For scale or multi-select
   answer?: any
   score?: number // Calculated score for this question
   evidenceNotes?: string // For text area related to evidence
+  // Microsoft-aligned fields (from microsoft-aligned-questions.ts)
+  aiSuggestion?: string // AI-powered insights and suggestions
+  tags?: string[] // Tags for categorization and filtering
+  required?: boolean // Whether this question must be answered
+  references?: Array<{ title: string; url: string }> // Microsoft Learn references
   // Enhanced fields to support multiple timestamped entries
   codeSnippets?: string // Deprecated - for backward compatibility
   codeSnippetsList?: TimestampedCodeSnippet[] // New: multiple code snippets with timestamps
@@ -97,9 +104,9 @@ export interface AssessmentStandard {
 export interface AnswerPayload {
   standardSlug: string
   questionId: string
-  answer: any
+  answer: unknown
   evidenceNotes?: string
-  documentData?: any // For document review type
+  documentData?: unknown // For document review type
   riskOwner?: string // New
 }
 

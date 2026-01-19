@@ -13,7 +13,6 @@ import {
   Play,
   FileText,
   CheckCircle2,
-  Circle,
   ArrowRight,
   Sparkles,
   ClipboardCheck,

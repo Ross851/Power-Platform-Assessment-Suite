@@ -5,6 +5,28 @@ A comprehensive assessment tool for evaluating Power Platform maturity against M
 [![Deployed on Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?style=for-the-badge&logo=vercel)](https://vercel.com/rosshastie85-8737s-projects/v0-image-analysis)
 [![Built with Next.js](https://img.shields.io/badge/Built%20with-Next.js-black?style=for-the-badge&logo=next.js)](https://nextjs.org/)
 
+## ⚠️ IMPORTANT: Security & Production Readiness
+
+**Current Status:** ⚠️ **DEVELOPMENT PHASE - NOT PRODUCTION READY**
+
+This application is currently suitable for:
+- ✅ Local demos and proof-of-concepts
+- ✅ Template generation for reports
+- ✅ Training and education
+- ✅ Single-user assessments with manual backups
+
+This application is **NOT** suitable for:
+- ❌ Multi-user enterprise deployments
+- ❌ Storing sensitive or regulated data
+- ❌ Production use without authentication
+- ❌ Scenarios requiring guaranteed data persistence
+
+**Why?** This application uses browser `localStorage` for data storage. If browser cache is cleared, **all data is permanently lost**. There is no backend server, no database, and no authentication.
+
+**See [SECURITY.md](SECURITY.md) for complete security assessment and roadmap.**
+
+---
+
 ## 🎯 Overview
 
 The Power Platform Assessment Suite helps organizations evaluate their Power Platform maturity across 10 key areas:
@@ -123,6 +145,32 @@ To customize the assessment:
 2. Update `lib/types.ts` for new question types
 3. Add corresponding input components in `components/question-types/`
 
+## 📚 Governance Documentation
+
+This repository includes comprehensive Power Platform governance documentation (January 2026) in the `/docs/governance/` directory:
+
+### Strategic Documentation
+- **[Environmental Strategy](docs/governance/Environmental_Strategy.md)** - Three-container architecture and implementation approach
+- **[Implementation Workbook](docs/governance/Implementation_Workbook.md)** - 8-part actionable governance workbook
+- **[Workshop Script](docs/governance/Workshop_Script.md)** - Interactive discovery workshop guide (~2.5 hours)
+
+### Quick Reference Resources
+- **[Quick Reference Card](docs/governance/Quick_Reference_Card.md)** - Single-page desk reference
+- **[Glossary](docs/governance/Glossary.md)** - Comprehensive governance terminology
+- **[Top Tips and Talking Points](docs/governance/Top_Tips_and_Talking_Points.md)** - Strategic guidance and quick wins
+
+### Practical Guides
+- **[Junior Developer Guide](docs/governance/Junior_Developer_Guide.md)** - Maker onboarding resource
+- **[Justification and Citations](docs/governance/Justification_and_Citations.md)** - Evidence-based strategies with Microsoft citations
+
+### Assessment Integration
+The governance deliverables integrate with the assessment suite through TypeScript modules in `/lib/governance/integration/`:
+- Governance Workbook assessment questions
+- Environmental Strategy risk assessment questions
+- PL-600 exam scenario questions
+
+See the [Governance Documentation Index](docs/governance/README.md) for detailed navigation and recommended reading paths.
+
 ## 📊 Usage
 
 1. **Create a Project** - Start by creating a new assessment project
@@ -130,6 +178,7 @@ To customize the assessment:
 3. **Add Evidence** - Document observations and evidence for each answer
 4. **Review RAG Status** - Monitor Red/Amber/Green status indicators
 5. **Export Results** - Generate reports in Excel, JSON, or Word format
+6. **Reference Governance Docs** - Use the comprehensive governance guides for implementation guidance
 
 ## 🤝 Contributing
 

@@ -85,7 +85,7 @@ export function Microsoft2025Integration({ className, showOnlyButton = false }: 
           <div>
             <div className="flex items-center gap-2 mb-2">
               <HiSparkles className="w-6 h-6 text-purple-600" />
-              <h3 className="text-xl font-bold">Microsoft 2025 Assessment Framework</h3>
+              <h3 className="text-xl font-bold">Microsoft 2026 Assessment Framework</h3>
               <Badge variant="secondary" className="ml-2">NEW</Badge>
             </div>
             <p className="text-gray-600 dark:text-gray-400">
